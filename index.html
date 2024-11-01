@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>房市新聞摘要與趨勢分析</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .card { margin-bottom: 20px; }
+        .card-img-top { height: 200px; object-fit: cover; }
+        #trendChartContainer { margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">房市新聞摘要</h1>
+        <div id="filter-options" class="mb-4">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <label for="start-date">起始日期：</label>
+                    <input type="date" id="start-date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label for="end-date">結束日期：</label>
+                    <input type="date" id="end-date" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label for="keyword-filter">關鍵字：</label>
+                    <input type="text" id="keyword-filter" class="form-control" placeholder="輸入關鍵字">
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <button id="filter-button" class="btn btn-primary btn-block"><i class="fas fa-filter"></i> 篩選</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="articles" class="row"></div>
+        <div id="pagination-options" class="mb-4">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <label for="jump-page">跳轉至頁碼：</label>
+                    <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1">
+                </div>
+                <div class="col-md-3 align-self-end">
+                    <button id="jump-button" class="btn btn-secondary btn-block"><i class="fas fa-arrow-right"></i> 跳轉</button>
+                </div>
+            </div>
+        </div>
+        <div class="pagination" id="pagination"></div>
+
+        <h1 id="trendChartContainer" class="text-center">趨勢分析</h1>
+        <canvas id="trend" width="600" height="400"></canvas>
+    </div>
+
+    <!-- 引入外部資源 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="data.js"></script>
+    <script>
+        const articlesPerPage = 6;
+        let currentPage = 1;
+        let filteredArticlesData = [...articlesData];
+        let trendChart = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderArticles(currentPage);
+            renderPagination();
+            renderTrendChart();
+
+            // 綁定篩選按鈕事件
+            const filterButton = document.getElementById('filter-button');
+            filterButton.addEventListener('click', filterArticles);
+
+            // 綁定跳轉按鈕事件
+            const jumpButton = document.getElementById('jump-button');
+            jumpButton.addEventListener('click', function() {
+                const jumpPage = parseInt(document.getElementById('jump-page').value, 10);
+                if (!isNaN(jumpPage) && jumpPage >= 1 && jumpPage <= Math.ceil(filteredArticlesData.length / articlesPerPage)) {
+                    currentPage = jumpPage;
+                    renderArticles(currentPage);
+                    renderPagination();
+                } else {
+                    alert('請輸入有效的頁碼！');
+                }
+            });
+        });
+
+        function renderArticles(page) {
+            const start = (page - 1) * articlesPerPage;
+            const end = start + articlesPerPage;
+            const currentArticles = filteredArticlesData.slice(start, end);
+            const articlesContainer = document.getElementById('articles');
+            articlesContainer.innerHTML = '';
+
+            currentArticles.forEach(article => {
+                const articleCard = document.createElement('div');
+                articleCard.className = 'col-md-4';
+                const imageUrl = article.imageUrl ? article.imageUrl : 'https://via.placeholder.com/400x200';
+                const keywords = article.keywords.slice(0, 3).join(', ');
+                articleCard.innerHTML = `
+                    <div class="card shadow-sm">
+                        <img src="${imageUrl}" class="card-img-top" alt="新聞圖片">
+                        <div class="card-body">
+                            <h5 class="card-title">${article.title}</h5>
+                            <p class="card-text">${article.summary.length > 100 ? article.summary.substring(0, 100) + '...' : article.summary}</p>
+                            <p class="text-muted">發布時間：${article.date} | 作者：${article.author} | 發布單位：${article.publisher}</p>
+                            <p class="text-muted">關鍵詞：${keywords}</p>
+                            <a href="#" class="btn btn-primary" onclick="showArticleDetails(${article.id})">閱讀更多</a>
+                        </div>
+                    </div>
+                `;
+                articlesContainer.appendChild(articleCard);
+            });
+        }
+
+        function showArticleDetails(articleId) {
+            const article = articlesData.find(a => a.id === articleId);
+            if (article) {
+                const modalHtml = `
+                    <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="articleModalLabel">${article.title}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${article.fullText}</p>
+                                    <p class="text-muted">發布時間：${article.date} | 作者：${article.author} | 發布單位：${article.publisher}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                // Append modal to body and show it
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                $('#articleModal').modal('show');
+
+                // Remove modal from DOM after it's closed
+                $('#articleModal').on('hidden.bs.modal', function () {
+                    document.getElementById('articleModal').remove();
+                });
+            }
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredArticlesData.length / articlesPerPage);
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            // 定義頁簽顯示範圍
+            const maxVisiblePages = 5;
+            let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
+            let endPage = startPage + maxVisiblePages - 1;
+            if (endPage > totalPages) {
+                endPage = totalPages;
+                startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+            }
+
+            if (startPage > 1) {
+                const firstPageButton = document.createElement('button');
+                firstPageButton.textContent = '1';
+                firstPageButton.className = 'btn btn-secondary mx-1';
+                firstPageButton.addEventListener('click', () => {
+                    currentPage = 1;
+                    renderArticles(currentPage);
+                    renderPagination();
+                });
+                paginationDiv.appendChild(firstPageButton);
+                if (startPage > 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    paginationDiv.appendChild(dots);
+                }
+            }
+
+            if (currentPage > 1) {
+                const prevButton = document.createElement('button');
+                prevButton.textContent = '上一頁';
+                prevButton.className = 'btn btn-secondary mx-1';
+                prevButton.addEventListener('click', () => {
+                    currentPage--;
+                    renderArticles(currentPage);
+                    renderPagination();
+                });
+                paginationDiv.appendChild(prevButton);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = `btn btn-secondary mx-1 ${i === currentPage ? 'active' : ''}`;
+                button.addEventListener('click', () => {
+                    currentPage = i;
+                    renderArticles(currentPage);
+                    renderPagination();
+                });
+                paginationDiv.appendChild(button);
+            }
+
+            if (currentPage < totalPages) {
+                const nextButton = document.createElement('button');
+                nextButton.textContent = '下一頁';
+                nextButton.className = 'btn btn-secondary mx-1';
+                nextButton.addEventListener('click', () => {
+                    currentPage++;
+                    renderArticles(currentPage);
+                    renderPagination();
+                });
+                paginationDiv.appendChild(nextButton);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    paginationDiv.appendChild(dots);
+                }
+                const lastPageButton = document.createElement('button');
+                lastPageButton.textContent = totalPages;
+                lastPageButton.className = 'btn btn-secondary mx-1';
+                lastPageButton.addEventListener('click', () => {
+                    currentPage = totalPages;
+                    renderArticles(currentPage);
+                    renderPagination();
+                });
+                paginationDiv.appendChild(lastPageButton);
+            }
+        }
+
+        function filterArticles() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            const keyword = document.getElementById('keyword-filter').value.trim().toLowerCase();
+
+            filteredArticlesData = articlesData.filter(article => {
+                const articleDate = new Date(article.date);
+                const matchesDate = (!isNaN(startDate) ? articleDate >= startDate : true) && (!isNaN(endDate) ? articleDate <= endDate : true);
+                const matchesKeyword = keyword ? article.keywords.some(kw => kw.toLowerCase().includes(keyword)) : true;
+                return matchesDate && matchesKeyword;
+            });
+
+            currentPage = 1;
+            renderArticles(currentPage);
+            renderPagination();
+            renderTrendChart();
+        }
+
+        function renderTrendChart() {
+            const keywordCounts = {};
+
+            filteredArticlesData.forEach(article => {
+                article.keywords.forEach(keyword => {
+                    if (keywordCounts[keyword]) {
+                        keywordCounts[keyword]++;
+                    } else {
+                        keywordCounts[keyword] = 1;
+                    }
+                });
+            });
+
+            const sortedKeywordCounts = Object.entries(keywordCounts).filter(entry => entry[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const labels = sortedKeywordCounts.map(entry => entry[0]);
+            const data = sortedKeywordCounts.map(entry => entry[1]);
+
+            if (trendChart) {
+                trendChart.destroy();
+            }
+
+            const ctx = document.getElementById('trend').getContext('2d');
+            trendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '關鍵詞出現次數',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    </script>
+    <!-- 引入 Bootstrap 所需的 JavaScript 和 Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
