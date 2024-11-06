@@ -11,6 +11,7 @@
         .card { margin-bottom: 20px; }
         .card-img-top { height: 200px; object-fit: cover; }
         #trendChartContainer { margin-top: 40px; }
+        .btn-group-toggle .btn { border-radius: 0.25rem; }
     </style>
 </head>
 <body>
@@ -32,6 +33,37 @@
                 </div>
                 <div class="col-md-3 align-self-end">
                     <button id="filter-button" class="btn btn-primary btn-block"><i class="fas fa-filter"></i> 篩選</button>
+                </div>
+            </div>
+            
+            <!-- 折疊區域 -->
+            <div class="mb-3">
+                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#advanced-filters" aria-expanded="false" aria-controls="advanced-filters">
+                    進階篩選
+                </button>
+            </div>
+            <div class="collapse" id="advanced-filters">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <label>新聞媒體：</label>
+                        <div class="btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-outline-primary active">
+                                <input type="checkbox" class="media-filter" value="中國時報" checked> 中國時報
+                            </label>
+                            <label class="btn btn-outline-primary active">
+                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked> 聯合新聞網
+                            </label>
+                            <label class="btn btn-outline-primary active">
+                                <input type="checkbox" class="media-filter" value="工商時報" checked> 工商時報
+                            </label>
+                            <label class="btn btn-outline-primary active">
+                                <input type="checkbox" class="media-filter" value="自由時報" checked> 自由時報
+                            </label>
+                            <label class="btn btn-outline-primary active">
+                                <input type="checkbox" class="media-filter" value="風傳媒" checked> 風傳媒
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -58,7 +90,11 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="data.js"></script>
+    <!-- 引入 Bootstrap 所需的 JavaScript 和 Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        // JavaScript 邏輯
         const articlesPerPage = 6;
         let currentPage = 1;
         let filteredArticlesData = [...articlesData];
@@ -72,6 +108,14 @@
             // 綁定篩選按鈕事件
             const filterButton = document.getElementById('filter-button');
             filterButton.addEventListener('click', filterArticles);
+
+            // 綁定輸入事件，自動觸發篩選
+            document.getElementById('start-date').addEventListener('change', filterArticles);
+            document.getElementById('end-date').addEventListener('change', filterArticles);
+            document.getElementById('keyword-filter').addEventListener('input', filterArticles);
+            document.querySelectorAll('.media-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', filterArticles);
+            });
 
             // 綁定跳轉按鈕事件
             const jumpButton = document.getElementById('jump-button');
@@ -115,39 +159,27 @@
             });
         }
 
-        function showArticleDetails(articleId) {
-            const article = articlesData.find(a => a.id === articleId);
-            if (article) {
-                const modalHtml = `
-                    <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="articleModalLabel">${article.title}</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>${article.fullText}</p>
-                                    <p class="text-muted">發布時間：${article.date} | 作者：${article.author} | 發布單位：${article.publisher}</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
+        function filterArticles() {
+            const startDate = new Date(document.getElementById('start-date').value);
+            const endDate = new Date(document.getElementById('end-date').value);
+            const keyword = document.getElementById('keyword-filter').value.trim().toLowerCase();
+            
+            // 獲取選中的新聞媒體
+            const selectedMedia = Array.from(document.querySelectorAll('.media-filter:checked')).map(el => el.value);
 
-                // Append modal to body and show it
-                document.body.insertAdjacentHTML('beforeend', modalHtml);
-                $('#articleModal').modal('show');
+            filteredArticlesData = articlesData.filter(article => {
+                const articleDate = new Date(article.date);
+                const matchesDate = (!isNaN(startDate) ? articleDate >= startDate : true) && (!isNaN(endDate) ? articleDate <= endDate : true);
+                const matchesKeyword = keyword ? article.keywords.some(kw => kw.toLowerCase().includes(keyword)) : true;
+                const matchesMedia = selectedMedia.includes(article.publisher); // 檢查是否在選中的媒體中
+                
+                return matchesDate && matchesKeyword && matchesMedia;
+            });
 
-                // Remove modal from DOM after it's closed
-                $('#articleModal').on('hidden.bs.modal', function () {
-                    document.getElementById('articleModal').remove();
-                });
-            }
+            currentPage = 1;
+            renderArticles(currentPage);
+            renderPagination();
+            renderTrendChart();
         }
 
         function renderPagination() {
@@ -235,27 +267,10 @@
             }
         }
 
-        function filterArticles() {
-            const startDate = new Date(document.getElementById('start-date').value);
-            const endDate = new Date(document.getElementById('end-date').value);
-            const keyword = document.getElementById('keyword-filter').value.trim().toLowerCase();
-
-            filteredArticlesData = articlesData.filter(article => {
-                const articleDate = new Date(article.date);
-                const matchesDate = (!isNaN(startDate) ? articleDate >= startDate : true) && (!isNaN(endDate) ? articleDate <= endDate : true);
-                const matchesKeyword = keyword ? article.keywords.some(kw => kw.toLowerCase().includes(keyword)) : true;
-                return matchesDate && matchesKeyword;
-            });
-
-            currentPage = 1;
-            renderArticles(currentPage);
-            renderPagination();
-            renderTrendChart();
-        }
-
         function renderTrendChart() {
             const keywordCounts = {};
 
+            // 計算關鍵字出現次數
             filteredArticlesData.forEach(article => {
                 article.keywords.forEach(keyword => {
                     if (keywordCounts[keyword]) {
@@ -266,7 +281,11 @@
                 });
             });
 
-            const sortedKeywordCounts = Object.entries(keywordCounts).filter(entry => entry[1] > 1).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            // 移除或調整出現次數大於 1 的條件
+            const sortedKeywordCounts = Object.entries(keywordCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
             const labels = sortedKeywordCounts.map(entry => entry[0]);
             const data = sortedKeywordCounts.map(entry => entry[1]);
 
@@ -293,9 +312,41 @@
                 }
             });
         }
+
+        function showArticleDetails(articleId) {
+            const article = articlesData.find(a => a.id === articleId);
+            if (article) {
+                const modalHtml = `
+                    <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="articleModalLabel">${article.title}</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${article.fullText}</p>
+                                    <p class="text-muted">發布時間：${article.date} | 作者：${article.author} | 發布單位：${article.publisher}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+                // Append modal to body and show it
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                $('#articleModal').modal('show');
+
+                // Remove modal from DOM after it's closed
+                $('#articleModal').on('hidden.bs.modal', function () {
+                    document.getElementById('articleModal').remove();
+                });
+            }
+        }
     </script>
-    <!-- 引入 Bootstrap 所需的 JavaScript 和 Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
