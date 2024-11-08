@@ -1,0 +1,267 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+    color: #343a40;
+}
+
+h1, h3 {
+    font-size: 1.8rem;
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.text-center.mb-3 {
+    margin-bottom: 20px !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Filter Options */
+#filter-options {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+#filter-options label {
+    font-weight: bold;
+}
+
+/* Articles List */
+.card {
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Trend Chart */
+#trendChartContainer {
+    margin: 50px 0;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Monthly Trend Chart */
+#monthlyTrendChart {
+    margin-top: 20px;
+}
+
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    margin: 5px;
+    padding: 10px 15px;
+    border: none;
+    background-color: #007bff;
+    color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.pagination button.active, .pagination button:hover {
+    background-color: #0056b3;
+}
+
+/* Advanced Filters */
+#advanced-filters {
+    background-color: #f1f1f1;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Modal */
+.modal-header {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-body {
+    color: #343a40;
+}
+
+/* Miscellaneous */
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+    color: #6c757d !important;
+}
+
+/* Toggle News Button */
+#toggle-news-button {
+    display: block;
+    margin: 20px auto;
+    background-color: #17a2b8;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#toggle-news-button:hover {
+    background-color: #138496;
+}
+
+/* Collapsed News Content */
+#news-content.collapse {
+    display: none;
+}
+
+#news-content {
+    transition: max-height 0.3s ease;
+}
+
+/* 按鈕的互動效果 */
+button.btn-primary, button.btn-secondary {
+    transition: transform 0.1s ease-in-out, box-shadow 0.2s;
+}
+
+button.btn-primary:active, button.btn-secondary:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 滑桿樣式 */
+#month-slider {
+    -webkit-appearance: none;
+    width: 60%;
+    height: 8px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    outline: none;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+#month-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#month-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* 分隔線樣式 */
+.section-divider {
+    border-top: 1px solid #dcdcdc;
+    margin: 20px 0;
+}
+
+/* 圖表容器樣式 */
+#keywordTrendContainer, #expectedTrendContainer {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+#keywordTrendContainer h1, #expectedTrendContainer h3 {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+/* 圖表切換按鈕 */
+#showKeywordTrend, #showExpectedTrend {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+#showKeywordTrend.btn-primary, #showExpectedTrend.btn-primary {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+#showKeywordTrend.btn-secondary, #showExpectedTrend.btn-secondary {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+/* 淡入淡出動畫 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
