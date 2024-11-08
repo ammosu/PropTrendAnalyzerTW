@@ -48,46 +48,28 @@
             <div class="collapse" id="advanced-filters">
                 <div class="form-row">
                     <div class="col-md-12">
-                        <label>新聞媒體：</label>
-                        <div class="btn-group-toggle" data-toggle="buttons">
-                            <label class="btn btn-outline-primary active">
-                                <input type="checkbox" class="media-filter" value="中國時報" checked> 中國時報
-                            </label>
-                            <label class="btn btn-outline-primary active">
-                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked> 聯合新聞網
-                            </label>
-                            <label class="btn btn-outline-primary active">
-                                <input type="checkbox" class="media-filter" value="工商時報" checked> 工商時報
-                            </label>
-                            <label class="btn btn-outline-primary active">
-                                <input type="checkbox" class="media-filter" value="自由時報" checked> 自由時報
-                            </label>
-                            <label class="btn btn-outline-primary active">
-                                <input type="checkbox" class="media-filter" value="風傳媒" checked> 風傳媒
-                            </label>
-                        </div>
+                        <label>新聞媒體：
+                            <div class="btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active">
+                                    <input type="checkbox" class="media-filter" value="中國時報" checked name="media-filter-chinatimes" id="media-filter-chinatimes"> 中國時報
+                                </label>
+                                <label class="btn btn-outline-primary active">
+                                    <input type="checkbox" class="media-filter" value="聯合新聞網" checked name="media-filter-united-daily" id="media-filter-united-daily"> 聯合新聞網
+                                </label>
+                                <label class="btn btn-outline-primary active">
+                                    <input type="checkbox" class="media-filter" value="工商時報" checked name="media-filter-commercial-times" id="media-filter-commercial-times"> 工商時報
+                                </label>
+                                <label class="btn btn-outline-primary active">
+                                    <input type="checkbox" class="media-filter" value="自由時報" checked name="media-filter-liberty-times" id="media-filter-liberty-times"> 自由時報
+                                </label>
+                                <label class="btn btn-outline-primary active">
+                                    <input type="checkbox" class="media-filter" value="風傳媒" checked name="media-filter-storm" id="media-filter-storm"> 風傳媒
+                                </label>
+                            </div>
+                        </label>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="section-divider"></div>
-
-        <button id="toggle-news-button" class="btn btn-info mb-4"><i class="fas fa-newspaper"></i> 顯示/隱藏新聞內容</button>
-        <div id="news-content" class="collapse">
-            <div id="articles" class="row"></div>
-            <div id="pagination-options" class="mb-4">
-                <div class="form-row">
-                    <div class="col-md-3">
-                        <label for="jump-page">跳轉至頁碼：</label>
-                        <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1">
-                    </div>
-                    <div class="col-md-3 align-self-end">
-                        <button id="jump-button" class="btn btn-secondary btn-block"><i class="fas fa-arrow-right"></i> 跳轉</button>
-                    </div>
-                </div>
-            </div>
-            <div class="pagination" id="pagination"></div>
         </div>
 
         <div class="section-divider"></div>
@@ -118,6 +100,25 @@
             <h3>每月預期市場趨勢分佈</h3>
             <canvas id="expectedTrendChart" width="600" height="400"></canvas>
             <button id="toggleChartType" class="btn btn-primary mt-3">切換到折線圖</button>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <button id="toggle-news-button" class="btn btn-info mb-4"><i class="fas fa-newspaper"></i> 顯示/隱藏新聞內容</button>
+        <div id="news-content" class="collapse">
+            <div id="articles" class="row"></div>
+            <div id="pagination-options" class="mb-4">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <label for="jump-page">跳轉至頁碼：</label>
+                        <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1">
+                    </div>
+                    <div class="col-md-3 align-self-end">
+                        <button id="jump-button" class="btn btn-secondary btn-block"><i class="fas fa-arrow-right"></i> 跳轉</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination" id="pagination"></div>
         </div>
 
     </div>
