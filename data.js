@@ -13,34 +13,99 @@ let trendData = {
 // 載入文章數據
 async function loadArticlesData() {
   try {
-    // 首先載入元數據以獲取可用月份
-    const metadataResponse = await fetch('data/metadata.json');
-    const metadata = await metadataResponse.json();
-    
-    // 載入所有文章數據
-    const response = await fetch('data/all_articles.json');
-    articlesData = await response.json();
-    
-    // 計算關鍵詞趨勢
-    calculateTrendData();
-    
-    // 觸發頁面初始化
-    if (typeof initializePage === 'function') {
-      initializePage();
+    // 檢查是否有已上傳的數據（從IndexedDB載入）
+    if (window.csvUploader && typeof window.csvUploader.hasArticlesInDB === 'function') {
+      try {
+        const hasData = await window.csvUploader.hasArticlesInDB();
+        if (hasData) {
+          articlesData = await window.csvUploader.getArticlesFromDB();
+          console.log(`從IndexedDB載入 ${articlesData.length} 篇文章`);
+          
+          // 計算關鍵詞趨勢
+          calculateTrendData();
+          
+          // 觸發頁面初始化
+          if (typeof initializePage === 'function') {
+            initializePage();
+          }
+          
+          return;
+        }
+      } catch (dbError) {
+        console.warn('從IndexedDB載入數據失敗:', dbError);
+      }
     }
     
-    console.log(`成功載入 ${articlesData.length} 篇文章`);
+    // 如果沒有上傳的數據，嘗試從預設位置載入
+    try {
+      // 首先載入元數據以獲取可用月份
+      const metadataResponse = await fetch('data/metadata.json');
+      const metadata = await metadataResponse.json();
+      
+      // 載入所有文章數據
+      const response = await fetch('data/all_articles.json');
+      articlesData = await response.json();
+      
+      // 計算關鍵詞趨勢
+      calculateTrendData();
+      
+      // 觸發頁面初始化
+      if (typeof initializePage === 'function') {
+        initializePage();
+      }
+      
+      console.log(`成功載入 ${articlesData.length} 篇文章`);
+    } catch (fetchError) {
+      console.warn('無法從預設位置載入數據:', fetchError);
+      
+      // 如果沒有預設數據，顯示上傳提示
+      const uploadStatus = document.getElementById('upload-status');
+      if (uploadStatus) {
+        uploadStatus.innerHTML = `
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 尚未載入任何數據。請上傳CSV檔案以開始分析。
+          </div>
+        `;
+      }
+      
+      // 初始化空數據
+      articlesData = [];
+      
+      // 仍然初始化頁面，但會顯示空內容
+      if (typeof initializePage === 'function') {
+        initializePage();
+      }
+    }
   } catch (error) {
     console.error('載入文章數據時發生錯誤:', error);
     // 如果載入失敗，顯示錯誤訊息
-    document.getElementById('articles').innerHTML = `
-      <div class="col-12 text-center">
-        <div class="alert alert-danger">
-          載入數據時發生錯誤。請稍後再試。
+    const articlesElement = document.getElementById('articles');
+    if (articlesElement) {
+      articlesElement.innerHTML = `
+        <div class="col-12 text-center">
+          <div class="alert alert-danger">
+            載入數據時發生錯誤。請稍後再試。
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   }
+}
+
+// 設置上傳的文章數據
+function setArticlesData(data) {
+  articlesData = data;
+  
+  // 計算關鍵詞趨勢
+  calculateTrendData();
+  
+  // 重新初始化頁面
+  if (typeof initializePage === 'function') {
+    initializePage();
+  }
+  
+  console.log(`成功設置 ${articlesData.length} 篇文章`);
+  return articlesData.length;
 }
 
 // 計算關鍵詞趨勢數據
