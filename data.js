@@ -1,54 +1,106 @@
 // data.js
-// 文章數據
-const articlesData = [
-  {
-    "title": "主要城市房價飆升",
-    "summary": "過去一年中，主要城市的房地產市場經歷了顯著的價格上漲。",
-    "keywords": ["房地產", "價格上漲", "主要城市", "專家", "市場"],
-    "date": "2024-10-01",
-    "publisher": "自由時報",
-    "author": "張三",
-    "fullText": "過去一年中，主要城市的房地產市場經歷了顯著的價格上漲，這引起了社會各界的廣泛關注。專家分析認為，這主要是由於經濟增長和市場需求增加所致，政府也在考慮採取措施來穩定市場。",
-    "expectedMarketTrend": "上漲",
-    "imageUrl": "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7"
-  },
-  {
-    "title": "新住房政策出台",
-    "summary": "政府發布新住房政策，旨在控制市場過熱，保障居民需求。",
-    "keywords": ["住房政策", "政府", "市場過熱", "居民需求", "控制"],
-    "date": "2024-09-28",
-    "publisher": "聯合報",
-    "author": "李四",
-    "fullText": "政府近日發布了一項新的住房政策，目的是為了控制房地產市場過熱的現象，確保居民的住房需求得到有效保障。這項政策包括對投機性購房行為的限制以及增加住房供應等多方面的措施。",
-    "expectedMarketTrend": "無法判斷",
-    "imageUrl": "https://images.unsplash.com/photo-1501594907352-04cda38ebc29"
-  },
-  {
-    "title": "貸款利率調整對房市的影響",
-    "summary": "近期貸款利率的調整可能會對房地產市場需求產生影響。",
-    "keywords": ["貸款利率", "房地產市場", "需求", "調整", "影響"],
-    "date": "2024-09-25",
-    "publisher": "經濟日報",
-    "author": "王五",
-    "fullText": "貸款利率的上調對房地產市場產生了直接影響，許多潛在購房者因為貸款成本的增加而推遲了購房計劃。專家表示，這可能會導致房地產市場需求的短期下降，但從長遠來看，這有助於市場的健康發展。",
-    "expectedMarketTrend": "下跌",
-    "imageUrl": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853"
-  }
-];
+// 動態載入文章數據
 
-// 初始趨勢數據計算
-const keywordCounts = {};
-articlesData.forEach(article => {
-  article.keywords.forEach(keyword => {
-    if (keywordCounts[keyword]) {
-      keywordCounts[keyword]++;
-    } else {
-      keywordCounts[keyword] = 1;
-    }
-  });
-});
+// 初始化空的文章數據陣列
+let articlesData = [];
 
-const trendData = {
-  labels: Object.keys(keywordCounts),
-  data: Object.values(keywordCounts)
+// 初始化趨勢數據
+let trendData = {
+  labels: [],
+  data: []
 };
+
+// 載入文章數據
+async function loadArticlesData() {
+  try {
+    // 首先載入元數據以獲取可用月份
+    const metadataResponse = await fetch('data/metadata.json');
+    const metadata = await metadataResponse.json();
+    
+    // 載入所有文章數據
+    const response = await fetch('data/all_articles.json');
+    articlesData = await response.json();
+    
+    // 計算關鍵詞趨勢
+    calculateTrendData();
+    
+    // 觸發頁面初始化
+    if (typeof initializePage === 'function') {
+      initializePage();
+    }
+    
+    console.log(`成功載入 ${articlesData.length} 篇文章`);
+  } catch (error) {
+    console.error('載入文章數據時發生錯誤:', error);
+    // 如果載入失敗，顯示錯誤訊息
+    document.getElementById('articles').innerHTML = `
+      <div class="col-12 text-center">
+        <div class="alert alert-danger">
+          載入數據時發生錯誤。請稍後再試。
+        </div>
+      </div>
+    `;
+  }
+}
+
+// 計算關鍵詞趨勢數據
+function calculateTrendData() {
+  const keywordCounts = {};
+  
+  articlesData.forEach(article => {
+    article.keywords.forEach(keyword => {
+      if (keywordCounts[keyword]) {
+        keywordCounts[keyword]++;
+      } else {
+        keywordCounts[keyword] = 1;
+      }
+    });
+  });
+  
+  trendData = {
+    labels: Object.keys(keywordCounts),
+    data: Object.values(keywordCounts)
+  };
+}
+
+// 按月份載入文章數據
+async function loadArticlesByMonth(yearMonth) {
+  try {
+    const response = await fetch(`data/articles_${yearMonth}.json`);
+    return await response.json();
+  } catch (error) {
+    console.error(`載入 ${yearMonth} 月份數據時發生錯誤:`, error);
+    return [];
+  }
+}
+
+// 頁面載入時自動載入數據
+document.addEventListener('DOMContentLoaded', loadArticlesData);
+
+// 提供一個初始化頁面的函數，在數據載入完成後調用
+function initializePage() {
+  // 這個函數將在 scripts.js 中定義
+  // 用於在數據載入完成後初始化頁面元素
+  if (typeof renderArticles === 'function') {
+    renderArticles(1); // 渲染第一頁文章
+  }
+  
+  if (typeof renderPagination === 'function') {
+    renderPagination(); // 渲染分頁
+  }
+  
+  if (typeof renderTrendChart === 'function') {
+    // 獲取第一個月份
+    const firstMonth = articlesData.length > 0 
+      ? new Date(articlesData[0].date).toISOString().substring(0, 7)
+      : null;
+      
+    if (firstMonth) {
+      renderTrendChart(firstMonth); // 渲染趨勢圖
+    }
+  }
+  
+  if (typeof renderExpectedTrendChart === 'function') {
+    renderExpectedTrendChart(); // 渲染預期趨勢圖
+  }
+}

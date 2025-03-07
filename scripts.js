@@ -2,14 +2,31 @@
 
 const articlesPerPage = 6;
 let currentPage = 1;
-let filteredArticlesData = [...articlesData];
+let filteredArticlesData = [];
 let trendChart = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+// 頁面初始化函數，在數據載入完成後調用
+function initializePage() {
+    // 初始化過濾後的文章數據
+    filteredArticlesData = [...articlesData];
+    
+    // 渲染頁面元素
     renderArticles(currentPage);
     renderPagination();
-    renderTrendChart();
+    
+    // 初始化月份滑桿
+    initializeMonthSlider();
+    
+    // 初始化預期趨勢圖表
+    renderExpectedTrendChart();
+    
+    // 應用初始篩選
+    filterArticles();
+    
+    console.log('頁面初始化完成');
+}
 
+document.addEventListener('DOMContentLoaded', function() {
     // 自動篩選監聽器
     document.getElementById('start-date').addEventListener('change', filterArticles);
     document.getElementById('end-date').addEventListener('change', filterArticles);
@@ -34,8 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// 綁定顯示/隱藏新聞內容按鈕事件
 document.addEventListener('DOMContentLoaded', function() {
-    // 綁定顯示/隱藏新聞內容按鈕事件
     const toggleNewsButton = document.getElementById('toggle-news-button');
     const newsContent = document.getElementById('news-content');
 
@@ -85,8 +103,6 @@ document.getElementById('showExpectedTrend').addEventListener('click', function(
     document.getElementById('showKeywordTrend').classList.remove('btn-primary');
 });
 
-
-
 function renderArticles(page) {
     const start = (page - 1) * articlesPerPage;
     const end = start + articlesPerPage;
@@ -120,6 +136,10 @@ function renderArticles(page) {
 
 // 計算最小和最大月份範圍
 function getMonthRange(articles) {
+    if (!articles || articles.length === 0) {
+        return [];
+    }
+    
     const dates = articles.map(article => new Date(article.date));
     const minDate = new Date(Math.min(...dates));
     const maxDate = new Date(Math.max(...dates));
@@ -150,8 +170,12 @@ document.getElementById('toggleChartType').addEventListener('click', function() 
     renderExpectedTrendChart();
 });
 
-
 function renderExpectedTrendChart() {
+    if (!articlesData || articlesData.length === 0) {
+        console.warn('沒有可用的文章數據，無法渲染預期趨勢圖表');
+        return;
+    }
+    
     const months = getMonthRange(articlesData);
     const trendCountsPerMonth = {};
 
@@ -230,19 +254,14 @@ function renderExpectedTrendChart() {
     });
 }
 
-// 初始渲染圖表
-document.addEventListener('DOMContentLoaded', function() {
-    renderExpectedTrendChart();
-});
-// 頁面加載完成後，執行篩選和排序
-document.addEventListener('DOMContentLoaded', function() {
-    filterArticles(); // 初次加載時應用篩選和排序
-});
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
+// 初始化月份滑桿
+function initializeMonthSlider() {
     const months = getMonthRange(articlesData);
+    if (months.length === 0) {
+        console.warn('沒有可用的月份數據');
+        return;
+    }
+    
     const monthSlider = document.getElementById('month-slider');
     const selectedMonthLabel = document.getElementById('selected-month');
     const prevButton = document.getElementById('prev-month');
@@ -276,11 +295,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 初始渲染
     renderTrendChart(months[monthSlider.value]);
-});
-
-
+}
 
 function renderTrendChart(selectedMonth) {
+    if (!selectedMonth) {
+        console.warn('未提供月份參數，無法渲染趨勢圖表');
+        return;
+    }
+    
     const keywordCounts = {};
 
     // 使用篩選後的 `filteredArticlesData`，確保資料動態更新
@@ -343,6 +365,10 @@ function renderTrendChart(selectedMonth) {
 }
 
 function getFilteredArticles() {
+    if (!articlesData || articlesData.length === 0) {
+        return [];
+    }
+    
     const startDate = new Date(document.getElementById('start-date').value);
     const endDate = new Date(document.getElementById('end-date').value);
     const keyword = document.getElementById('keyword-filter').value.trim().toLowerCase();
@@ -353,12 +379,11 @@ function getFilteredArticles() {
         const articleDate = new Date(article.date);
         const matchesDate = (!isNaN(startDate) ? articleDate >= startDate : true) && (!isNaN(endDate) ? articleDate <= endDate : true);
         const matchesKeyword = keyword ? article.keywords.some(kw => kw.toLowerCase().includes(keyword)) : true;
-        const matchesMedia = selectedMedia.includes(article.publisher);
+        const matchesMedia = selectedMedia.length === 0 || selectedMedia.includes(article.publisher);
 
         return matchesDate && matchesKeyword && matchesMedia;
     });
 }
-
 
 function filterArticles() {
     // 使用通用篩選邏輯更新 `filteredArticlesData`
@@ -386,12 +411,12 @@ function filterArticles() {
 
     // 使用當前滑桿選擇的月份更新趨勢圖
     const selectedMonth = document.getElementById('selected-month').textContent;
-    renderTrendChart(selectedMonth);
+    if (selectedMonth) {
+        renderTrendChart(selectedMonth);
+    }
 }
 
 document.getElementById('sort-options').addEventListener('change', filterArticles);
-
-
 
 function renderPagination() {
     const totalPages = Math.ceil(filteredArticlesData.length / articlesPerPage);
@@ -478,71 +503,10 @@ function renderPagination() {
     }
 }
 
-function renderTrendChart(selectedMonth) {
-    const keywordCounts = {};
-
-    // 使用 `filteredArticlesData` 進行月份篩選
-    const filteredArticles = filteredArticlesData.filter(article => {
-        const articleDate = new Date(article.date);
-        const articleYearMonth = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
-        return articleYearMonth === selectedMonth;
-    });
-
-    // 統計當前月份的關鍵詞出現次數
-    filteredArticles.forEach(article => {
-        article.keywords.forEach(keyword => {
-            if (keywordCounts[keyword]) {
-                keywordCounts[keyword]++;
-            } else {
-                keywordCounts[keyword] = 1;
-            }
-        });
-    });
-
-    // 若無數據，則清空圖表
-    if (Object.keys(keywordCounts).length === 0) {
-        if (trendChart) {
-            trendChart.destroy();
-        }
-        return;
-    }
-
-    // 提取出現次數最多的前10個關鍵詞
-    const sortedKeywordCounts = Object.entries(keywordCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-
-    const labels = sortedKeywordCounts.map(entry => entry[0]);
-    const data = sortedKeywordCounts.map(entry => entry[1]);
-
-    if (trendChart) {
-        trendChart.destroy();
-    }
-
-    const ctx = document.getElementById('trend').getContext('2d');
-    trendChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: `關鍵詞出現次數 (${selectedMonth})`,
-                data: data,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-}
-
 function formatArticleContent(content) {
+    if (!content) return '';
     return content.replace(/_x000D_/g, '<br>').replace(/\r\n|\n/g, '<br>');
 }
-
 
 function showArticleDetails(articleId) {
     const article = articlesData.find(a => a.id === articleId);

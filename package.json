@@ -1,0 +1,23 @@
+{
+  "name": "proptrendanalyzertw",
+  "version": "1.0.0",
+  "description": "本專案是一個前端應用程式，用於顯示房地產新聞摘要並提供趨勢分析圖表。使用者可以透過篩選功能過濾新聞內容，並查看熱門關鍵詞的趨勢變化。此應用程式支援分頁、關鍵字篩選、以及跳轉至指定頁碼的功能，提供簡潔易用的新聞瀏覽介面。",
+  "main": "csv-to-json.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ammosu/PropTrendAnalyzerTW.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ammosu/PropTrendAnalyzerTW/issues"
+  },
+  "homepage": "https://github.com/ammosu/PropTrendAnalyzerTW#readme",
+  "dependencies": {
+    "csv-parser": "^3.2.0"
+  }
+}
