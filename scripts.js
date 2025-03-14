@@ -113,7 +113,7 @@ function renderArticles(page) {
     currentArticles.forEach(article => {
         const articleCard = document.createElement('div');
         articleCard.className = 'col-md-4';
-        const imageUrl = article.imageUrl ? article.imageUrl : 'https://via.placeholder.com/400x200';
+        const imageUrl = `https://picsum.photos/seed/${article.id || Math.floor(Math.random() * 1000)}/600/400`;
         const keywords = article.keywords.slice(0, 3).join(', ');
         const publisherLink = article.url ? `<a href="${article.url}" target="_blank">${article.publisher}</a>` : article.publisher;
         const expectedTrend = article.expectedMarketTrend ? `<p class="text-muted">預期趨勢：${article.expectedMarketTrend}</p>` : '';
@@ -171,12 +171,12 @@ document.getElementById('toggleChartType').addEventListener('click', function() 
 });
 
 function renderExpectedTrendChart() {
-    if (!articlesData || articlesData.length === 0) {
+    if (!filteredArticlesData || filteredArticlesData.length === 0) {
         console.warn('沒有可用的文章數據，無法渲染預期趨勢圖表');
         return;
     }
     
-    const months = getMonthRange(articlesData);
+    const months = getMonthRange(filteredArticlesData);
     const trendCountsPerMonth = {};
 
     // 初始化每月的五種「預期趨勢」計數
@@ -191,7 +191,7 @@ function renderExpectedTrendChart() {
     });
 
     // 遍歷所有文章，統計每月的「預期趨勢」
-    articlesData.forEach(article => {
+    filteredArticlesData.forEach(article => {
         const articleDate = new Date(article.date);
         const articleYearMonth = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
         
@@ -256,7 +256,7 @@ function renderExpectedTrendChart() {
 
 // 初始化月份滑桿
 function initializeMonthSlider() {
-    const months = getMonthRange(articlesData);
+    const months = getMonthRange(filteredArticlesData.length > 0 ? filteredArticlesData : articlesData);
     if (months.length === 0) {
         console.warn('沒有可用的月份數據');
         return;
@@ -408,12 +408,12 @@ function filterArticles() {
     currentPage = 1;
     renderArticles(currentPage);
     renderPagination();
-
-    // 使用當前滑桿選擇的月份更新趨勢圖
-    const selectedMonth = document.getElementById('selected-month').textContent;
-    if (selectedMonth) {
-        renderTrendChart(selectedMonth);
-    }
+    
+    // 重新初始化月份滑桿，以反映篩選後的日期範圍
+    initializeMonthSlider();
+    
+    // 更新每月預期市場趨勢分佈圖表
+    renderExpectedTrendChart();
 }
 
 document.getElementById('sort-options').addEventListener('change', filterArticles);
