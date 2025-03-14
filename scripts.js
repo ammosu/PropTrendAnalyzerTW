@@ -273,12 +273,31 @@ document.getElementById('showKeywordTrend').addEventListener('click', function()
                 hideLoading();
                 
                 // 重新渲染圖表以確保正確顯示
-                if (trendChart) {
-                    setTimeout(() => {
+                setTimeout(() => {
+                    // 如果有保存的月份滑桿狀態，則恢復它
+                    if (window.savedMonthSliderState) {
+                        const monthSlider = document.getElementById('month-slider');
+                        const selectedMonthLabel = document.getElementById('selected-month');
+                        
+                        // 先調整滑桿寬度
+                        const months = getMonthRange(filteredArticlesData.length > 0 ? filteredArticlesData : articlesData);
+                        if (months && months.length > 0) {
+                            adjustSliderWidth(months.length);
+                            
+                            // 然後設置滑桿值和月份標籤
+                            if (window.savedMonthSliderState.value <= monthSlider.max) {
+                                monthSlider.value = window.savedMonthSliderState.value;
+                                selectedMonthLabel.textContent = window.savedMonthSliderState.month;
+                            }
+                        }
+                        
+                        // 渲染趨勢圖表
+                        renderTrendChart(selectedMonthLabel.textContent);
+                    } else if (trendChart) {
                         const currentMonth = document.getElementById('selected-month').textContent;
                         renderTrendChart(currentMonth);
-                    }, 100);
-                }
+                    }
+                }, 100);
             }, 300);
         } else {
             keywordTrendContainer.style.display = 'block';
@@ -289,6 +308,12 @@ document.getElementById('showKeywordTrend').addEventListener('click', function()
             this.classList.remove('btn-secondary');
             document.getElementById('showExpectedTrend').classList.add('btn-secondary');
             document.getElementById('showExpectedTrend').classList.remove('btn-primary');
+            
+            // 調整月份滑桿寬度
+            const months = getMonthRange(filteredArticlesData.length > 0 ? filteredArticlesData : articlesData);
+            if (months && months.length > 0) {
+                adjustSliderWidth(months.length);
+            }
             
             // 隱藏載入動畫
             hideLoading();
@@ -303,6 +328,10 @@ document.getElementById('showExpectedTrend').addEventListener('click', function(
     
     // 顯示載入動畫
     showLoading('正在載入市場趨勢分佈...');
+    
+    // 保存當前月份滑桿狀態，以便切換回來時恢復
+    const currentMonthValue = document.getElementById('month-slider').value;
+    const selectedMonth = document.getElementById('selected-month').textContent;
     
     // 使用 setTimeout 創建平滑過渡
     setTimeout(() => {
@@ -330,6 +359,12 @@ document.getElementById('showExpectedTrend').addEventListener('click', function(
                 // 重新渲染圖表以確保正確顯示
                 setTimeout(() => {
                     renderExpectedTrendChart();
+                    
+                    // 保存當前月份滑桿狀態，以便切換回來時恢復
+                    window.savedMonthSliderState = {
+                        value: document.getElementById('month-slider').value,
+                        month: document.getElementById('selected-month').textContent
+                    };
                 }, 100);
             }, 300);
         } else {
@@ -716,6 +751,9 @@ function initializeMonthSlider() {
     const prevButton = document.getElementById('prev-month');
     const nextButton = document.getElementById('next-month');
 
+    // 根據月份數量動態調整滑桿寬度
+    adjustSliderWidth(months.length);
+
     monthSlider.min = 0;
     monthSlider.max = months.length - 1;
     monthSlider.value = 0;
@@ -746,6 +784,36 @@ function initializeMonthSlider() {
     renderTrendChart(months[monthSlider.value]);
 }
 
+// 根據月份數量動態調整滑桿寬度
+function adjustSliderWidth(monthCount) {
+    const monthSlider = document.getElementById('month-slider');
+    
+    // 根據月份數量計算適當的寬度
+    // 月份越多，滑桿越寬，但有最小和最大限制
+    let width;
+    
+    if (monthCount <= 3) {
+        // 少量月份，使用較窄的滑桿
+        width = '30%';
+    } else if (monthCount <= 6) {
+        // 中等月份數量
+        width = '45%';
+    } else if (monthCount <= 12) {
+        // 一年左右的月份
+        width = '60%';
+    } else if (monthCount <= 24) {
+        // 兩年左右的月份
+        width = '75%';
+    } else {
+        // 大量月份數據
+        width = '85%';
+    }
+    
+    // 應用新的寬度
+    monthSlider.style.width = width;
+    console.log(`根據 ${monthCount} 個月份調整滑桿寬度為 ${width}`);
+}
+
 function renderTrendChart(selectedMonth) {
     if (!selectedMonth) {
         console.warn('未提供月份參數，無法渲染趨勢圖表');
@@ -754,6 +822,12 @@ function renderTrendChart(selectedMonth) {
     
     // 顯示載入動畫
     showLoading('正在生成關鍵詞趨勢圖表...');
+    
+    // 確保月份滑桿寬度已調整
+    const months = getMonthRange(filteredArticlesData.length > 0 ? filteredArticlesData : articlesData);
+    if (months && months.length > 0) {
+        adjustSliderWidth(months.length);
+    }
     
     const keywordCounts = {};
 

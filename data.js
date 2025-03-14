@@ -104,6 +104,14 @@ function setArticlesData(data) {
     initializePage();
   }
   
+  // 確保月份滑桿寬度調整（如果函數存在）
+  if (typeof adjustSliderWidth === 'function') {
+    const months = getMonthRange(articlesData);
+    if (months && months.length > 0) {
+      adjustSliderWidth(months.length);
+    }
+  }
+  
   console.log(`成功設置 ${articlesData.length} 篇文章`);
   return articlesData.length;
 }

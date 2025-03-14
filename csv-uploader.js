@@ -242,6 +242,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                             // 設置文章數據
                             setArticlesData(articlesData);
                             
+                            // 確保月份滑桿寬度調整（如果函數存在）
+                            if (typeof adjustSliderWidth === 'function') {
+                                const months = getMonthRange(articlesData);
+                                if (months && months.length > 0) {
+                                    adjustSliderWidth(months.length);
+                                }
+                            }
+                            
                             // 顯示成功訊息
                             uploadStatus.innerHTML = `
                                 <div class="alert alert-success">
@@ -320,6 +328,35 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 });
+
+// 從 scripts.js 引入 getMonthRange 函數
+function getMonthRange(articles) {
+    if (!articles || articles.length === 0) {
+        return [];
+    }
+    
+    // 過濾無效日期
+    const validArticles = articles.filter(article => article.date && !isNaN(new Date(article.date).getTime()));
+    
+    if (validArticles.length === 0) {
+        return [];
+    }
+    
+    const dates = validArticles.map(article => new Date(article.date));
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+
+    const months = [];
+    let currentDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+
+    while (currentDate <= maxDate) {
+        const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+        months.push(yearMonth);
+        currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+
+    return months;
+}
 
 // 導出函數供其他模塊使用
 window.csvUploader = {
