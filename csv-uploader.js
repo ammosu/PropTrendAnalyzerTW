@@ -152,11 +152,33 @@ function processCSVData(csvData) {
                     keywords = item.keywords.split(',').map(k => k.trim());
                 }
             } catch (e) {
-                console.warn(`無法解析文章 ${index} 的關鍵詞: ${item.keywords}`);
-                // 嘗試使用正則表達式提取關鍵詞
-                const matches = item.keywords.match(/'([^']+)'/g);
-                if (matches) {
-                    keywords = matches.map(m => m.replace(/'/g, '').trim());
+                console.warn(`無法解析文章 ${index} 的關鍵詞，嘗試其他方法`);
+                // 嘗試使用更寬泛的正則表達式提取關鍵詞
+                try {
+                    // 先處理特殊字符
+                    let cleanKeywords = item.keywords
+                        .replace(/'/g, '"')  // 單引號轉雙引號
+                        .replace(/'/g, '"')  // 智能單引號轉雙引號
+                        .replace(/'/g, '"')  // 另一種智能單引號
+                        .replace(/"/g, '"')  // 智能雙引號轉標準雙引號
+                        .replace(/"/g, '"'); // 另一種智能雙引號
+                    
+                    // 如果還是解析失敗，嘗試手動分割
+                    if (cleanKeywords.startsWith('[') && cleanKeywords.endsWith(']')) {
+                        keywords = JSON.parse(cleanKeywords);
+                    } else {
+                        // 使用正則表達式提取被引號包圍的內容
+                        const matches = item.keywords.match(/["'](.*?)["']/g);
+                        if (matches) {
+                            keywords = matches.map(m => m.replace(/["']/g, '').trim());
+                        } else {
+                            // 最後嘗試：按逗號分割
+                            keywords = item.keywords.split(',').map(k => k.trim().replace(/^['"]|['"]$/g, ''));
+                        }
+                    }
+                } catch (e2) {
+                    console.warn(`文章 ${index} 的關鍵詞處理失敗，使用空陣列`);
+                    keywords = [];
                 }
             }
         }

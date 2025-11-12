@@ -1,0 +1,365 @@
+// App.js - 主應用程式控制器
+class App {
+    constructor() {
+        this.stateManager = null;
+        this.uiComponents = null;
+        this.chartManager = null;
+        this.eventHandlers = null;
+        this.utilities = null;
+        this.isInitialized = false;
+        
+        this.initialize();
+    }
+
+    // 初始化應用程式
+    async initialize() {
+        try {
+            console.log('初始化 PropTrendAnalyzerTW 應用程式...');
+            
+            // 等待 DOM 載入完成
+            if (document.readyState === 'loading') {
+                await this.waitForDOMContentLoaded();
+            }
+            
+            // 初始化模組
+            this.initializeModules();
+            
+            // 設置全域引用供向後相容
+            this.setupGlobalReferences();
+            
+            // 初始化應用程式狀態
+            await this.initializeAppState();
+            
+            // 訂閱狀態變化
+            this.subscribeToStateChanges();
+            
+            this.isInitialized = true;
+            console.log('應用程式初始化完成');
+            
+            // 觸發初始頁面載入
+            this.initializePage();
+            
+        } catch (error) {
+            console.error('應用程式初始化失敗:', error);
+            this.showInitializationError(error);
+        }
+    }
+
+    // 等待 DOM 內容載入完成
+    waitForDOMContentLoaded() {
+        return new Promise(resolve => {
+            document.addEventListener('DOMContentLoaded', resolve);
+        });
+    }
+
+    // 初始化所有模組
+    initializeModules() {
+        // 檢查依賴是否已載入
+        if (typeof StateManager === 'undefined' || 
+            typeof UIComponents === 'undefined' || 
+            typeof ChartManager === 'undefined' || 
+            typeof EventHandlers === 'undefined' || 
+            typeof Utilities === 'undefined') {
+            throw new Error('必要的模組尚未載入完成');
+        }
+
+        // 初始化模組實例
+        this.stateManager = window.StateManager;
+        this.utilities = window.Utilities;
+        this.uiComponents = new UIComponents(this.stateManager);
+        this.chartManager = new ChartManager(this.stateManager, this.uiComponents);
+        this.eventHandlers = new EventHandlers(
+            this.stateManager, 
+            this.uiComponents, 
+            this.chartManager, 
+            this.utilities
+        );
+
+        console.log('所有模組初始化完成');
+    }
+
+    // 設置全域引用供向後相容
+    setupGlobalReferences() {
+        // 供 HTML 中的 onclick 事件使用
+        window.UIManager = {
+            showArticleDetails: (id) => this.uiComponents.showArticleDetails(id)
+        };
+
+        // 供其他舊代碼使用的全域函數
+        window.initializePage = () => this.initializePage();
+        window.renderArticles = (page) => this.uiComponents.renderArticles(page);
+        window.renderPagination = () => this.uiComponents.renderPagination();
+        window.showLoading = (message) => this.uiComponents.showLoading(message);
+        window.hideLoading = () => this.uiComponents.hideLoading();
+        window.renderTrendChart = (month) => this.chartManager.renderTrendChart(month);
+        window.renderExpectedTrendChart = () => this.chartManager.renderExpectedTrendChart();
+        
+        console.log('全域引用設置完成');
+    }
+
+    // 初始化應用程式狀態
+    async initializeAppState() {
+        // 等待一小段時間讓 data.js 有機會載入
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // 嘗試從 data.js 載入數據
+        if (typeof articlesData !== 'undefined' && articlesData.length > 0) {
+            this.stateManager.setArticlesData(articlesData);
+            console.log(`從 data.js 載入 ${articlesData.length} 篇文章`);
+        } else {
+            console.log('等待數據載入...');
+            // 設置一個監聽器來等待數據載入
+            this.waitForDataLoading();
+        }
+    }
+
+    // 等待數據載入的監聽器
+    waitForDataLoading() {
+        const checkInterval = setInterval(() => {
+            if (typeof articlesData !== 'undefined' && articlesData.length > 0) {
+                clearInterval(checkInterval);
+                this.stateManager.setArticlesData(articlesData);
+                console.log(`延遲載入 ${articlesData.length} 篇文章`);
+                // 確保設置初始過濾數據
+                this.stateManager.setFilteredArticles([...articlesData]);
+                // 重新初始化頁面
+                this.initializePage();
+            }
+        }, 100);
+
+        // 10秒後停止等待
+        setTimeout(() => {
+            clearInterval(checkInterval);
+        }, 10000);
+    }
+
+    // 訂閱狀態變化
+    subscribeToStateChanges() {
+        this.stateManager.subscribe((stateKey, newValue, oldValue) => {
+            console.log(`狀態變更: ${stateKey}`, { newValue, oldValue });
+            
+            // 根據狀態變化執行相應操作
+            switch (stateKey) {
+                case 'articlesData':
+                    if (newValue && newValue.length > 0) {
+                        this.handleArticlesDataLoaded();
+                    }
+                    break;
+                case 'filteredArticlesData':
+                    this.handleFilteredArticlesChanged();
+                    break;
+                case 'currentPage':
+                    this.handlePageChanged();
+                    break;
+            }
+        });
+    }
+
+    // 處理文章數據載入完成
+    handleArticlesDataLoaded() {
+        console.log('文章數據載入完成，更新 UI');
+        
+        // 初始化篩選器
+        this.initializeFilters();
+        
+        // 初始化新聞內容切換狀態
+        this.initializeNewsContentState();
+    }
+
+    // 處理過濾後文章變化
+    handleFilteredArticlesChanged() {
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+        console.log(`過濾後的文章數量: ${filteredArticlesData.length}`);
+    }
+
+    // 處理頁面變化
+    handlePageChanged() {
+        const currentPage = this.stateManager.getState('currentPage');
+        console.log(`切換到第 ${currentPage} 頁`);
+    }
+
+    // 初始化頁面
+    initializePage() {
+        if (!this.isInitialized) {
+            console.log('應用程式尚未初始化，延遲頁面初始化');
+            setTimeout(() => this.initializePage(), 100);
+            return;
+        }
+
+        console.log('開始初始化頁面...');
+        
+        this.uiComponents.showLoading('正在初始化頁面...');
+        
+        let articlesData = this.stateManager.getState('articlesData');
+        
+        // 如果 StateManager 中沒有數據，檢查全域變數
+        if ((!articlesData || articlesData.length === 0) && typeof window.articlesData !== 'undefined' && window.articlesData.length > 0) {
+            console.log('從全域變數同步數據到 StateManager');
+            this.stateManager.setArticlesData(window.articlesData);
+            articlesData = window.articlesData;
+        }
+        
+        if (!articlesData || articlesData.length === 0) {
+            console.log('沒有文章數據，顯示空狀態');
+            this.showEmptyState();
+            this.uiComponents.hideLoading();
+            return;
+        }
+        
+        // 初始化過濾後的文章數據
+        this.stateManager.setFilteredArticles(articlesData);
+        
+        // 渲染頁面元素
+        setTimeout(() => {
+            // 直接設置初始的過濾數據，避免空篩選
+            this.stateManager.setFilteredArticles([...articlesData]);
+            
+            this.uiComponents.renderArticles(1);
+            this.uiComponents.renderPagination();
+            
+            // 初始化月份滑桿
+            this.eventHandlers.initializeMonthSlider();
+            
+            // 初始化預期趨勢圖表
+            this.chartManager.renderExpectedTrendChart();
+            
+            // 隱藏載入動畫
+            this.uiComponents.hideLoading();
+            
+            console.log('頁面初始化完成');
+        }, 500);
+    }
+
+    // 顯示空狀態
+    showEmptyState() {
+        const articlesContainer = document.getElementById('articles');
+        if (articlesContainer) {
+            articlesContainer.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h4>尚未載入任何數據</h4>
+                        <p>請上傳 CSV 檔案或檢查數據載入狀況。</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 初始化篩選器
+    initializeFilters() {
+        const articlesData = this.stateManager.getState('articlesData');
+        
+        // 設置日期範圍
+        if (articlesData.length > 0) {
+            const dates = articlesData.map(article => new Date(article.date));
+            const minDate = new Date(Math.min(...dates));
+            const maxDate = new Date(Math.max(...dates));
+            
+            const startDateEl = document.getElementById('start-date');
+            const endDateEl = document.getElementById('end-date');
+            
+            if (startDateEl && endDateEl) {
+                startDateEl.min = minDate.toISOString().split('T')[0];
+                startDateEl.max = maxDate.toISOString().split('T')[0];
+                endDateEl.min = minDate.toISOString().split('T')[0];
+                endDateEl.max = maxDate.toISOString().split('T')[0];
+            }
+        }
+        
+        // 初始化媒體篩選選項
+        this.initializeMediaFilters();
+    }
+
+    // 初始化媒體篩選器
+    initializeMediaFilters() {
+        const articlesData = this.stateManager.getState('articlesData');
+        const publishers = [...new Set(articlesData.map(article => article.publisher))];
+        
+        const mediaFilterContainer = document.querySelector('.media-filters');
+        if (mediaFilterContainer && publishers.length > 0) {
+            const checkboxes = publishers.map(publisher => `
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input media-filter" type="checkbox" value="${this.utilities.escapeHtml(publisher)}" id="media-${publisher}">
+                    <label class="form-check-label" for="media-${publisher}">
+                        ${this.utilities.escapeHtml(publisher)}
+                    </label>
+                </div>
+            `).join('');
+            
+            mediaFilterContainer.innerHTML = checkboxes;
+            
+            // 重新綁定事件
+            document.querySelectorAll('.media-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', () => this.eventHandlers.filterArticles());
+            });
+        }
+    }
+
+    // 初始化新聞內容切換狀態
+    initializeNewsContentState() {
+        const newsContent = document.getElementById('news-content');
+        if (newsContent) {
+            // 確保頁面初次載入時只顯示分析部分
+            newsContent.classList.add('collapse');
+        }
+    }
+
+    // 顯示初始化錯誤
+    showInitializationError(error) {
+        const container = document.querySelector('.container');
+        if (container) {
+            container.innerHTML = `
+                <div class="alert alert-danger mt-4">
+                    <h4><i class="fas fa-exclamation-triangle"></i> 應用程式初始化失敗</h4>
+                    <p>錯誤訊息：${this.utilities ? this.utilities.escapeHtml(error.message) : error.message}</p>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <i class="fas fa-refresh"></i> 重新載入頁面
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // 設置文章數據（供外部調用）
+    setArticlesData(data) {
+        if (this.isInitialized && this.stateManager) {
+            this.stateManager.setArticlesData(data);
+            // 立即觸發頁面重新渲染
+            setTimeout(() => {
+                this.initializePage();
+            }, 100);
+            console.log(`App: 設置並重新渲染 ${data.length} 篇文章`);
+            return true;
+        }
+        console.warn('應用程式尚未初始化，無法設置文章數據');
+        return false;
+    }
+
+    // 獲取應用程式狀態
+    getAppState() {
+        return {
+            isInitialized: this.isInitialized,
+            articlesCount: this.stateManager?.getState('articlesData')?.length || 0,
+            filteredCount: this.stateManager?.getState('filteredArticlesData')?.length || 0,
+            currentPage: this.stateManager?.getState('currentPage') || 1
+        };
+    }
+
+    // 重置應用程式
+    reset() {
+        if (this.stateManager) {
+            this.stateManager.reset();
+        }
+        this.initializePage();
+    }
+}
+
+// 創建應用程式實例
+const app = new App();
+
+// 導出供全域使用
+window.App = app;
+
+// 供向後相容的全域函數
+window.setArticlesData = (data) => app.setArticlesData(data);

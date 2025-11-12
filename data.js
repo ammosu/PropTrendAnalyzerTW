@@ -19,6 +19,7 @@ async function loadArticlesData() {
         const hasData = await window.csvUploader.hasArticlesInDB();
         if (hasData) {
           articlesData = await window.csvUploader.getArticlesFromDB();
+          window.articlesData = articlesData; // 確保全域存取
           console.log(`從IndexedDB載入 ${articlesData.length} 篇文章`);
           
           // 計算關鍵詞趨勢
@@ -40,11 +41,18 @@ async function loadArticlesData() {
     try {
       // 首先載入元數據以獲取可用月份
       const metadataResponse = await fetch('data/metadata.json');
-      const metadata = await metadataResponse.json();
+      if (metadataResponse.ok) {
+        const metadata = await metadataResponse.json();
+      }
       
       // 載入所有文章數據
       const response = await fetch('data/all_articles.json');
-      articlesData = await response.json();
+      if (response.ok) {
+        articlesData = await response.json();
+        window.articlesData = articlesData; // 確保全域存取
+      } else {
+        throw new Error(`HTTP ${response.status}: 無法載入 data/all_articles.json`);
+      }
       
       // 計算關鍵詞趨勢
       calculateTrendData();
@@ -95,6 +103,14 @@ async function loadArticlesData() {
 // 設置上傳的文章數據
 function setArticlesData(data) {
   articlesData = data;
+  
+  // 確保全域存取
+  window.articlesData = data;
+  
+  // 同步到 StateManager（如果存在）
+  if (window.App && window.App.setArticlesData) {
+    window.App.setArticlesData(data);
+  }
   
   // 計算關鍵詞趨勢
   calculateTrendData();
