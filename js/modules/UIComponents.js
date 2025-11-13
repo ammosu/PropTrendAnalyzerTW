@@ -2,6 +2,7 @@
 class UIComponents {
     constructor(stateManager) {
         this.stateManager = stateManager;
+        this.securityUtils = window.SecurityUtils;
     }
 
     // 顯示載入動畫
@@ -85,18 +86,13 @@ class UIComponents {
         const end = start + articlesPerPage;
         const currentArticles = filteredArticlesData.slice(start, end);
         const articlesContainer = document.getElementById('articles');
-        articlesContainer.innerHTML = '';
+        // 安全地清空容器
+        while (articlesContainer.firstChild) {
+            articlesContainer.removeChild(articlesContainer.firstChild);
+        }
 
         if (currentArticles.length === 0) {
-            const noArticlesMessage = document.createElement('div');
-            noArticlesMessage.className = 'col-12 text-center py-5';
-            noArticlesMessage.innerHTML = `
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle fa-2x mb-3"></i>
-                    <h4>沒有符合條件的文章</h4>
-                    <p>請嘗試調整篩選條件或上傳更多數據。</p>
-                </div>
-            `;
+            const noArticlesMessage = this.createNoArticlesMessage();
             articlesContainer.appendChild(noArticlesMessage);
             this.hideLoading();
             return;
@@ -118,55 +114,9 @@ class UIComponents {
         const articleCard = document.createElement('div');
         articleCard.className = 'col-md-4 mb-4';
         
-        const imageUrl = `https://picsum.photos/seed/${article.title.substring(0, 10) || article.id || Math.floor(Math.random() * 1000)}/600/400`;
-        
-        const keywordsHtml = article.keywords.slice(0, 3).map(keyword => 
-            `<span class="badge badge-pill badge-light mr-1 mb-1">${this.escapeHtml(keyword)}</span>`
-        ).join('');
-        
-        let trendBadgeClass = 'badge-secondary';
-        if (article.expectedMarketTrend === '上漲') {
-            trendBadgeClass = 'badge-success';
-        } else if (article.expectedMarketTrend === '下跌') {
-            trendBadgeClass = 'badge-danger';
-        } else if (article.expectedMarketTrend === '平穩') {
-            trendBadgeClass = 'badge-info';
-        }
-        
-        const publisherLink = article.url ? 
-            `<a href="${this.escapeHtml(article.url)}" target="_blank">${this.escapeHtml(article.publisher)}</a>` : 
-            this.escapeHtml(article.publisher);
-        
-        const expectedTrend = article.expectedMarketTrend ? 
-            `<span class="badge ${trendBadgeClass} trend-badge">${this.escapeHtml(article.expectedMarketTrend)}</span>` : '';
-        
-        articleCard.innerHTML = `
-            <div class="card shadow-sm h-100">
-                <div class="card-img-container">
-                    <img src="${imageUrl}" class="card-img-top" alt="新聞圖片" loading="lazy">
-                    <div class="card-img-overlay-top">
-                        <span class="badge badge-primary">${this.escapeHtml(article.publisher)}</span>
-                        ${expectedTrend}
-                    </div>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">${this.escapeHtml(article.title)}</h5>
-                    <p class="card-text flex-grow-1">${this.escapeHtml(article.summary.length > 100 ? article.summary.substring(0, 100) + '...' : article.summary)}</p>
-                    <div class="mt-2 mb-2">
-                        ${keywordsHtml}
-                    </div>
-                    <div class="card-footer bg-transparent border-0 p-0">
-                        <p class="text-muted mb-2">
-                            <i class="far fa-calendar-alt"></i> ${this.formatDate(article.date)}
-                            ${article.author ? `<span class="ml-2"><i class="far fa-user"></i> ${this.escapeHtml(article.author)}</span>` : ''}
-                        </p>
-                        <a href="#" class="btn btn-primary btn-block" onclick="event.preventDefault(); window.UIManager.showArticleDetails(${article.id})">
-                            <i class="fas fa-book-open"></i> 閱讀更多
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `;
+        // 直接使用安全的卡片創建方法
+        const secureCard = this.createSecureArticleCard(article, index);
+        articleCard.appendChild(secureCard);
         
         setTimeout(() => {
             articleCard.classList.add('animate__animated', 'animate__fadeIn');
@@ -184,7 +134,10 @@ class UIComponents {
         
         const totalPages = Math.ceil(filteredArticlesData.length / articlesPerPage);
         const paginationDiv = document.getElementById('pagination');
-        paginationDiv.innerHTML = '';
+        // 安全地清空分頁容器
+        while (paginationDiv.firstChild) {
+            paginationDiv.removeChild(paginationDiv.firstChild);
+        }
 
         const maxVisiblePages = 5;
         let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
@@ -317,6 +270,218 @@ class UIComponents {
     formatArticleContent(content) {
         if (!content) return '';
         return this.escapeHtml(content.replace(/_x000D_/g, '<br>').replace(/\r\n|\n/g, '<br>'));
+    }
+
+    // 獲取趨勢徽章類別
+    getTrendBadgeClass(expectedTrend) {
+        if (expectedTrend === '上漲') {
+            return 'badge-success';
+        } else if (expectedTrend === '下跌') {
+            return 'badge-danger';
+        } else if (expectedTrend === '平穩') {
+            return 'badge-info';
+        }
+        return 'badge-secondary'; // 預設
+    }
+
+    // 生成字符串哈希值
+    generateHashFromString(str) {
+        let hash = 0;
+        if (str.length === 0) return hash;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // 轉換為32位整數
+        }
+        return Math.abs(hash);
+    }
+
+    // 創建安全的無文章訊息
+    createNoArticlesMessage() {
+        const container = this.securityUtils.createSafeElement('div', { class: 'col-12 text-center py-5' });
+        const alert = this.securityUtils.createSafeElement('div', { class: 'alert alert-info' });
+        const icon = this.securityUtils.createSafeElement('i', { class: 'fas fa-info-circle fa-2x mb-3' });
+        const title = this.securityUtils.createSafeElement('h4', {}, '沒有符合條件的文章');
+        const text = this.securityUtils.createSafeElement('p', {}, '請嘗試調整篩選條件或上傳更多數據。');
+        
+        alert.appendChild(icon);
+        alert.appendChild(title);
+        alert.appendChild(text);
+        container.appendChild(alert);
+        
+        return container;
+    }
+
+    // 創建安全的文章卡片
+    createSecureArticleCard(article, index) {
+        const cardContainer = this.securityUtils.createSafeElement('div', { class: 'card shadow-sm h-100' });
+        
+        // 圖片容器
+        const imgContainer = this.createImageContainer(article, index);
+        cardContainer.appendChild(imgContainer);
+        
+        // 卡片主體
+        const cardBody = this.createCardBody(article);
+        cardContainer.appendChild(cardBody);
+        
+        return cardContainer;
+    }
+
+    // 創建圖片容器
+    createImageContainer(article, index) {
+        const imgContainer = this.securityUtils.createSafeElement('div', { class: 'card-img-container' });
+        
+        // 圖片 - 使用 SVG 預設圖片以避免外部服務依賴
+        let imageUrl;
+        if (article.imageUrl) {
+            imageUrl = article.imageUrl;
+        } else {
+            // 根據文章標題生成顏色
+            const titleHash = this.generateHashFromString(article.title || '預設');
+            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+            const bgColor = colors[titleHash % colors.length];
+            const textColor = '#ffffff';
+            
+            // 生成 SVG 預設圖片
+            const svgContent = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="${bgColor}"/>
+                <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="${textColor}" text-anchor="middle">房地產新聞</text>
+                <text x="50%" y="65%" font-family="Arial, sans-serif" font-size="12" fill="${textColor}" text-anchor="middle" opacity="0.8">${(article.title || '').substring(0, 15)}...</text>
+            </svg>`;
+            
+            imageUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svgContent)}`;
+        }
+        const safeImageUrl = this.securityUtils.sanitizeUrl(imageUrl);
+        if (safeImageUrl) {
+            const img = this.securityUtils.createSafeElement('img', {
+                src: safeImageUrl,
+                class: 'card-img-top',
+                alt: '新聞圖片',
+                loading: 'lazy'
+            });
+            
+            // 圖片載入失敗時的處理
+            img.addEventListener('error', () => {
+                // 使用純色背景替代
+                img.style.backgroundColor = '#f8f9fa';
+                img.style.display = 'flex';
+                img.style.alignItems = 'center';
+                img.style.justifyContent = 'center';
+                img.style.color = '#6c757d';
+                img.style.fontSize = '14px';
+                img.alt = '圖片載入失敗';
+                // 設置一個簡單的預設圖片
+                img.src = 'data:image/svg+xml;charset=UTF-8,%3csvg width="400" height="200" xmlns="http://www.w3.org/2000/svg"%3e%3crect width="100%25" height="100%25" fill="%23dee2e6"/%3e%3ctext x="50%25" y="50%25" font-family="Arial" font-size="14" fill="%236c757d" text-anchor="middle" dy=".3em"%3e新聞圖片%3c/text%3e%3c/svg%3e';
+            });
+            
+            imgContainer.appendChild(img);
+        }
+        
+        // 覆蓋層
+        const overlay = this.securityUtils.createSafeElement('div', { class: 'card-img-overlay-top' });
+        
+        // 發布者標籤
+        const publisherBadge = this.securityUtils.createSafeElement('span', { class: 'badge badge-primary' }, article.publisher || '');
+        overlay.appendChild(publisherBadge);
+        
+        // 趨勢標籤
+        if (article.expectedMarketTrend) {
+            const trendBadgeClass = this.getTrendBadgeClass(article.expectedMarketTrend);
+            const trendBadge = this.securityUtils.createSafeElement('span', { 
+                class: `badge ${trendBadgeClass} trend-badge` 
+            }, article.expectedMarketTrend);
+            overlay.appendChild(trendBadge);
+        }
+        
+        imgContainer.appendChild(overlay);
+        return imgContainer;
+    }
+
+    // 創建卡片主體
+    createCardBody(article) {
+        const cardBody = this.securityUtils.createSafeElement('div', { class: 'card-body d-flex flex-column' });
+        
+        // 標題
+        const title = this.securityUtils.createSafeElement('h5', { class: 'card-title' }, article.title || '');
+        cardBody.appendChild(title);
+        
+        // 摘要
+        const summaryText = article.summary ? 
+            (article.summary.length > 100 ? article.summary.substring(0, 100) + '...' : article.summary) : '';
+        const summary = this.securityUtils.createSafeElement('p', { class: 'card-text flex-grow-1' }, summaryText);
+        cardBody.appendChild(summary);
+        
+        // 關鍵詞
+        if (article.keywords && article.keywords.length > 0) {
+            const keywordsContainer = this.createKeywordsContainer(article.keywords);
+            cardBody.appendChild(keywordsContainer);
+        }
+        
+        // 頁腳
+        const footer = this.createCardFooter(article);
+        cardBody.appendChild(footer);
+        
+        return cardBody;
+    }
+
+    // 創建關鍵詞容器
+    createKeywordsContainer(keywords) {
+        const container = this.securityUtils.createSafeElement('div', { class: 'mt-2 mb-2' });
+        
+        keywords.forEach(keyword => {
+            const badge = this.securityUtils.createSafeElement('span', { 
+                class: 'badge badge-pill badge-light mr-1 mb-1' 
+            }, keyword);
+            container.appendChild(badge);
+        });
+        
+        return container;
+    }
+
+    // 創建卡片頁腳
+    createCardFooter(article) {
+        const footer = this.securityUtils.createSafeElement('div', { class: 'card-footer bg-transparent border-0 p-0' });
+        
+        // 日期和作者信息
+        const infoContainer = this.securityUtils.createSafeElement('p', { class: 'text-muted mb-2' });
+        
+        const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });
+        infoContainer.appendChild(dateIcon);
+        
+        const dateText = document.createTextNode(` ${this.formatDate(article.date)}`);
+        infoContainer.appendChild(dateText);
+        
+        if (article.author) {
+            const authorIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-user' });
+            const authorSpan = this.securityUtils.createSafeElement('span', { class: 'ml-2' });
+            authorSpan.appendChild(authorIcon);
+            authorSpan.appendChild(document.createTextNode(` ${article.author}`));
+            infoContainer.appendChild(authorSpan);
+        }
+        
+        footer.appendChild(infoContainer);
+        
+        // 閱讀更多按鈕
+        const readMoreBtn = this.securityUtils.createSafeElement('button', { 
+            class: 'btn btn-primary btn-block',
+            type: 'button',
+            'data-article-id': article.id
+        });
+        
+        const btnIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-book-open' });
+        readMoreBtn.appendChild(btnIcon);
+        readMoreBtn.appendChild(document.createTextNode(' 閱讀更多'));
+        
+        // 安全的事件處理
+        readMoreBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (window.UIManager && window.UIManager.showArticleDetails) {
+                window.UIManager.showArticleDetails(article.id);
+            }
+        });
+        
+        footer.appendChild(readMoreBtn);
+        return footer;
     }
 }
 

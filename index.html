@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+        img-src 'self' data: blob: https: http:;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        connect-src 'self';
+        frame-src 'none';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>房市新聞摘要與趨勢分析</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,6 +26,12 @@
     <div class="container mt-4">
         <h1 class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
         <p class="text-center text-muted mb-4 animate__animated animate__fadeIn animate__delay-1s">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
+        
+        <!-- 測試SVG圖片 -->
+        <div class="text-center mb-3" id="svg-test" style="display:none;">
+            <img src="data:image/svg+xml;charset=UTF-8,%3csvg width='200' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='%233498db'/%3e%3ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='white' text-anchor='middle' dy='.3em'%3e測試圖片%3c/text%3e%3c/svg%3e" alt="測試SVG圖片" style="max-width: 200px;">
+            <p><small>SVG 圖片測試</small></p>
+        </div>
         
         <!-- CSV上傳區域 -->
         <div id="csv-upload-section" class="mb-4 animate__animated animate__fadeIn animate__delay-1s">
@@ -204,6 +222,8 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
     
     <!-- 引入模組化的 JavaScript 檔案 -->
+    <script src="js/modules/SecurityUtils.js"></script>
+    <script src="js/modules/ErrorHandler.js"></script>
     <script src="js/modules/Utilities.js"></script>
     <script src="js/modules/StateManager.js"></script>
     <script src="js/modules/UIComponents.js"></script>

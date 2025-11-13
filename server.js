@@ -9,12 +9,41 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 安全標頭中間件 (必須在其他中間件之前)
+app.use((req, res, next) => {
+    // 內容安全政策
+    res.setHeader('Content-Security-Policy', 
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
+        "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
+        "img-src 'self' data: blob: https: http:; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
+        "connect-src 'self'; " +
+        "frame-src 'none'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self';"
+    );
+    
+    // 其他安全標頭
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    
+    // 移除服務器標識
+    res.removeHeader('X-Powered-By');
+    
+    next();
+});
+
+// Middleware to parse JSON and URL-encoded data (無大小限制)
+app.use(express.json({ limit: '1gb' })); // 設置較大的限制
+app.use(express.urlencoded({ extended: true, limit: '1gb' })); // 設置較大的限制
+
 // Serve static files from the current directory
 app.use(express.static(__dirname));
-
-// Middleware to parse JSON and URL-encoded data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Route for the home page
 app.get('/', (req, res) => {

@@ -135,8 +135,17 @@ async function hasArticlesInDB() {
     }
 }
 
-// 處理 CSV 數據，轉換為應用程式所需的格式
+// 處理 CSV 數據，轉換為應用程式所需的格式（安全版本）
 function processCSVData(csvData) {
+    if (!Array.isArray(csvData) || csvData.length === 0) {
+        throw new Error('CSV 數據格式無效或為空');
+    }
+    
+    // 檢查記錄數量限制（如果設定了限制）
+    if (UPLOAD_CONFIG.maxRecords > 0 && csvData.length > UPLOAD_CONFIG.maxRecords) {
+        throw new Error(`記錄數量超過限制 (${UPLOAD_CONFIG.maxRecords})`);
+    }
+    
     return csvData.map((item, index) => {
         // 處理關鍵詞
         let keywords = [];
@@ -189,26 +198,72 @@ function processCSVData(csvData) {
             expectedMarketTrend = item['預期走向'];
         }
         
-        // 返回格式化的文章數據
+        // 安全地清理所有字段
+        const safeTitle = sanitizeField(item.title || '', 200);
+        const safeSummary = sanitizeField(item.summary || '', 500);
+        const safePublisher = sanitizeField(item.publisher || '', 100);
+        const safeAuthor = sanitizeField(item.author || '', 100);
+        const safeFullText = sanitizeField(item.fullText || '', 5000);
+        const safeExpectedTrend = sanitizeField(expectedMarketTrend, 50);
+        
+        // 驗證和清理 URL
+        let safeUrl = '';
+        if (item.url && typeof item.url === 'string') {
+            try {
+                const url = new URL(item.url);
+                if (url.protocol === 'http:' || url.protocol === 'https:') {
+                    safeUrl = url.toString();
+                }
+            } catch (e) {
+                console.warn(`無效的 URL: ${item.url}`);
+            }
+        }
+        
+        // 生成安全的圖片 URL - 使用 SVG 避免外部依賴
+        const titleHash = generateHashFromString(safeTitle || 'default');
+        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+        const bgColor = colors[titleHash % colors.length];
+        
+        const svgContent = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="${bgColor}"/>
+            <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">房地產新聞</text>
+            <text x="50%" y="65%" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle" opacity="0.8">${(safeTitle || '').substring(0, 15)}...</text>
+        </svg>`;
+        
+        const safeImageUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svgContent)}`;
+        
+        // 返回格式化的安全文章數據
         return {
             id: index,
-            title: item.title || '',
-            summary: item.summary || '',
-            keywords: keywords,
-            date: item.date || '',
-            publisher: item.publisher || '',
-            author: item.author || '',
-            fullText: item.fullText || '',
-            expectedMarketTrend: expectedMarketTrend,
-            url: item.url || '',
-            imageUrl: item.imageUrl || `https://source.unsplash.com/random/400x200?property,${index}` // 隨機房地產相關圖片
+            title: safeTitle,
+            summary: safeSummary,
+            keywords: keywords, // 關鍵詞已在上面處理
+            date: item.date || '', // 日期格式驗證可以在後續加強
+            publisher: safePublisher,
+            author: safeAuthor,
+            fullText: safeFullText,
+            expectedMarketTrend: safeExpectedTrend,
+            url: safeUrl,
+            imageUrl: safeImageUrl
         };
     });
 }
 
+// 文件上傳配置
+const UPLOAD_CONFIG = {
+    maxFileSize: 0, // 0 = 無檔案大小限制
+    allowedMimeTypes: ['text/csv', 'application/csv', 'text/plain'],
+    allowedExtensions: ['.csv'],
+    maxRecords: 0, // 0 = 無記錄數限制
+    maxFieldLength: 10000 // 增加字段長度限制以支持大型文檔
+};
+
 // 初始化頁面
 document.addEventListener('DOMContentLoaded', async function() {
     try {
+        // 等待安全工具載入
+        await waitForSecurityUtils();
+        
         // 初始化數據庫
         await initDB();
         
@@ -223,21 +278,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const fileInput = document.getElementById('csv-file');
                 const file = fileInput.files[0];
                 
-                if (!file) {
-                    uploadStatus.innerHTML = `
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> 請選擇一個CSV檔案。
-                        </div>
-                    `;
+                try {
+                    // 安全驗證上傳的文件
+                    await validateUploadedFile(file);
+                    
+                    // 顯示驗證成功並開始處理
+                    showUploadStatus('正在驗證和處理檔案...', 'info');
+                    
+                } catch (error) {
+                    showUploadStatus(error.message, 'danger');
                     return;
                 }
-                
-                // 顯示上傳中狀態
-                uploadStatus.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-spinner fa-spin"></i> 正在處理CSV檔案，請稍候...
-                    </div>
-                `;
                 
                 // 使用 PapaParse 解析 CSV 檔案
                 Papa.parse(file, {
@@ -245,18 +296,18 @@ document.addEventListener('DOMContentLoaded', async function() {
                     skipEmptyLines: true,
                     complete: async function(results) {
                         if (results.errors.length > 0) {
-                            // 顯示解析錯誤
-                            uploadStatus.innerHTML = `
-                                <div class="alert alert-danger">
-                                    <i class="fas fa-times-circle"></i> CSV解析錯誤：${results.errors[0].message}
-                                </div>
-                            `;
+                            const errorMsg = results.errors[0].message || '未知解析錯誤';
+                            showUploadStatus(`CSV解析錯誤：${errorMsg}`, 'danger');
                             return;
                         }
                         
                         try {
+                            showUploadStatus('正在處理數據...', 'info');
+                            
                             // 轉換 CSV 數據為應用程式所需的格式
                             const articlesData = processCSVData(results.data);
+                            
+                            showUploadStatus('正在保存到數據庫...', 'info');
                             
                             // 保存到 IndexedDB
                             const count = await saveArticlesToDB(articlesData);
@@ -272,43 +323,22 @@ document.addEventListener('DOMContentLoaded', async function() {
                                 }
                             }
                             
-                            // 顯示成功訊息
-                            uploadStatus.innerHTML = `
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle"></i> 成功處理 ${count} 篇文章。
-                                    <button id="clear-data" class="btn btn-sm btn-outline-danger ml-2">清除數據</button>
-                                </div>
-                            `;
-                            
-                            // 綁定清除數據按鈕
-                            document.getElementById('clear-data').addEventListener('click', async function() {
-                                try {
-                                    await clearArticlesDB();
-                                    location.reload(); // 重新載入頁面
-                                } catch (error) {
-                                    console.error('清除數據錯誤:', error);
-                                    alert('清除數據失敗: ' + error);
-                                }
-                            });
+                            // 創建成功訊息和清除按鈕
+                            showSuccessWithClearButton(count);
                             
                             // 清空檔案輸入
                             fileInput.value = '';
+                            
                         } catch (error) {
                             console.error('處理CSV數據時發生錯誤:', error);
-                            uploadStatus.innerHTML = `
-                                <div class="alert alert-danger">
-                                    <i class="fas fa-times-circle"></i> 處理CSV數據時發生錯誤：${error.message || error}
-                                </div>
-                            `;
+                            const errorMsg = error.message || error.toString();
+                            showUploadStatus(`處理數據時發生錯誤：${errorMsg}`, 'danger');
                         }
                     },
                     error: function(error) {
                         console.error('CSV解析錯誤:', error);
-                        uploadStatus.innerHTML = `
-                            <div class="alert alert-danger">
-                                <i class="fas fa-times-circle"></i> CSV解析錯誤：${error.message}
-                            </div>
-                        `;
+                        const errorMsg = error.message || error.toString();
+                        showUploadStatus(`CSV解析錯誤：${errorMsg}`, 'danger');
                     }
                 });
             });
@@ -319,37 +349,275 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (hasData) {
             const articles = await getArticlesFromDB();
             if (uploadStatus) {
-                uploadStatus.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> 已從數據庫載入 ${articles.length} 篇文章。
-                        <button id="clear-data" class="btn btn-sm btn-outline-danger ml-2">清除數據</button>
-                    </div>
-                `;
-                
-                // 綁定清除數據按鈕
-                document.getElementById('clear-data').addEventListener('click', async function() {
-                    try {
-                        await clearArticlesDB();
-                        location.reload(); // 重新載入頁面
-                    } catch (error) {
-                        console.error('清除數據錯誤:', error);
-                        alert('清除數據失敗: ' + error);
-                    }
-                });
+                showDatabaseLoadedStatus(articles.length);
             }
         }
     } catch (error) {
         console.error('初始化錯誤:', error);
         const uploadStatus = document.getElementById('upload-status');
         if (uploadStatus) {
-            uploadStatus.innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-times-circle"></i> 初始化錯誤：${error.message || error}
-                </div>
-            `;
+            const errorMsg = error.message || error.toString();
+            showUploadStatus(`初始化錯誤：${errorMsg}`, 'danger');
         }
     }
 });
+
+// 等待安全工具載入
+function waitForSecurityUtils() {
+    return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+            if (window.SecurityUtils) {
+                clearInterval(checkInterval);
+                resolve();
+            }
+        }, 50);
+        
+        // 5秒後放棄等待
+        setTimeout(() => {
+            clearInterval(checkInterval);
+            console.warn('SecurityUtils 載入超時，將使用基本安全措施');
+            resolve();
+        }, 5000);
+    });
+}
+
+// 安全驗證文件
+async function validateUploadedFile(file) {
+    // 基本檢查
+    if (!file) {
+        throw new Error('請選擇一個檔案');
+    }
+    
+    // 文件大小檢查（如果設定了限制）
+    if (UPLOAD_CONFIG.maxFileSize > 0 && file.size > UPLOAD_CONFIG.maxFileSize) {
+        throw new Error(`檔案大小超過限制 (${(UPLOAD_CONFIG.maxFileSize / 1024 / 1024).toFixed(1)}MB)`);
+    }
+    
+    // 文件類型檢查
+    const fileName = file.name.toLowerCase();
+    const hasValidExtension = UPLOAD_CONFIG.allowedExtensions.some(ext => fileName.endsWith(ext));
+    if (!hasValidExtension) {
+        throw new Error('只允許上傳 CSV 格式的檔案');
+    }
+    
+    // MIME 類型檢查（如果可用）
+    if (file.type && !UPLOAD_CONFIG.allowedMimeTypes.includes(file.type)) {
+        throw new Error('檔案類型不符合要求');
+    }
+    
+    // 檢查檔案內容
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const content = e.target.result;
+                
+                // 檢查檔案是否包含危險內容
+                if (containsDangerousContent(content)) {
+                    reject(new Error('檔案內容包含不安全的內容'));
+                    return;
+                }
+                
+                // 檢查檔案記錄數（如果設定了限制）
+                const lines = content.split('\n').filter(line => line.trim());
+                if (UPLOAD_CONFIG.maxRecords > 0 && lines.length > UPLOAD_CONFIG.maxRecords) {
+                    reject(new Error(`檔案記錄數超過限制 (${UPLOAD_CONFIG.maxRecords})`));
+                    return;
+                }
+                
+                resolve(true);
+            } catch (error) {
+                reject(new Error('檔案內容無法讀取'));
+            }
+        };
+        
+        reader.onerror = function() {
+            reject(new Error('檔案讀取失敗'));
+        };
+        
+        // 只讀取檔案的一部分來檢查
+        const blob = file.slice(0, Math.min(file.size, 1024 * 100)); // 最多讀取 100KB
+        reader.readAsText(blob);
+    });
+}
+
+// 檢查內容是否包含危險內容
+function containsDangerousContent(content) {
+    const dangerousPatterns = [
+        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+        /javascript:/i,
+        /on\w+\s*=/i,
+        /<iframe\b/i,
+        /<object\b/i,
+        /<embed\b/i,
+        /data:text\/html/i,
+        /data:application\/javascript/i,
+        /<link\b.*?rel\s*=\s*["']stylesheet["']/i
+    ];
+    
+    return dangerousPatterns.some(pattern => pattern.test(content));
+}
+
+// 安全地清理和驗證數據字段
+function sanitizeField(value, maxLength = UPLOAD_CONFIG.maxFieldLength) {
+    if (typeof value !== 'string') {
+        return '';
+    }
+    
+    // 移除危險字符
+    let cleaned = value
+        .replace(/[<>]/g, '') // 移除尖括號
+        .replace(/javascript:/gi, '') // 移除 javascript: 協議
+        .replace(/on\w+=/gi, '') // 移除事件處理器
+        .trim();
+    
+    // 限制長度
+    if (cleaned.length > maxLength) {
+        cleaned = cleaned.substring(0, maxLength);
+        console.warn(`字段內容過長，已截斷至 ${maxLength} 個字符`);
+    }
+    
+    return cleaned;
+}
+
+// 安全地顯示上傳狀態
+function showUploadStatus(message, type = 'info') {
+    const uploadStatus = document.getElementById('upload-status');
+    if (!uploadStatus) return;
+    
+    // 清空現有內容
+    while (uploadStatus.firstChild) {
+        uploadStatus.removeChild(uploadStatus.firstChild);
+    }
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    
+    const icon = document.createElement('i');
+    switch (type) {
+        case 'success':
+            icon.className = 'fas fa-check-circle';
+            break;
+        case 'danger':
+            icon.className = 'fas fa-times-circle';
+            break;
+        case 'warning':
+            icon.className = 'fas fa-exclamation-triangle';
+            break;
+        default:
+            icon.className = 'fas fa-spinner fa-spin';
+    }
+    
+    alertDiv.appendChild(icon);
+    alertDiv.appendChild(document.createTextNode(' ' + message));
+    
+    uploadStatus.appendChild(alertDiv);
+}
+
+// 安全地顯示成功訊息並添加清除按鈕
+function showSuccessWithClearButton(count) {
+    const uploadStatus = document.getElementById('upload-status');
+    if (!uploadStatus) return;
+    
+    // 清空現有內容
+    while (uploadStatus.firstChild) {
+        uploadStatus.removeChild(uploadStatus.firstChild);
+    }
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success';
+    
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-check-circle';
+    alertDiv.appendChild(icon);
+    
+    const successText = document.createTextNode(` 成功處理 ${count} 篇文章。`);
+    alertDiv.appendChild(successText);
+    
+    // 創建清除按鈕
+    const clearButton = document.createElement('button');
+    clearButton.id = 'clear-data';
+    clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
+    clearButton.textContent = '清除數據';
+    
+    // 安全的事件處理
+    clearButton.addEventListener('click', async function() {
+        if (!confirm('確定要清除所有數據嗎？此操作無法撤銷。')) {
+            return;
+        }
+        
+        try {
+            showUploadStatus('正在清除數據...', 'info');
+            await clearArticlesDB();
+            showUploadStatus('數據已清除，頁面即將重新載入...', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } catch (error) {
+            console.error('清除數據錯誤:', error);
+            showUploadStatus(`清除數據失敗: ${error.message || error}`, 'danger');
+        }
+    });
+    
+    alertDiv.appendChild(clearButton);
+    uploadStatus.appendChild(alertDiv);
+}
+
+// 顯示數據庫已載入狀態
+function showDatabaseLoadedStatus(count) {
+    const uploadStatus = document.getElementById('upload-status');
+    if (!uploadStatus) return;
+    
+    // 清空現有內容
+    while (uploadStatus.firstChild) {
+        uploadStatus.removeChild(uploadStatus.firstChild);
+    }
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-info';
+    
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-info-circle';
+    alertDiv.appendChild(icon);
+    
+    const infoText = document.createTextNode(` 已從數據庫載入 ${count} 篇文章。`);
+    alertDiv.appendChild(infoText);
+    
+    // 創建清除按鈕
+    const clearButton = document.createElement('button');
+    clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
+    clearButton.textContent = '清除數據';
+    
+    // 安全的事件處理
+    clearButton.addEventListener('click', async function() {
+        if (!confirm('確定要清除所有數據嗎？此操作無法撤銷。')) {
+            return;
+        }
+        
+        try {
+            showUploadStatus('正在清除數據...', 'info');
+            await clearArticlesDB();
+            showUploadStatus('數據已清除，頁面即將重新載入...', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } catch (error) {
+            console.error('清除數據錯誤:', error);
+            showUploadStatus(`清除數據失敗: ${error.message || error}`, 'danger');
+        }
+    });
+    
+    alertDiv.appendChild(clearButton);
+    uploadStatus.appendChild(alertDiv);
+}
+
+// 生成字符串哈希值
+function generateHashFromString(str) {
+    let hash = 0;
+    if (str.length === 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 轉換為32位整數
+    }
+    return Math.abs(hash);
+}
 
 // 從 scripts.js 引入 getMonthRange 函數
 function getMonthRange(articles) {
