@@ -211,7 +211,7 @@ class UIComponents {
             // 顯示 Modal
             $(modal).modal('show');
             
-            // 設置關閉事件
+            // 設定關閉事件
             $(modal).on('hidden.bs.modal', function () {
                 modal.remove();
             });
@@ -263,7 +263,7 @@ class UIComponents {
         const contentDiv = this.securityUtils.createSafeElement('div', { class: 'article-content mb-4' });
         const formattedContent = this.formatArticleContent(article.fullText);
         
-        // 安全地設置 HTML 內容
+        // 安全地設定 HTML 內容
         if (this.securityUtils && this.securityUtils.sanitizeHtml) {
             contentDiv.innerHTML = formattedContent;
         } else {
@@ -372,7 +372,7 @@ class UIComponents {
         }
     }
 
-    // 獲取趨勢徽章類別
+    // 取得趨勢徽章類別
     getTrendBadgeClass(expectedTrend) {
         if (expectedTrend === '上漲') {
             return 'badge-success';
@@ -402,7 +402,7 @@ class UIComponents {
         const alert = this.securityUtils.createSafeElement('div', { class: 'alert alert-info' });
         const icon = this.securityUtils.createSafeElement('i', { class: 'fas fa-info-circle fa-2x mb-3' });
         const title = this.securityUtils.createSafeElement('h4', {}, '沒有符合條件的文章');
-        const text = this.securityUtils.createSafeElement('p', {}, '請嘗試調整篩選條件或上傳更多數據。');
+        const text = this.securityUtils.createSafeElement('p', {}, '請嘗試調整篩選條件或上傳更多資料。');
         
         alert.appendChild(icon);
         alert.appendChild(title);
@@ -479,7 +479,7 @@ class UIComponents {
                 img.style.color = '#6c757d';
                 img.style.fontSize = '14px';
                 img.alt = '圖片載入失敗';
-                // 設置一個房地產主題的預設圖片
+                // 設定一個房地產主題的預設圖片
                 const fallbackSVG = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100%" height="100%" fill="#dee2e6"/>
                     <rect x="150" y="60" width="100" height="80" fill="#6c757d" opacity="0.5"/>

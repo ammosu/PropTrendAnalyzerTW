@@ -6,19 +6,19 @@ const dbName = 'articlesDatabase';
 const storeName = 'articlesStore';
 let db;
 
-// 打開或創建 IndexedDB 數據庫
+// 打開或創建 IndexedDB 資料庫
 function initDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName, 1);
         
         request.onerror = function(event) {
             console.error('IndexedDB 錯誤:', event.target.error);
-            reject('無法打開數據庫');
+            reject('無法打開資料庫');
         };
         
         request.onsuccess = function(event) {
             db = event.target.result;
-            console.log('數據庫連接成功');
+            console.log('資料庫連線成功');
             resolve(db);
         };
         
@@ -26,30 +26,30 @@ function initDB() {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(storeName)) {
                 db.createObjectStore(storeName, { keyPath: 'id' });
-                console.log('創建數據存儲');
+                console.log('創建資料存儲');
             }
         };
     });
 }
 
-// 保存文章數據到 IndexedDB
+// 儲存文章資料到 IndexedDB
 function saveArticlesToDB(articles) {
     return new Promise((resolve, reject) => {
         if (!db) {
-            reject('數據庫未初始化');
+            reject('資料庫未初始化');
             return;
         }
         
         const transaction = db.transaction([storeName], 'readwrite');
         const store = transaction.objectStore(storeName);
         
-        // 清除現有數據
+        // 清除現有資料
         const clearRequest = store.clear();
         
         clearRequest.onsuccess = function() {
-            console.log('清除現有數據');
+            console.log('清除現有資料');
             
-            // 批量添加新數據
+            // 批量添加新資料
             let count = 0;
             articles.forEach(article => {
                 const request = store.add(article);
@@ -66,22 +66,22 @@ function saveArticlesToDB(articles) {
         };
         
         clearRequest.onerror = function(event) {
-            console.error('清除數據錯誤:', event.target.error);
-            reject('清除數據失敗');
+            console.error('清除資料錯誤:', event.target.error);
+            reject('清除資料失敗');
         };
         
         transaction.onerror = function(event) {
             console.error('事務錯誤:', event.target.error);
-            reject('保存數據失敗');
+            reject('儲存資料失敗');
         };
     });
 }
 
-// 從 IndexedDB 獲取所有文章
+// 從 IndexedDB 取得所有文章
 function getArticlesFromDB() {
     return new Promise((resolve, reject) => {
         if (!db) {
-            reject('數據庫未初始化');
+            reject('資料庫未初始化');
             return;
         }
         
@@ -94,17 +94,17 @@ function getArticlesFromDB() {
         };
         
         request.onerror = function(event) {
-            console.error('獲取數據錯誤:', event.target.error);
-            reject('獲取數據失敗');
+            console.error('取得資料錯誤:', event.target.error);
+            reject('取得資料失敗');
         };
     });
 }
 
-// 清除 IndexedDB 中的所有數據
+// 清除 IndexedDB 中的所有資料
 function clearArticlesDB() {
     return new Promise((resolve, reject) => {
         if (!db) {
-            reject('數據庫未初始化');
+            reject('資料庫未初始化');
             return;
         }
         
@@ -113,32 +113,32 @@ function clearArticlesDB() {
         const request = store.clear();
         
         request.onsuccess = function() {
-            console.log('數據庫已清空');
+            console.log('資料庫已清空');
             resolve();
         };
         
         request.onerror = function(event) {
-            console.error('清除數據庫錯誤:', event.target.error);
-            reject('清除數據失敗');
+            console.error('清除資料庫錯誤:', event.target.error);
+            reject('清除資料失敗');
         };
     });
 }
 
-// 檢查數據庫中是否有文章
+// 檢查資料庫中是否有文章
 async function hasArticlesInDB() {
     try {
         const articles = await getArticlesFromDB();
         return articles && articles.length > 0;
     } catch (error) {
-        console.error('檢查數據庫錯誤:', error);
+        console.error('檢查資料庫錯誤:', error);
         return false;
     }
 }
 
-// 處理 CSV 數據，轉換為應用程式所需的格式（安全版本）
+// 處理 CSV 資料，轉換為應用程式所需的格式（安全版本）
 function processCSVData(csvData) {
     if (!Array.isArray(csvData) || csvData.length === 0) {
-        throw new Error('CSV 數據格式無效或為空');
+        throw new Error('CSV 資料格式無效或為空');
     }
     
     // 檢查記錄數量限制（如果設定了限制）
@@ -241,7 +241,7 @@ function processCSVData(csvData) {
         
         const safeImageUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svgContent)}`;
         
-        // 返回格式化的安全文章數據
+        // 返回格式化的安全文章資料
         return {
             id: index,
             title: safeTitle,
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // 等待安全工具載入
         await waitForSecurityUtils();
         
-        // 初始化數據庫
+        // 初始化資料庫
         await initDB();
         
         // 綁定上傳表單提交事件
@@ -311,17 +311,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                         }
                         
                         try {
-                            showUploadStatus('正在處理數據...', 'info');
+                            showUploadStatus('正在處理資料...', 'info');
                             
-                            // 轉換 CSV 數據為應用程式所需的格式
+                            // 轉換 CSV 資料為應用程式所需的格式
                             const articlesData = processCSVData(results.data);
                             
-                            showUploadStatus('正在保存到數據庫...', 'info');
+                            showUploadStatus('正在儲存到資料庫...', 'info');
                             
-                            // 保存到 IndexedDB
+                            // 儲存到 IndexedDB
                             const count = await saveArticlesToDB(articlesData);
                             
-                            // 設置文章數據
+                            // 設定文章資料
                             setArticlesData(articlesData);
                             
                             // 確保月份滑桿寬度調整（如果函數存在）
@@ -339,9 +339,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                             fileInput.value = '';
                             
                         } catch (error) {
-                            console.error('處理CSV數據時發生錯誤:', error);
+                            console.error('處理CSV資料時發生錯誤:', error);
                             const errorMsg = error.message || error.toString();
-                            showUploadStatus(`處理數據時發生錯誤：${errorMsg}`, 'danger');
+                            showUploadStatus(`處理資料時發生錯誤：${errorMsg}`, 'danger');
                         }
                     },
                     error: function(error) {
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
         
-        // 檢查是否有已存儲的數據
+        // 檢查是否有已存儲的資料
         const hasData = await hasArticlesInDB();
         if (hasData) {
             const articles = await getArticlesFromDB();
@@ -467,7 +467,7 @@ function containsDangerousContent(content) {
     return dangerousPatterns.some(pattern => pattern.test(content));
 }
 
-// 安全地清理和驗證數據字段
+// 安全地清理和驗證資料字段
 function sanitizeField(value, maxLength = UPLOAD_CONFIG.maxFieldLength) {
     if (typeof value !== 'string') {
         return '';
@@ -547,22 +547,22 @@ function showSuccessWithClearButton(count) {
     const clearButton = document.createElement('button');
     clearButton.id = 'clear-data';
     clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
-    clearButton.textContent = '清除數據';
+    clearButton.textContent = '清除資料';
     
     // 安全的事件處理
     clearButton.addEventListener('click', async function() {
-        if (!confirm('確定要清除所有數據嗎？此操作無法撤銷。')) {
+        if (!confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
             return;
         }
         
         try {
-            showUploadStatus('正在清除數據...', 'info');
+            showUploadStatus('正在清除資料...', 'info');
             await clearArticlesDB();
-            showUploadStatus('數據已清除，頁面即將重新載入...', 'success');
+            showUploadStatus('資料已清除，頁面即將重新載入...', 'success');
             setTimeout(() => location.reload(), 1000);
         } catch (error) {
-            console.error('清除數據錯誤:', error);
-            showUploadStatus(`清除數據失敗: ${error.message || error}`, 'danger');
+            console.error('清除資料錯誤:', error);
+            showUploadStatus(`清除資料失敗: ${error.message || error}`, 'danger');
         }
     });
     
@@ -570,7 +570,7 @@ function showSuccessWithClearButton(count) {
     uploadStatus.appendChild(alertDiv);
 }
 
-// 顯示數據庫已載入狀態
+// 顯示資料庫已載入狀態
 function showDatabaseLoadedStatus(count) {
     const uploadStatus = document.getElementById('upload-status');
     if (!uploadStatus) return;
@@ -587,28 +587,28 @@ function showDatabaseLoadedStatus(count) {
     icon.className = 'fas fa-info-circle';
     alertDiv.appendChild(icon);
     
-    const infoText = document.createTextNode(` 已從數據庫載入 ${count} 篇文章。`);
+    const infoText = document.createTextNode(` 已從資料庫載入 ${count} 篇文章。`);
     alertDiv.appendChild(infoText);
     
     // 創建清除按鈕
     const clearButton = document.createElement('button');
     clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
-    clearButton.textContent = '清除數據';
+    clearButton.textContent = '清除資料';
     
     // 安全的事件處理
     clearButton.addEventListener('click', async function() {
-        if (!confirm('確定要清除所有數據嗎？此操作無法撤銷。')) {
+        if (!confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
             return;
         }
         
         try {
-            showUploadStatus('正在清除數據...', 'info');
+            showUploadStatus('正在清除資料...', 'info');
             await clearArticlesDB();
-            showUploadStatus('數據已清除，頁面即將重新載入...', 'success');
+            showUploadStatus('資料已清除，頁面即將重新載入...', 'success');
             setTimeout(() => location.reload(), 1000);
         } catch (error) {
-            console.error('清除數據錯誤:', error);
-            showUploadStatus(`清除數據失敗: ${error.message || error}`, 'danger');
+            console.error('清除資料錯誤:', error);
+            showUploadStatus(`清除資料失敗: ${error.message || error}`, 'danger');
         }
     });
     

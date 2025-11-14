@@ -293,7 +293,7 @@ class EventHandlers {
         }
     }
 
-    // 保存當前月份滑桿狀態
+    // 儲存當前月份滑桿狀態
     saveCurrentMonthSliderState() {
         const monthSlider = document.getElementById('month-slider');
         const selectedMonth = document.getElementById('selected-month');
@@ -441,7 +441,7 @@ class EventHandlers {
         const months = this.chartManager.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
         
         if (months.length === 0) {
-            console.warn('沒有可用的月份數據');
+            console.warn('沒有可用的月份資料');
             return;
         }
         

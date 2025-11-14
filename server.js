@@ -39,8 +39,8 @@ app.use((req, res, next) => {
 });
 
 // Middleware to parse JSON and URL-encoded data (無大小限制)
-app.use(express.json({ limit: '1gb' })); // 設置較大的限制
-app.use(express.urlencoded({ extended: true, limit: '1gb' })); // 設置較大的限制
+app.use(express.json({ limit: '1gb' })); // 設定較大的限制
+app.use(express.urlencoded({ extended: true, limit: '1gb' })); // 設定較大的限制
 
 // Serve static files from the current directory
 app.use(express.static(__dirname));

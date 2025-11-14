@@ -110,7 +110,7 @@ class Utilities {
         return escaped.replace(/_x000D_/g, '<br>').replace(/\r\n|\n/g, '<br>');
     }
 
-    // 獲取月份範圍
+    // 取得月份範圍
     getMonthRange(articles) {
         if (!articles || articles.length === 0) {
             return [];
@@ -190,13 +190,13 @@ class Utilities {
         return numbers.reduce((acc, num) => acc + (parseFloat(num) || 0), 0);
     }
 
-    // 獲取陣列中的最大值
+    // 取得陣列中的最大值
     max(numbers) {
         if (!Array.isArray(numbers) || numbers.length === 0) return null;
         return Math.max(...numbers.map(num => parseFloat(num) || 0));
     }
 
-    // 獲取陣列中的最小值
+    // 取得陣列中的最小值
     min(numbers) {
         if (!Array.isArray(numbers) || numbers.length === 0) return null;
         return Math.min(...numbers.map(num => parseFloat(num) || 0));

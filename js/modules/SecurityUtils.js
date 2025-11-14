@@ -197,7 +197,7 @@ class SecurityUtils {
     createSafeElement(tagName, attributes = {}, textContent = '') {
         const element = document.createElement(tagName);
         
-        // 安全地設置屬性
+        // 安全地設定屬性
         Object.keys(attributes).forEach(key => {
             const value = attributes[key];
             if (key === 'href' && value) {
@@ -210,7 +210,7 @@ class SecurityUtils {
             }
         });
 
-        // 安全地設置文字內容
+        // 安全地設定文字內容
         if (textContent) {
             element.textContent = textContent;
         }

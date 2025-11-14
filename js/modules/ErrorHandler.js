@@ -23,13 +23,13 @@ class ErrorHandler {
         
         if (window.SecurityUtils) {
             this.securityUtils = window.SecurityUtils;
-            console.log('ErrorHandler: SecurityUtils 已連接');
+            console.log('ErrorHandler: SecurityUtils 已連線');
         } else {
             console.warn('ErrorHandler: SecurityUtils 載入超時，使用基本錯誤處理');
         }
     }
 
-    // 設置全域錯誤處理器
+    // 設定全域錯誤處理器
     setupGlobalErrorHandlers() {
         // JavaScript 錯誤處理
         window.addEventListener('error', (event) => {
@@ -209,13 +209,13 @@ class ErrorHandler {
         this.showErrorToast(userMessage, 'error');
     }
 
-    // 獲取用戶友好的錯誤信息
+    // 取得用戶友好的錯誤信息
     getUserFriendlyMessage(errorInfo) {
         const errorTypeMap = {
             'NetworkError': '網路連線發生問題，請檢查網路設定後重試',
-            'QuotaExceededError': '儲存空間不足，請清理瀏覽器數據後重試',
+            'QuotaExceededError': '儲存空間不足，請清理瀏覽器資料後重試',
             'SecurityError': '安全性限制，請確保使用 HTTPS 連線',
-            'TypeError': '數據格式錯誤，請檢查輸入內容',
+            'TypeError': '資料格式錯誤，請檢查輸入內容',
             'ReferenceError': '功能載入失敗，請重新整理頁面',
             'Resource Load Error': '資源載入失敗，請重新整理頁面',
             'Unhandled Promise Rejection': '操作失敗，請稍後再試'
@@ -234,14 +234,14 @@ class ErrorHandler {
         }
         
         if (errorInfo.message?.includes('parse') || errorInfo.message?.includes('JSON')) {
-            return '數據解析失敗，請檢查檔案格式';
+            return '資料解析失敗，請檢查檔案格式';
         }
         
         if (errorInfo.message?.includes('permission') || errorInfo.message?.includes('denied')) {
             return '權限不足，請檢查瀏覽器設定';
         }
         
-        // 默認錯誤信息
+        // 預設錯誤信息
         return '發生未預期的錯誤，請稍後再試或重新整理頁面';
     }
 
@@ -311,7 +311,7 @@ class ErrorHandler {
         return !isDuplicate;
     }
 
-    // 獲取錯誤統計
+    // 取得錯誤統計
     getErrorStats() {
         const stats = {
             totalErrors: this.errorQueue.length,

@@ -35,29 +35,29 @@ class StateManager {
         this.notify(key, value, oldValue);
     }
 
-    // 獲取狀態
+    // 取得狀態
     getState(key) {
         return key ? this.state[key] : this.state;
     }
 
-    // 設置文章數據
+    // 設定文章資料
     setArticlesData(data) {
         this.updateState('articlesData', [...data]);
         this.updateState('filteredArticlesData', [...data]);
-        console.log(`StateManager: 設置 ${data.length} 篇文章`);
+        console.log(`StateManager: 設定 ${data.length} 篇文章`);
     }
 
-    // 設置過濾後的文章數據
+    // 設定過濾後的文章資料
     setFilteredArticles(data) {
         this.updateState('filteredArticlesData', [...data]);
     }
 
-    // 設置當前頁碼
+    // 設定當前頁碼
     setCurrentPage(page) {
         this.updateState('currentPage', page);
     }
 
-    // 設置圖表實例
+    // 設定圖表實例
     setTrendChart(chart) {
         this.updateState('trendChart', chart);
     }
@@ -74,7 +74,7 @@ class StateManager {
         return newType;
     }
 
-    // 保存月份滑桿狀態
+    // 儲存月份滑桿狀態
     saveMonthSliderState(value, month) {
         this.updateState('savedMonthSliderState', { value, month });
     }

@@ -13,15 +13,15 @@ class ChartManager {
         const currentChartType = this.stateManager.getState('currentChartType');
         const chartAnimationDuration = this.stateManager.getState('chartAnimationDuration');
         
-        // 如果過濾數據為空，嘗試使用原始數據
+        // 如果過濾資料為空，嘗試使用原始資料
         if (!filteredArticlesData || filteredArticlesData.length === 0) {
             const articlesData = this.stateManager.getState('articlesData');
             if (articlesData && articlesData.length > 0) {
-                console.log('使用原始文章數據渲染圖表');
+                console.log('使用原始文章資料渲染圖表');
                 filteredArticlesData = articlesData;
             } else {
-                console.warn('沒有可用的文章數據，無法渲染預期趨勢圖表');
-                this.showEmptyChart('expectedTrendChart', '無可用的趨勢數據');
+                console.warn('沒有可用的文章資料，無法渲染預期趨勢圖表');
+                this.showEmptyChart('expectedTrendChart', '無可用的趨勢資料');
                 this.uiComponents.hideLoading();
                 return;
             }
@@ -184,7 +184,7 @@ class ChartManager {
         let filteredArticlesData = this.stateManager.getState('filteredArticlesData');
         const chartAnimationDuration = this.stateManager.getState('chartAnimationDuration');
         
-        // 如果過濾數據為空，嘗試使用原始數據
+        // 如果過濾資料為空，嘗試使用原始資料
         if (!filteredArticlesData || filteredArticlesData.length === 0) {
             const articlesData = this.stateManager.getState('articlesData');
             if (articlesData && articlesData.length > 0) {
@@ -216,7 +216,7 @@ class ChartManager {
                 existingChart.destroy();
             }
             
-            this.showEmptyChart('trend', '此月份無關鍵詞數據');
+            this.showEmptyChart('trend', '此月份無關鍵詞資料');
             this.uiComponents.hideLoading();
             return;
         }
@@ -350,7 +350,7 @@ class ChartManager {
         ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
     }
 
-    // 工具函數：獲取月份範圍
+    // 工具函數：取得月份範圍
     getMonthRange(articles) {
         if (!articles || articles.length === 0) {
             return [];

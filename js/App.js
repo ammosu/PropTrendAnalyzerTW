@@ -24,7 +24,7 @@ class App {
             // 初始化模組
             this.initializeModules();
             
-            // 設置全域引用供向後相容
+            // 設定全域引用供向後相容
             this.setupGlobalReferences();
             
             // 初始化應用程式狀態
@@ -78,7 +78,7 @@ class App {
         console.log('所有模組初始化完成');
     }
 
-    // 設置全域引用供向後相容
+    // 設定全域引用供向後相容
     setupGlobalReferences() {
         // 供 HTML 中的 onclick 事件使用
         window.UIManager = {
@@ -94,7 +94,7 @@ class App {
         window.renderTrendChart = (month) => this.chartManager.renderTrendChart(month);
         window.renderExpectedTrendChart = () => this.chartManager.renderExpectedTrendChart();
         
-        console.log('全域引用設置完成');
+        console.log('全域引用設定完成');
     }
 
     // 初始化應用程式狀態
@@ -102,25 +102,25 @@ class App {
         // 等待一小段時間讓 data.js 有機會載入
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // 嘗試從 data.js 載入數據
+        // 嘗試從 data.js 載入資料
         if (typeof articlesData !== 'undefined' && articlesData.length > 0) {
             this.stateManager.setArticlesData(articlesData);
             console.log(`從 data.js 載入 ${articlesData.length} 篇文章`);
         } else {
-            console.log('等待數據載入...');
-            // 設置一個監聽器來等待數據載入
+            console.log('等待資料載入...');
+            // 設定一個監聽器來等待資料載入
             this.waitForDataLoading();
         }
     }
 
-    // 等待數據載入的監聽器
+    // 等待資料載入的監聽器
     waitForDataLoading() {
         const checkInterval = setInterval(() => {
             if (typeof articlesData !== 'undefined' && articlesData.length > 0) {
                 clearInterval(checkInterval);
                 this.stateManager.setArticlesData(articlesData);
                 console.log(`延遲載入 ${articlesData.length} 篇文章`);
-                // 確保設置初始過濾數據
+                // 確保設定初始過濾資料
                 this.stateManager.setFilteredArticles([...articlesData]);
                 // 重新初始化頁面
                 this.initializePage();
@@ -155,9 +155,9 @@ class App {
         });
     }
 
-    // 處理文章數據載入完成
+    // 處理文章資料載入完成
     handleArticlesDataLoaded() {
-        console.log('文章數據載入完成，更新 UI');
+        console.log('文章資料載入完成，更新 UI');
         
         // 初始化篩選器
         this.initializeFilters();
@@ -192,26 +192,26 @@ class App {
         
         let articlesData = this.stateManager.getState('articlesData');
         
-        // 如果 StateManager 中沒有數據，檢查全域變數
+        // 如果 StateManager 中沒有資料，檢查全域變數
         if ((!articlesData || articlesData.length === 0) && typeof window.articlesData !== 'undefined' && window.articlesData.length > 0) {
-            console.log('從全域變數同步數據到 StateManager');
+            console.log('從全域變數同步資料到 StateManager');
             this.stateManager.setArticlesData(window.articlesData);
             articlesData = window.articlesData;
         }
         
         if (!articlesData || articlesData.length === 0) {
-            console.log('沒有文章數據，顯示空狀態');
+            console.log('沒有文章資料，顯示空狀態');
             this.showEmptyState();
             this.uiComponents.hideLoading();
             return;
         }
         
-        // 初始化過濾後的文章數據
+        // 初始化過濾後的文章資料
         this.stateManager.setFilteredArticles(articlesData);
         
         // 渲染頁面元素
         setTimeout(() => {
-            // 直接設置初始的過濾數據，避免空篩選
+            // 直接設定初始的過濾資料，避免空篩選
             this.stateManager.setFilteredArticles([...articlesData]);
             
             this.uiComponents.renderArticles(1);
@@ -238,8 +238,8 @@ class App {
                 <div class="col-12 text-center py-5">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle fa-2x mb-3"></i>
-                        <h4>尚未載入任何數據</h4>
-                        <p>請上傳 CSV 檔案或檢查數據載入狀況。</p>
+                        <h4>尚未載入任何資料</h4>
+                        <p>請上傳 CSV 檔案或檢查資料載入狀況。</p>
                     </div>
                 </div>
             `;
@@ -250,7 +250,7 @@ class App {
     initializeFilters() {
         const articlesData = this.stateManager.getState('articlesData');
         
-        // 設置日期範圍
+        // 設定日期範圍
         if (articlesData.length > 0) {
             const dates = articlesData.map(article => new Date(article.date));
             const minDate = new Date(Math.min(...dates));
@@ -321,7 +321,7 @@ class App {
         }
     }
 
-    // 設置文章數據（供外部調用）
+    // 設定文章資料（供外部調用）
     setArticlesData(data) {
         if (this.isInitialized && this.stateManager) {
             this.stateManager.setArticlesData(data);
@@ -329,14 +329,14 @@ class App {
             setTimeout(() => {
                 this.initializePage();
             }, 100);
-            console.log(`App: 設置並重新渲染 ${data.length} 篇文章`);
+            console.log(`App: 設定並重新渲染 ${data.length} 篇文章`);
             return true;
         }
-        console.warn('應用程式尚未初始化，無法設置文章數據');
+        console.warn('應用程式尚未初始化，無法設定文章資料');
         return false;
     }
 
-    // 獲取應用程式狀態
+    // 取得應用程式狀態
     getAppState() {
         return {
             isInitialized: this.isInitialized,
