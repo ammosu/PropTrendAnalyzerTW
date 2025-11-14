@@ -224,11 +224,20 @@ function processCSVData(csvData) {
         const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
         const bgColor = colors[titleHash % colors.length];
         
-        const svgContent = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100%" height="100%" fill="${bgColor}"/>
-            <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ffffff" text-anchor="middle">房地產新聞</text>
-            <text x="50%" y="65%" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle" opacity="0.8">${(safeTitle || '').substring(0, 15)}...</text>
-        </svg>`;
+        let svgContent;
+        try {
+            svgContent = generateRealEstateSVG(bgColor, '#ffffff', safeTitle);
+        } catch (error) {
+            console.warn('SVG 生成失敗，使用簡單圖片:', error);
+            // 簡單的後備 SVG
+            svgContent = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100%" height="100%" fill="${bgColor}"/>
+                <rect x="150" y="80" width="100" height="60" fill="#ffffff" opacity="0.2"/>
+                <polygon points="140,80 200,50 260,80" fill="#ffffff" opacity="0.3"/>
+                <text x="200" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">房地產新聞</text>
+                <text x="200" y="180" font-family="Arial, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" opacity="0.8">${(safeTitle || '').substring(0, 20)}...</text>
+            </svg>`;
+        }
         
         const safeImageUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svgContent)}`;
         
@@ -646,6 +655,126 @@ function getMonthRange(articles) {
     }
 
     return months;
+}
+
+// 生成房地產主題的 SVG 圖片
+function generateRealEstateSVG(bgColor, textColor, title) {
+    const titleHash = generateHashFromString(title);
+    const houseVariant = titleHash % 4; // 4種不同的房子樣式
+    
+    // 調色函數
+    function lightenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + 
+                     (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + 
+                     (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+    }
+    
+    function darkenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) - amt;
+        const G = (num >> 8 & 0x00FF) - amt;
+        const B = (num & 0x0000FF) - amt;
+        return "#" + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 + 
+                     (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 + 
+                     (B > 255 ? 255 : B < 0 ? 0 : B)).toString(16).slice(1);
+    }
+    
+    // 選擇房子圖案
+    let houseElement = '';
+    const lightColor = lightenColor(bgColor, 20);
+    const darkColor = darkenColor(bgColor, 20);
+    
+    switch (houseVariant) {
+        case 0: // 現代公寓
+            houseElement = `
+                <!-- 公寓建築 -->
+                <rect x="120" y="80" width="160" height="90" fill="${lightColor}" stroke="${darkColor}" stroke-width="2"/>
+                <rect x="130" y="90" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="165" y="90" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="200" y="90" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="235" y="90" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="130" y="125" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="165" y="125" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="200" y="125" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+                <rect x="235" y="125" width="25" height="25" fill="${textColor}" opacity="0.3"/>
+            `;
+            break;
+        case 1: // 傳統住宅
+            houseElement = `
+                <!-- 房子屋頂 -->
+                <polygon points="120,100 200,60 280,100" fill="${darkColor}"/>
+                <!-- 房子主體 -->
+                <rect x="140" y="100" width="120" height="70" fill="${lightColor}" stroke="${darkColor}" stroke-width="2"/>
+                <!-- 門 -->
+                <rect x="180" y="140" width="40" height="30" fill="${darkColor}"/>
+                <!-- 窗戶 -->
+                <rect x="150" y="115" width="20" height="20" fill="${textColor}" opacity="0.3"/>
+                <rect x="230" y="115" width="20" height="20" fill="${textColor}" opacity="0.3"/>
+            `;
+            break;
+        case 2: // 摩天大樓
+            houseElement = `
+                <!-- 大樓主體 -->
+                <rect x="160" y="40" width="80" height="130" fill="${lightColor}" stroke="${darkColor}" stroke-width="2"/>
+                <!-- 窗戶網格 -->
+                <rect x="170" y="50" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="186" y="50" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="202" y="50" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="218" y="50" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="170" y="66" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="186" y="66" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="202" y="66" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="218" y="66" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="170" y="82" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="186" y="82" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="202" y="82" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <rect x="218" y="82" width="12" height="12" fill="${textColor}" opacity="0.3"/>
+                <!-- 天線 -->
+                <rect x="198" y="30" width="4" height="20" fill="${darkColor}"/>
+            `;
+            break;
+        case 3: // 別墅
+            houseElement = `
+                <!-- 主屋屋頂 -->
+                <polygon points="110,90 180,50 250,90" fill="${darkColor}"/>
+                <!-- 主屋 -->
+                <rect x="130" y="90" width="100" height="80" fill="${lightColor}" stroke="${darkColor}" stroke-width="2"/>
+                <!-- 側翼屋頂 -->
+                <polygon points="250,100 300,75 330,100" fill="${darkColor}"/>
+                <!-- 側翼 -->
+                <rect x="250" y="100" width="80" height="70" fill="${lightColor}" stroke="${darkColor}" stroke-width="2"/>
+                <!-- 門 -->
+                <rect x="165" y="140" width="30" height="30" fill="${darkColor}"/>
+                <!-- 窗戶 -->
+                <rect x="145" y="110" width="15" height="15" fill="${textColor}" opacity="0.3"/>
+                <rect x="200" y="110" width="15" height="15" fill="${textColor}" opacity="0.3"/>
+                <rect x="270" y="115" width="15" height="15" fill="${textColor}" opacity="0.3"/>
+            `;
+            break;
+    }
+    
+    return `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 背景 -->
+        <rect width="100%" height="100%" fill="${bgColor}"/>
+        
+        <!-- 地面 -->
+        <rect x="0" y="170" width="400" height="30" fill="${darkColor}" opacity="0.3"/>
+        
+        <!-- 房地產圖形 -->
+        ${houseElement}
+        
+        <!-- 標題文字 -->
+        <text x="200" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="${textColor}" text-anchor="middle">房地產新聞</text>
+        
+        <!-- 文章標題縮略 -->
+        <text x="200" y="195" font-family="Arial, sans-serif" font-size="10" fill="${textColor}" text-anchor="middle" opacity="0.8">${title.substring(0, 20)}${title.length > 20 ? '...' : ''}</text>
+    </svg>`;
 }
 
 // 導出函數供其他模塊使用
