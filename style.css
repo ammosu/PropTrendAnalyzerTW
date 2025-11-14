@@ -864,4 +864,95 @@ canvas#trend, canvas#expectedTrendChart {
     }
 }
 
+/* 文章內容樣式 */
+.article-content {
+    line-height: 1.8;
+    font-size: 1rem;
+    color: var(--text-color, #333);
+}
+
+.article-content p {
+    margin-bottom: 1rem;
+}
+
+.article-content br {
+    line-height: 2;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3,
+.article-content h4,
+.article-content h5,
+.article-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--primary-dark, #2980b9);
+}
+
+.article-content h1 { font-size: 1.8rem; }
+.article-content h2 { font-size: 1.6rem; }
+.article-content h3 { font-size: 1.4rem; }
+.article-content h4 { font-size: 1.2rem; }
+.article-content h5 { font-size: 1.1rem; }
+.article-content h6 { font-size: 1rem; }
+
+.article-content strong,
+.article-content b {
+    font-weight: 600;
+    color: var(--neutral-dark, #34495e);
+}
+
+.article-content em,
+.article-content i {
+    font-style: italic;
+}
+
+.article-content ul,
+.article-content ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.article-content li {
+    margin-bottom: 0.5rem;
+}
+
+.article-content blockquote {
+    border-left: 4px solid var(--primary, #3498db);
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    background-color: rgba(52, 152, 219, 0.05);
+    font-style: italic;
+}
+
+.article-content div {
+    margin-bottom: 1rem;
+}
+
+/* 文章詳情 Modal 樣式 */
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.article-meta {
+    font-size: 0.9rem;
+}
+
+.article-meta i {
+    margin-right: 0.5rem;
+    width: 16px;
+    text-align: center;
+}
+
+.article-meta a {
+    color: var(--primary, #3498db);
+    text-decoration: none;
+}
+
+.article-meta a:hover {
+    text-decoration: underline;
+}
+
 /* 淡入淡出動畫 - 已經在上面定義過，這裡移除重複定義 */

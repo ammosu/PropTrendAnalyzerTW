@@ -204,40 +204,121 @@ class UIComponents {
         const article = articlesData.find(a => a.id === articleId);
         
         if (article) {
-            const expectedTrend = article.expectedMarketTrend ? 
-                `<p class="text-muted">預期趨勢：${this.escapeHtml(article.expectedMarketTrend)}</p>` : '';
-
-            const formattedFullText = this.formatArticleContent(article.fullText);
-
-            const modalHtml = `
-                <div class="modal fade" id="articleModal" tabindex="-1" role="dialog" aria-labelledby="articleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="articleModalLabel">${this.escapeHtml(article.title)}</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <p>${formattedFullText}</p>
-                                <p class="text-muted">發布時間：${this.escapeHtml(article.date)} | 作者：${this.escapeHtml(article.author)} | 發布單位：${article.url ? `<a href="${this.escapeHtml(article.url)}" target="_blank">${this.escapeHtml(article.publisher)}</a>` : this.escapeHtml(article.publisher)}</p>
-                                ${expectedTrend}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">關閉</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            $('#articleModal').modal('show');
-
-            $('#articleModal').on('hidden.bs.modal', function () {
-                document.getElementById('articleModal').remove();
+            // 使用安全的 DOM 創建方式
+            const modal = this.createArticleModal(article);
+            document.body.appendChild(modal);
+            
+            // 顯示 Modal
+            $(modal).modal('show');
+            
+            // 設置關閉事件
+            $(modal).on('hidden.bs.modal', function () {
+                modal.remove();
             });
         }
+    }
+
+    // 創建安全的文章 Modal
+    createArticleModal(article) {
+        // 創建 Modal 結構
+        const modal = this.securityUtils.createSafeElement('div', {
+            class: 'modal fade',
+            id: 'articleModal',
+            tabindex: '-1',
+            role: 'dialog',
+            'aria-labelledby': 'articleModalLabel',
+            'aria-hidden': 'true'
+        });
+
+        const modalDialog = this.securityUtils.createSafeElement('div', { 
+            class: 'modal-dialog modal-lg',
+            role: 'document' 
+        });
+
+        const modalContent = this.securityUtils.createSafeElement('div', { class: 'modal-content' });
+
+        // Modal Header
+        const modalHeader = this.securityUtils.createSafeElement('div', { class: 'modal-header' });
+        const modalTitle = this.securityUtils.createSafeElement('h5', { 
+            class: 'modal-title',
+            id: 'articleModalLabel' 
+        }, article.title);
+
+        const closeButton = this.securityUtils.createSafeElement('button', {
+            type: 'button',
+            class: 'close',
+            'data-dismiss': 'modal',
+            'aria-label': 'Close'
+        });
+        const closeSpan = this.securityUtils.createSafeElement('span', { 'aria-hidden': 'true' }, '×');
+        closeButton.appendChild(closeSpan);
+
+        modalHeader.appendChild(modalTitle);
+        modalHeader.appendChild(closeButton);
+
+        // Modal Body
+        const modalBody = this.securityUtils.createSafeElement('div', { class: 'modal-body' });
+        
+        // 文章內容 - 使用安全的 HTML 渲染
+        const contentDiv = this.securityUtils.createSafeElement('div', { class: 'article-content mb-4' });
+        const formattedContent = this.formatArticleContent(article.fullText);
+        
+        // 安全地設置 HTML 內容
+        if (this.securityUtils && this.securityUtils.sanitizeHtml) {
+            contentDiv.innerHTML = formattedContent;
+        } else {
+            contentDiv.textContent = article.fullText;
+        }
+
+        modalBody.appendChild(contentDiv);
+
+        // 文章資訊
+        const metaInfo = this.securityUtils.createSafeElement('div', { class: 'article-meta text-muted border-top pt-3' });
+        
+        const dateInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
+        dateInfo.innerHTML = `<i class="far fa-calendar-alt"></i> 發布時間：${this.escapeHtml(article.date)}`;
+        
+        const authorInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
+        authorInfo.innerHTML = `<i class="far fa-user"></i> 作者：${this.escapeHtml(article.author)}`;
+        
+        const publisherInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
+        if (article.url) {
+            publisherInfo.innerHTML = `<i class="fas fa-newspaper"></i> 發布單位：<a href="${this.escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(article.publisher)}</a>`;
+        } else {
+            publisherInfo.innerHTML = `<i class="fas fa-newspaper"></i> 發布單位：${this.escapeHtml(article.publisher)}`;
+        }
+
+        metaInfo.appendChild(dateInfo);
+        metaInfo.appendChild(authorInfo);
+        metaInfo.appendChild(publisherInfo);
+
+        // 預期趨勢
+        if (article.expectedMarketTrend) {
+            const trendInfo = this.securityUtils.createSafeElement('p', { class: 'mb-0' });
+            const trendBadgeClass = this.getTrendBadgeClass(article.expectedMarketTrend);
+            trendInfo.innerHTML = `<i class="fas fa-chart-line"></i> 預期趨勢：<span class="badge ${trendBadgeClass}">${this.escapeHtml(article.expectedMarketTrend)}</span>`;
+            metaInfo.appendChild(trendInfo);
+        }
+
+        modalBody.appendChild(metaInfo);
+
+        // Modal Footer
+        const modalFooter = this.securityUtils.createSafeElement('div', { class: 'modal-footer' });
+        const closeBtn = this.securityUtils.createSafeElement('button', {
+            type: 'button',
+            class: 'btn btn-secondary',
+            'data-dismiss': 'modal'
+        }, '關閉');
+        modalFooter.appendChild(closeBtn);
+
+        // 組裝 Modal
+        modalContent.appendChild(modalHeader);
+        modalContent.appendChild(modalBody);
+        modalContent.appendChild(modalFooter);
+        modalDialog.appendChild(modalContent);
+        modal.appendChild(modalDialog);
+
+        return modal;
     }
 
     // 工具函數：轉義 HTML 以防止 XSS
@@ -269,7 +350,26 @@ class UIComponents {
     // 工具函數：格式化文章內容
     formatArticleContent(content) {
         if (!content) return '';
-        return this.escapeHtml(content.replace(/_x000D_/g, '<br>').replace(/\r\n|\n/g, '<br>'));
+        
+        // 使用 SecurityUtils 安全地處理 HTML
+        if (this.securityUtils && this.securityUtils.sanitizeHtml) {
+            // 首先處理常見的換行符和特殊字符
+            let processedContent = content
+                .replace(/_x000D_/g, '<br>')  // 替換特殊換行符
+                .replace(/\r\n/g, '<br>')     // Windows 換行符
+                .replace(/\n/g, '<br>')       // Unix 換行符
+                .replace(/<br><br>/g, '<br>') // 避免過多的空行
+                .replace(/<br>\s*<br>/g, '<br>'); // 清理連續的 br 標籤
+            
+            // 使用安全的 HTML 處理
+            return this.securityUtils.sanitizeHtml(processedContent);
+        } else {
+            // 如果 SecurityUtils 不可用，則使用安全的文本處理
+            return this.escapeHtml(content)
+                .replace(/_x000D_/g, '<br>')
+                .replace(/\r\n/g, '<br>')
+                .replace(/\n/g, '<br>');
+        }
     }
 
     // 獲取趨勢徽章類別

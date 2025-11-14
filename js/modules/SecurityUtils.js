@@ -1,7 +1,7 @@
 // SecurityUtils.js - 安全性工具模組
 class SecurityUtils {
     constructor() {
-        this.ALLOWED_HTML_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'span'];
+        this.ALLOWED_HTML_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote'];
         this.ALLOWED_PROTOCOLS = ['http:', 'https:', 'data:'];
         this.MAX_STRING_LENGTH = 1000;
     }
