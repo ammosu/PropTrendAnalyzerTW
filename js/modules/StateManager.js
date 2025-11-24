@@ -1,18 +1,20 @@
 // StateManager.js - 狀態管理模組
 class StateManager {
     constructor() {
+        const constants = window.Constants;
+
         this.state = {
             articlesData: [],
             filteredArticlesData: [],
-            currentPage: 1,
-            articlesPerPage: 6,
+            currentPage: constants.STATE.INITIAL_PAGE,
+            articlesPerPage: constants.PAGINATION.ARTICLES_PER_PAGE,
             trendChart: null,
             expectedTrendChart: null,
-            currentChartType: 'bar',
-            chartAnimationDuration: 800,
+            currentChartType: constants.STATE.DEFAULT_CHART_TYPE,
+            chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
             savedMonthSliderState: null
         };
-        
+
         this.subscribers = [];
     }
 

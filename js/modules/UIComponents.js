@@ -4,6 +4,7 @@ class UIComponents {
         this.stateManager = stateManager;
         this.securityUtils = window.SecurityUtils;
         this.utilities = window.Utilities;
+        this.constants = window.Constants;
     }
 
     // 顯示載入動畫
@@ -113,7 +114,7 @@ class UIComponents {
     // 創建文章卡片
     createArticleCard(article, index) {
         const articleCard = document.createElement('div');
-        articleCard.className = 'col-md-4 mb-4';
+        articleCard.className = this.constants.CSS_CLASSES.ARTICLE_CARD_COLUMN;
         
         // 直接使用安全的卡片創建方法
         const secureCard = this.createSecureArticleCard(article, index);
@@ -399,14 +400,17 @@ class UIComponents {
 
     // 取得趨勢徽章類別
     getTrendBadgeClass(expectedTrend) {
-        if (expectedTrend === '上漲') {
-            return 'badge-success';
-        } else if (expectedTrend === '下跌') {
-            return 'badge-danger';
-        } else if (expectedTrend === '平穩') {
-            return 'badge-info';
+        const trends = this.constants.MARKET_TRENDS;
+        const classes = this.constants.CSS_CLASSES;
+
+        if (expectedTrend === trends.UP) {
+            return classes.BADGE_SUCCESS;
+        } else if (expectedTrend === trends.DOWN) {
+            return classes.BADGE_DANGER;
+        } else if (expectedTrend === trends.STABLE) {
+            return classes.BADGE_INFO;
         }
-        return 'badge-secondary'; // 預設
+        return classes.BADGE_SECONDARY; // 預設
     }
 
     // 生成字符串哈希值
@@ -463,7 +467,7 @@ class UIComponents {
         } else {
             // 根據文章標題生成顏色
             const titleHash = this.generateHashFromString(article.title || '預設');
-            const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+            const colors = this.constants.COLORS.PALETTE;
             const bgColor = colors[titleHash % colors.length];
             const textColor = '#ffffff';
             

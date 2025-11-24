@@ -6,6 +6,7 @@ class EventHandlers {
         this.chartManager = chartManager;
         this.utilities = utilities;
         this.cache = window.CacheManager;
+        this.constants = window.Constants;
 
         this.initializeEventListeners();
     }
@@ -42,13 +43,13 @@ class EventHandlers {
         const sortOptionsEl = document.getElementById('sort-options');
 
         if (startDateEl) {
-            startDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), 300));
+            startDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DATE_FILTER_DEBOUNCE));
         }
         if (endDateEl) {
-            endDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), 300));
+            endDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DATE_FILTER_DEBOUNCE));
         }
         if (keywordFilterEl) {
-            keywordFilterEl.addEventListener('input', this.utilities.debounce(() => this.filterArticles(), 500));
+            keywordFilterEl.addEventListener('input', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DEBOUNCE_DELAY));
         }
         if (sortOptionsEl) {
             sortOptionsEl.addEventListener('change', () => this.filterArticles());
@@ -192,7 +193,7 @@ class EventHandlers {
         });
 
         // 存入快取（TTL 設為 5 分鐘）
-        this.cache.set(cacheKey, filteredArticles, 5 * 60 * 1000);
+        this.cache.set(cacheKey, filteredArticles, this.constants.CACHE.FILTER_TTL);
 
         this.stateManager.setFilteredArticles(filteredArticles);
         this.stateManager.setCurrentPage(1);
