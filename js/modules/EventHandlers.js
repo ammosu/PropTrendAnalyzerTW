@@ -7,6 +7,7 @@ class EventHandlers {
         this.utilities = utilities;
         this.cache = window.CacheManager;
         this.constants = window.Constants;
+        this.validator = window.Validator;
 
         this.initializeEventListeners();
     }
@@ -130,6 +131,25 @@ class EventHandlers {
         const selectedMedia = Array.from(document.querySelectorAll('.media-filter:checked')).map(el => el.value);
         const sortOption = sortOptionsEl ? sortOptionsEl.value : 'date-desc';
 
+        // 驗證日期輸入
+        if (startDate && !this.validator.isValidDate(startDate)) {
+            this.showFilterError('開始日期格式無效');
+            return;
+        }
+        if (endDate && !this.validator.isValidDate(endDate)) {
+            this.showFilterError('結束日期格式無效');
+            return;
+        }
+
+        // 驗證關鍵詞長度
+        if (keyword) {
+            const keywordResult = this.validator.validateKeyword(keyword);
+            if (!keywordResult.valid) {
+                this.showFilterError(keywordResult.error);
+                return;
+            }
+        }
+
         // 生成快取鍵
         const filterParams = {
             startDate,
@@ -210,38 +230,43 @@ class EventHandlers {
         const jumpPageEl = document.getElementById('jump-page');
         const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
         const articlesPerPage = this.stateManager.getState('articlesPerPage');
-        
+
         if (!jumpPageEl) return;
-        
-        const jumpPage = parseInt(jumpPageEl.value, 10);
+
         const maxPage = Math.ceil(filteredArticlesData.length / articlesPerPage);
-        
-        if (!isNaN(jumpPage) && jumpPage >= 1 && jumpPage <= maxPage) {
+
+        // 使用 Validator 驗證頁碼
+        const validationResult = this.validator.validatePageNumber(jumpPageEl.value, maxPage);
+
+        if (validationResult.valid) {
+            const jumpPage = validationResult.value;
             this.stateManager.setCurrentPage(jumpPage);
-            
+
             document.getElementById('articles')?.scrollIntoView({ behavior: 'smooth' });
-            
+
             this.uiComponents.showLoading('正在載入頁面...');
-            
+
             setTimeout(() => {
                 this.uiComponents.renderArticles(jumpPage);
                 this.uiComponents.renderPagination();
                 this.uiComponents.hideLoading();
             }, 300);
         } else {
-            this.showJumpPageError(maxPage, jumpPageEl);
+            this.showJumpPageError(maxPage, jumpPageEl, validationResult.error);
         }
     }
 
     // 顯示頁面跳轉錯誤
-    showJumpPageError(maxPage, jumpPageEl) {
+    showJumpPageError(maxPage, jumpPageEl, customError = null) {
         const errorMessage = document.createElement('div');
         errorMessage.className = 'alert alert-warning mt-2';
 
         const icon = document.createElement('i');
         icon.className = 'fas fa-exclamation-triangle';
         errorMessage.appendChild(icon);
-        errorMessage.appendChild(document.createTextNode(` 請輸入有效的頁碼（1-${maxPage}）！`));
+
+        const message = customError || `請輸入有效的頁碼（1-${maxPage}）！`;
+        errorMessage.appendChild(document.createTextNode(` ${message}`));
 
         const container = jumpPageEl.closest('.form-row');
         if (!container) return;
@@ -252,6 +277,33 @@ class EventHandlers {
         }
 
         container.appendChild(errorMessage);
+
+        setTimeout(() => {
+            errorMessage.style.opacity = '0';
+            errorMessage.style.transition = 'opacity 0.5s';
+            setTimeout(() => errorMessage.remove(), 500);
+        }, 3000);
+    }
+
+    // 顯示篩選錯誤
+    showFilterError(message) {
+        const filtersContainer = document.querySelector('.filters');
+        if (!filtersContainer) return;
+
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-warning mt-2';
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-triangle';
+        errorMessage.appendChild(icon);
+        errorMessage.appendChild(document.createTextNode(` ${message}`));
+
+        const existingError = filtersContainer.querySelector('.alert');
+        if (existingError) {
+            existingError.remove();
+        }
+
+        filtersContainer.appendChild(errorMessage);
 
         setTimeout(() => {
             errorMessage.style.opacity = '0';

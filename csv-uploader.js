@@ -205,18 +205,32 @@ function processCSVData(csvData) {
         const safeAuthor = sanitizeField(item.author || '', 100);
         const safeFullText = sanitizeField(item.fullText || '', 5000);
         const safeExpectedTrend = sanitizeField(expectedMarketTrend, 50);
-        
-        // 驗證和清理 URL
+
+        // 驗證和清理 URL（使用 Validator）
         let safeUrl = '';
         if (item.url && typeof item.url === 'string') {
-            try {
-                const url = new URL(item.url);
-                if (url.protocol === 'http:' || url.protocol === 'https:') {
-                    safeUrl = url.toString();
+            const validator = window.Validator;
+            if (validator && validator.isValidUrl(item.url)) {
+                safeUrl = item.url;
+            } else {
+                // 後備驗證方案
+                try {
+                    const url = new URL(item.url);
+                    if (url.protocol === 'http:' || url.protocol === 'https:') {
+                        safeUrl = url.toString();
+                    }
+                } catch (e) {
+                    console.warn(`無效的 URL: ${item.url}`);
                 }
-            } catch (e) {
-                console.warn(`無效的 URL: ${item.url}`);
             }
+        }
+
+        // 驗證日期（使用 Validator）
+        const validator = window.Validator;
+        let safeDate = item.date || '';
+        if (safeDate && validator && !validator.isValidDate(safeDate)) {
+            console.warn(`文章 ${index} 的日期格式無效: ${safeDate}`);
+            safeDate = ''; // 清空無效日期
         }
         
         // 生成安全的圖片 URL - 使用 SVG 避免外部依賴
@@ -247,7 +261,7 @@ function processCSVData(csvData) {
             title: safeTitle,
             summary: safeSummary,
             keywords: keywords, // 關鍵詞已在上面處理
-            date: item.date || '', // 日期格式驗證可以在後續加強
+            date: safeDate, // 已驗證的日期
             publisher: safePublisher,
             author: safeAuthor,
             fullText: safeFullText,
@@ -392,23 +406,27 @@ function waitForSecurityUtils() {
 
 // 安全驗證文件
 async function validateUploadedFile(file) {
-    // 基本檢查
-    if (!file) {
-        throw new Error('請選擇一個檔案');
+    // 使用 Validator 模組進行文件驗證
+    const validator = window.Validator;
+
+    if (!validator) {
+        console.warn('Validator 模組未載入，使用基本驗證');
+        // 基本檢查（後備方案）
+        if (!file) {
+            throw new Error('請選擇一個檔案');
+        }
+    } else {
+        // 使用 Validator 驗證檔案
+        const validationResult = validator.validateFile(file, {
+            maxSize: UPLOAD_CONFIG.maxFileSize > 0 ? UPLOAD_CONFIG.maxFileSize : null,
+            allowedTypes: UPLOAD_CONFIG.allowedExtensions
+        });
+
+        if (!validationResult.valid) {
+            throw new Error(validationResult.error);
+        }
     }
-    
-    // 文件大小檢查（如果設定了限制）
-    if (UPLOAD_CONFIG.maxFileSize > 0 && file.size > UPLOAD_CONFIG.maxFileSize) {
-        throw new Error(`檔案大小超過限制 (${(UPLOAD_CONFIG.maxFileSize / 1024 / 1024).toFixed(1)}MB)`);
-    }
-    
-    // 文件類型檢查
-    const fileName = file.name.toLowerCase();
-    const hasValidExtension = UPLOAD_CONFIG.allowedExtensions.some(ext => fileName.endsWith(ext));
-    if (!hasValidExtension) {
-        throw new Error('只允許上傳 CSV 格式的檔案');
-    }
-    
+
     // MIME 類型檢查（如果可用）
     if (file.type && !UPLOAD_CONFIG.allowedMimeTypes.includes(file.type)) {
         throw new Error('檔案類型不符合要求');

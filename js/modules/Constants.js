@@ -101,7 +101,7 @@ const Constants = {
 
     // 驗證規則
     VALIDATION: {
-        MAX_FILE_SIZE: 100 * 1024 * 1024,  // 100MB
+        MAX_FILE_SIZE: 1024 * 1024 * 1024,  // 1GB
         ALLOWED_FILE_TYPES: ['.csv'],
         MIN_KEYWORD_LENGTH: 1,
         MAX_KEYWORD_LENGTH: 50,
