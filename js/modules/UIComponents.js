@@ -3,6 +3,7 @@ class UIComponents {
     constructor(stateManager) {
         this.stateManager = stateManager;
         this.securityUtils = window.SecurityUtils;
+        this.utilities = window.Utilities;
     }
 
     // 顯示載入動畫
@@ -630,11 +631,11 @@ class UIComponents {
     generateRealEstateSVG(bgColor, textColor, title) {
         const titleHash = this.generateHashFromString(title);
         const houseVariant = titleHash % 4; // 4種不同的房子樣式
-        
+
         // 選擇房子圖案
         let houseElement = '';
-        const lightColor = this.lightenColor(bgColor, 20);
-        const darkColor = this.darkenColor(bgColor, 20);
+        const lightColor = this.utilities.lightenColor(bgColor, 20);
+        const darkColor = this.utilities.darkenColor(bgColor, 20);
         
         switch (houseVariant) {
             case 0: // 現代公寓
@@ -721,30 +722,6 @@ class UIComponents {
             <!-- 文章標題縮略 -->
             <text x="200" y="195" font-family="Arial, sans-serif" font-size="10" fill="${textColor}" text-anchor="middle" opacity="0.8">${title.substring(0, 20)}${title.length > 20 ? '...' : ''}</text>
         </svg>`;
-    }
-
-    // 調亮顏色
-    lightenColor(color, percent) {
-        const num = parseInt(color.replace("#", ""), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
-        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 + 
-                     (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 + 
-                     (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
-    }
-
-    // 調暗顏色
-    darkenColor(color, percent) {
-        const num = parseInt(color.replace("#", ""), 16);
-        const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) - amt;
-        const G = (num >> 8 & 0x00FF) - amt;
-        const B = (num & 0x0000FF) - amt;
-        return "#" + (0x1000000 + (R > 255 ? 255 : R < 0 ? 0 : R) * 0x10000 + 
-                     (G > 255 ? 255 : G < 0 ? 0 : G) * 0x100 + 
-                     (B > 255 ? 255 : B < 0 ? 0 : B)).toString(16).slice(1);
     }
 }
 

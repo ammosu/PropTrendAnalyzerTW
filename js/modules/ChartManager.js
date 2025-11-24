@@ -3,6 +3,7 @@ class ChartManager {
     constructor(stateManager, uiComponents) {
         this.stateManager = stateManager;
         this.uiComponents = uiComponents;
+        this.utilities = window.Utilities;
     }
 
     // 渲染預期趨勢圖表
@@ -27,7 +28,7 @@ class ChartManager {
             }
         }
         
-        const months = this.getMonthRange(filteredArticlesData);
+        const months = this.utilities.getMonthRange(filteredArticlesData);
         const trendCountsPerMonth = {};
 
         months.forEach(month => {
@@ -49,7 +50,7 @@ class ChartManager {
             }
         });
 
-        const formattedLabels = months.map(month => this.formatMonthDisplay(month));
+        const formattedLabels = months.map(month => this.utilities.formatMonthDisplay(month));
 
         const trendColors = {
             "上漲": {
@@ -260,7 +261,7 @@ class ChartManager {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: `關鍵詞出現次數 (${this.formatMonthDisplay(selectedMonth)})`,
+                    label: `關鍵詞出現次數 (${this.utilities.formatMonthDisplay(selectedMonth)})`,
                     data: data,
                     backgroundColor: backgroundColors,
                     borderColor: gradientColors.map(color => color.replace('0.8', '1')),
@@ -348,47 +349,6 @@ class ChartManager {
         ctx.textAlign = 'center';
         ctx.fillStyle = '#7f8c8d';
         ctx.fillText(message, ctx.canvas.width / 2, ctx.canvas.height / 2);
-    }
-
-    // 工具函數：取得月份範圍
-    getMonthRange(articles) {
-        if (!articles || articles.length === 0) {
-            return [];
-        }
-        
-        const validArticles = articles.filter(article => article.date && !isNaN(new Date(article.date).getTime()));
-        
-        if (validArticles.length === 0) {
-            return [];
-        }
-        
-        const dates = validArticles.map(article => new Date(article.date));
-        const minDate = new Date(Math.min(...dates));
-        const maxDate = new Date(Math.max(...dates));
-
-        const months = [];
-        let currentDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-
-        while (currentDate <= maxDate) {
-            const yearMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-            months.push(yearMonth);
-            currentDate.setMonth(currentDate.getMonth() + 1);
-        }
-
-        return months;
-    }
-
-    // 工具函數：格式化月份顯示
-    formatMonthDisplay(yearMonth) {
-        if (!yearMonth) return '';
-        
-        const [year, month] = yearMonth.split('-');
-        const date = new Date(parseInt(year), parseInt(month) - 1, 1);
-        
-        return date.toLocaleDateString('zh-TW', {
-            year: 'numeric',
-            month: 'long'
-        });
     }
 
     // 切換圖表類型

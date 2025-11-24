@@ -5,7 +5,8 @@ class EventHandlers {
         this.uiComponents = uiComponents;
         this.chartManager = chartManager;
         this.utilities = utilities;
-        
+        this.cache = window.CacheManager;
+
         this.initializeEventListeners();
     }
 
@@ -112,34 +113,64 @@ class EventHandlers {
     // 篩選文章
     filterArticles() {
         const articlesData = this.stateManager.getState('articlesData');
-        
+
         if (!articlesData || articlesData.length === 0) {
             return;
         }
-        
+
         const startDateEl = document.getElementById('start-date');
         const endDateEl = document.getElementById('end-date');
         const keywordFilterEl = document.getElementById('keyword-filter');
         const sortOptionsEl = document.getElementById('sort-options');
 
-        const startDate = startDateEl ? new Date(startDateEl.value) : null;
-        const endDate = endDateEl ? new Date(endDateEl.value) : null;
+        const startDate = startDateEl ? startDateEl.value : '';
+        const endDate = endDateEl ? endDateEl.value : '';
         const keyword = keywordFilterEl ? keywordFilterEl.value.trim().toLowerCase() : '';
         const selectedMedia = Array.from(document.querySelectorAll('.media-filter:checked')).map(el => el.value);
+        const sortOption = sortOptionsEl ? sortOptionsEl.value : 'date-desc';
+
+        // 生成快取鍵
+        const filterParams = {
+            startDate,
+            endDate,
+            keyword,
+            selectedMedia: selectedMedia.sort(),
+            sortOption,
+            dataHash: articlesData.length // 簡單的資料版本檢查
+        };
+
+        const cacheKey = this.cache.generateKey('filter', filterParams);
+
+        // 檢查快取
+        const cachedResult = this.cache.get(cacheKey);
+        if (cachedResult) {
+            console.log('使用快取的篩選結果');
+            this.stateManager.setFilteredArticles(cachedResult);
+            this.stateManager.setCurrentPage(1);
+            this.uiComponents.renderArticles(1);
+            this.uiComponents.renderPagination();
+            this.initializeMonthSlider();
+            this.chartManager.renderExpectedTrendChart();
+            return;
+        }
+
+        // 執行篩選
+        const startDateObj = startDate ? new Date(startDate) : null;
+        const endDateObj = endDate ? new Date(endDate) : null;
 
         const filteredArticles = articlesData.filter(article => {
             const articleDate = new Date(article.date);
-            
+
             // 日期篩選邏輯修復
             let matchesDate = true;
-            if (startDate && !isNaN(startDate.getTime())) {
-                matchesDate = matchesDate && articleDate >= startDate;
+            if (startDateObj && !isNaN(startDateObj.getTime())) {
+                matchesDate = matchesDate && articleDate >= startDateObj;
             }
-            if (endDate && !isNaN(endDate.getTime())) {
-                matchesDate = matchesDate && articleDate <= endDate;
+            if (endDateObj && !isNaN(endDateObj.getTime())) {
+                matchesDate = matchesDate && articleDate <= endDateObj;
             }
-            
-            const matchesKeyword = keyword ? 
+
+            const matchesKeyword = keyword ?
                 (article.keywords && Array.isArray(article.keywords) && article.keywords.some(kw => kw.toLowerCase().includes(keyword))) : true;
             const matchesMedia = selectedMedia.length === 0 || selectedMedia.includes(article.publisher);
 
@@ -147,7 +178,6 @@ class EventHandlers {
         });
 
         // 應用排序
-        const sortOption = sortOptionsEl ? sortOptionsEl.value : 'date-desc';
         filteredArticles.sort((a, b) => {
             if (sortOption === 'date-desc') {
                 return new Date(b.date) - new Date(a.date);
@@ -161,12 +191,15 @@ class EventHandlers {
             return 0;
         });
 
+        // 存入快取（TTL 設為 5 分鐘）
+        this.cache.set(cacheKey, filteredArticles, 5 * 60 * 1000);
+
         this.stateManager.setFilteredArticles(filteredArticles);
         this.stateManager.setCurrentPage(1);
-        
+
         this.uiComponents.renderArticles(1);
         this.uiComponents.renderPagination();
-        
+
         this.initializeMonthSlider();
         this.chartManager.renderExpectedTrendChart();
     }
@@ -333,7 +366,7 @@ class EventHandlers {
             if (monthSlider && selectedMonthLabel) {
                 const filteredData = this.stateManager.getState('filteredArticlesData');
                 const articlesData = this.stateManager.getState('articlesData');
-                const months = this.chartManager.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+                const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
                 
                 if (months && months.length > 0) {
                     this.adjustSliderWidth(months.length);
@@ -353,7 +386,7 @@ class EventHandlers {
     adjustSliderForKeywordTrend() {
         const filteredData = this.stateManager.getState('filteredArticlesData');
         const articlesData = this.stateManager.getState('articlesData');
-        const months = this.chartManager.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
         
         if (months && months.length > 0) {
             this.adjustSliderWidth(months.length);
@@ -441,7 +474,7 @@ class EventHandlers {
         
         const filteredData = this.stateManager.getState('filteredArticlesData');
         const articlesData = this.stateManager.getState('articlesData');
-        const months = this.chartManager.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
         
         if (months && months.length > monthSlider.value) {
             selectedMonthLabel.textContent = months[monthSlider.value];
@@ -471,7 +504,7 @@ class EventHandlers {
     initializeMonthSlider() {
         const filteredData = this.stateManager.getState('filteredArticlesData');
         const articlesData = this.stateManager.getState('articlesData');
-        const months = this.chartManager.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
         
         if (months.length === 0) {
             console.warn('沒有可用的月份資料');
