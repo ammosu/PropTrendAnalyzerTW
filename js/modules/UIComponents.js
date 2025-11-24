@@ -262,10 +262,15 @@ class UIComponents {
         // 文章內容 - 使用安全的 HTML 渲染
         const contentDiv = this.securityUtils.createSafeElement('div', { class: 'article-content mb-4' });
         const formattedContent = this.formatArticleContent(article.fullText);
-        
-        // 安全地設定 HTML 內容
+
+        // 安全地設定 HTML 內容 - 使用 DOMParser
         if (this.securityUtils && this.securityUtils.sanitizeHtml) {
-            contentDiv.innerHTML = formattedContent;
+            const sanitizedContent = this.securityUtils.sanitizeHtml(formattedContent);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(sanitizedContent, 'text/html');
+            while (doc.body.firstChild) {
+                contentDiv.appendChild(doc.body.firstChild);
+            }
         } else {
             contentDiv.textContent = article.fullText;
         }
@@ -274,18 +279,30 @@ class UIComponents {
 
         // 文章資訊
         const metaInfo = this.securityUtils.createSafeElement('div', { class: 'article-meta text-muted border-top pt-3' });
-        
+
         const dateInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
-        dateInfo.innerHTML = `<i class="far fa-calendar-alt"></i> 發布時間：${this.escapeHtml(article.date)}`;
-        
+        const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });
+        dateInfo.appendChild(dateIcon);
+        dateInfo.appendChild(document.createTextNode(' 發布時間：' + article.date));
+
         const authorInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
-        authorInfo.innerHTML = `<i class="far fa-user"></i> 作者：${this.escapeHtml(article.author)}`;
-        
+        const authorIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-user' });
+        authorInfo.appendChild(authorIcon);
+        authorInfo.appendChild(document.createTextNode(' 作者：' + article.author));
+
         const publisherInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
+        const publisherIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-newspaper' });
+        publisherInfo.appendChild(publisherIcon);
+        publisherInfo.appendChild(document.createTextNode(' 發布單位：'));
         if (article.url) {
-            publisherInfo.innerHTML = `<i class="fas fa-newspaper"></i> 發布單位：<a href="${this.escapeHtml(article.url)}" target="_blank" rel="noopener noreferrer">${this.escapeHtml(article.publisher)}</a>`;
+            const link = this.securityUtils.createSafeElement('a', {
+                href: article.url,
+                target: '_blank',
+                rel: 'noopener noreferrer'
+            }, article.publisher);
+            publisherInfo.appendChild(link);
         } else {
-            publisherInfo.innerHTML = `<i class="fas fa-newspaper"></i> 發布單位：${this.escapeHtml(article.publisher)}`;
+            publisherInfo.appendChild(document.createTextNode(article.publisher));
         }
 
         metaInfo.appendChild(dateInfo);
@@ -295,8 +312,15 @@ class UIComponents {
         // 預期趨勢
         if (article.expectedMarketTrend) {
             const trendInfo = this.securityUtils.createSafeElement('p', { class: 'mb-0' });
+            const trendIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-chart-line' });
+            trendInfo.appendChild(trendIcon);
+            trendInfo.appendChild(document.createTextNode(' 預期趨勢：'));
+
             const trendBadgeClass = this.getTrendBadgeClass(article.expectedMarketTrend);
-            trendInfo.innerHTML = `<i class="fas fa-chart-line"></i> 預期趨勢：<span class="badge ${trendBadgeClass}">${this.escapeHtml(article.expectedMarketTrend)}</span>`;
+            const trendBadge = this.securityUtils.createSafeElement('span', {
+                class: `badge ${trendBadgeClass}`
+            }, article.expectedMarketTrend);
+            trendInfo.appendChild(trendBadge);
             metaInfo.appendChild(trendInfo);
         }
 

@@ -11,18 +11,19 @@ const PORT = process.env.PORT || 3000;
 
 // 安全標頭中間件 (必須在其他中間件之前)
 app.use((req, res, next) => {
-    // 內容安全政策
-    res.setHeader('Content-Security-Policy', 
+    // 內容安全政策（與 index.html 的 meta CSP 保持一致）
+    res.setHeader('Content-Security-Policy',
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
+        "script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
         "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
-        "img-src 'self' data: blob: https: http:; " +
+        "img-src 'self' data: blob: https:; " +
         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
         "connect-src 'self'; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +
         "base-uri 'self'; " +
-        "form-action 'self';"
+        "form-action 'self'; " +
+        "upgrade-insecure-requests;"
     );
     
     // 其他安全標頭

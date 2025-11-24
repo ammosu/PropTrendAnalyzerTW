@@ -16,6 +16,21 @@ class EventHandlers {
         this.initializeChartEvents();
         this.initializeContentToggleEvents();
         this.initializeSliderEvents();
+        this.initializeFileUploadLabel();
+    }
+
+    // 初始化檔案上傳標籤
+    initializeFileUploadLabel() {
+        const fileInput = document.querySelector('.custom-file-input');
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                const fileName = this.value.split('\\').pop();
+                const label = this.nextElementSibling;
+                if (label && label.classList.contains('custom-file-label')) {
+                    label.textContent = fileName || '選擇檔案...';
+                }
+            });
+        }
     }
 
     // 初始化篩選相關事件
@@ -188,18 +203,22 @@ class EventHandlers {
     showJumpPageError(maxPage, jumpPageEl) {
         const errorMessage = document.createElement('div');
         errorMessage.className = 'alert alert-warning mt-2';
-        errorMessage.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 請輸入有效的頁碼（1-${maxPage}）！`;
-        
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-exclamation-triangle';
+        errorMessage.appendChild(icon);
+        errorMessage.appendChild(document.createTextNode(` 請輸入有效的頁碼（1-${maxPage}）！`));
+
         const container = jumpPageEl.closest('.form-row');
         if (!container) return;
-        
+
         const existingError = container.querySelector('.alert');
         if (existingError) {
             existingError.remove();
         }
-        
+
         container.appendChild(errorMessage);
-        
+
         setTimeout(() => {
             errorMessage.style.opacity = '0';
             errorMessage.style.transition = 'opacity 0.5s';
@@ -363,21 +382,28 @@ class EventHandlers {
         newsContent.style.maxHeight = '0';
         newsContent.style.overflow = 'hidden';
         newsContent.style.transition = 'max-height 0.5s ease-in-out';
-        
+
         setTimeout(() => {
             newsContent.style.maxHeight = newsContent.scrollHeight + 'px';
-            
+
             setTimeout(() => {
                 newsContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                
+
                 setTimeout(() => {
                     newsContent.style.maxHeight = '';
                     newsContent.style.overflow = '';
                 }, 500);
             }, 300);
         }, 10);
-        
-        toggleButton.innerHTML = '<i class="fas fa-times-circle"></i> 隱藏新聞內容';
+
+        // 安全地更新按鈕內容
+        while (toggleButton.firstChild) {
+            toggleButton.removeChild(toggleButton.firstChild);
+        }
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-times-circle';
+        toggleButton.appendChild(icon);
+        toggleButton.appendChild(document.createTextNode(' 隱藏新聞內容'));
     }
 
     // 隱藏新聞內容
@@ -385,18 +411,25 @@ class EventHandlers {
         newsContent.style.maxHeight = newsContent.scrollHeight + 'px';
         newsContent.style.overflow = 'hidden';
         newsContent.style.transition = 'max-height 0.5s ease-in-out';
-        
+
         setTimeout(() => {
             newsContent.style.maxHeight = '0';
-            
+
             setTimeout(() => {
                 newsContent.classList.add('collapse');
                 newsContent.style.maxHeight = '';
                 newsContent.style.overflow = '';
             }, 500);
         }, 10);
-        
-        toggleButton.innerHTML = '<i class="fas fa-newspaper"></i> 顯示新聞內容';
+
+        // 安全地更新按鈕內容
+        while (toggleButton.firstChild) {
+            toggleButton.removeChild(toggleButton.firstChild);
+        }
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-newspaper';
+        toggleButton.appendChild(icon);
+        toggleButton.appendChild(document.createTextNode(' 顯示新聞內容'));
     }
 
     // 處理滑桿變化
