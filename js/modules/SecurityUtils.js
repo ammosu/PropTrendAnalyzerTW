@@ -1,5 +1,16 @@
-// SecurityUtils.js - 安全性工具模組
+/**
+ * SecurityUtils.js - 安全性工具模組
+ *
+ * 提供 XSS 防護、HTML 清理、內容安全策略等安全功能
+ *
+ * @class SecurityUtils
+ * @description 安全工具集，防範常見的 Web 安全威脅
+ */
 class SecurityUtils {
+    /**
+     * 建立 SecurityUtils 實例
+     * @constructor
+     */
     constructor() {
         this.ALLOWED_HTML_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote'];
         this.ALLOWED_PROTOCOLS = ['http:', 'https:', 'data:'];

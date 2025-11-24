@@ -1,5 +1,16 @@
-// ErrorHandler.js - 統一錯誤處理機制
+/**
+ * ErrorHandler.js - 統一錯誤處理機制
+ *
+ * 集中管理應用程式錯誤，提供錯誤記錄、報告與處理功能
+ *
+ * @class ErrorHandler
+ * @description 全域錯誤處理器，支援錯誤隊列與批量報告
+ */
 class ErrorHandler {
+    /**
+     * 建立 ErrorHandler 實例
+     * @constructor
+     */
     constructor() {
         this.errorQueue = [];
         this.isReporting = false;

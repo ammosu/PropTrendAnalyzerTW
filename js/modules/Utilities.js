@@ -1,5 +1,16 @@
-// Utilities.js - 工具函數模組
+/**
+ * Utilities.js - 工具函數模組
+ *
+ * 提供通用的工具函數，包含防抖/節流、日期處理、字串處理、顏色轉換等
+ *
+ * @class Utilities
+ * @description 全域工具函數集合，採用單例模式
+ */
 class Utilities {
+    /**
+     * 建立 Utilities 實例
+     * @constructor
+     */
     constructor() {}
 
     // 防抖動函數 - 優化性能

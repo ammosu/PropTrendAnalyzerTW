@@ -1,5 +1,17 @@
-// UIComponents.js - UI 元件模組
+/**
+ * UIComponents.js - UI 元件模組
+ *
+ * 負責所有 UI 渲染與更新，包含文章列表、分頁、載入動畫等
+ *
+ * @class UIComponents
+ * @description UI 渲染層，處理 DOM 操作與畫面更新
+ */
 class UIComponents {
+    /**
+     * 建立 UIComponents 實例
+     * @constructor
+     * @param {StateManager} stateManager - 狀態管理器實例
+     */
     constructor(stateManager) {
         this.stateManager = stateManager;
         this.securityUtils = window.SecurityUtils;

@@ -1,5 +1,18 @@
-// ChartManager.js - 圖表管理模組
+/**
+ * ChartManager.js - 圖表管理模組
+ *
+ * 使用 Chart.js 管理所有圖表渲染，包含關鍵詞趨勢圖與市場趨勢圖
+ *
+ * @class ChartManager
+ * @description 圖表渲染與管理，支援動態切換圖表類型
+ */
 class ChartManager {
+    /**
+     * 建立 ChartManager 實例
+     * @constructor
+     * @param {StateManager} stateManager - 狀態管理器實例
+     * @param {UIComponents} uiComponents - UI 元件實例
+     */
     constructor(stateManager, uiComponents) {
         this.stateManager = stateManager;
         this.uiComponents = uiComponents;

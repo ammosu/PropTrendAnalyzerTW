@@ -1,5 +1,17 @@
-// CacheManager.js - 快取管理模組
+/**
+ * CacheManager.js - 快取管理模組
+ *
+ * 採用 LRU (Least Recently Used) 策略管理快取，支援 TTL (Time To Live) 過期機制
+ *
+ * @class CacheManager
+ * @description 管理應用程式快取，提升篩選與查詢效能
+ */
 class CacheManager {
+    /**
+     * 建立 CacheManager 實例
+     * @constructor
+     * @param {number} [maxSize=50] - 最大快取容量
+     */
     constructor(maxSize = 50) {
         this.maxSize = maxSize;
         this.cache = new Map();

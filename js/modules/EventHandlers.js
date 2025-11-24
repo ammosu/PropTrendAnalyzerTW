@@ -1,5 +1,20 @@
-// EventHandlers.js - 事件處理模組
+/**
+ * EventHandlers.js - 事件處理模組
+ *
+ * 統一管理所有使用者互動事件，包含篩選、分頁、圖表切換等
+ *
+ * @class EventHandlers
+ * @description 事件處理層，連接 UI 互動與業務邏輯
+ */
 class EventHandlers {
+    /**
+     * 建立 EventHandlers 實例
+     * @constructor
+     * @param {StateManager} stateManager - 狀態管理器實例
+     * @param {UIComponents} uiComponents - UI 元件實例
+     * @param {ChartManager} chartManager - 圖表管理器實例
+     * @param {Utilities} utilities - 工具函數實例
+     */
     constructor(stateManager, uiComponents, chartManager, utilities) {
         this.stateManager = stateManager;
         this.uiComponents = uiComponents;
