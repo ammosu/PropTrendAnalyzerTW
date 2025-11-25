@@ -220,29 +220,35 @@ class App {
         // 初始化過濾後的文章資料
         this.stateManager.setFilteredArticles(articlesData);
         
+        // 顯示所有資料相關區塊
+        this.showDataDependentSections();
+
         // 渲染頁面元素
         setTimeout(() => {
             // 直接設定初始的過濾資料，避免空篩選
             this.stateManager.setFilteredArticles([...articlesData]);
-            
+
             this.uiComponents.renderArticles(1);
             this.uiComponents.renderPagination();
-            
+
             // 初始化月份滑桿
             this.eventHandlers.initializeMonthSlider();
-            
+
             // 初始化預期趨勢圖表
             this.chartManager.renderExpectedTrendChart();
-            
+
             // 隱藏載入動畫
             this.uiComponents.hideLoading();
-            
+
             console.log('頁面初始化完成');
         }, 500);
     }
 
     // 顯示空狀態
     showEmptyState() {
+        // 隱藏所有資料相關的區塊
+        this.hideDataDependentSections();
+
         const articlesContainer = document.getElementById('articles');
         if (articlesContainer) {
             articlesContainer.innerHTML = `
@@ -255,6 +261,29 @@ class App {
                 </div>
             `;
         }
+    }
+
+    // 隱藏所有資料相關的區塊
+    hideDataDependentSections() {
+        const sections = document.querySelectorAll('.data-dependent-section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
+        console.log('已隱藏所有資料相關區塊');
+    }
+
+    // 顯示所有資料相關的區塊
+    showDataDependentSections() {
+        const sections = document.querySelectorAll('.data-dependent-section');
+        sections.forEach(section => {
+            // 特殊處理：expectedTrendContainer 預設不顯示（由頁籤切換控制）
+            if (section.id === 'expectedTrendContainer') {
+                return; // 保持隱藏狀態
+            }
+            // 使用 block 來顯示區塊元素
+            section.style.display = 'block';
+        });
+        console.log('已顯示所有資料相關區塊（保持圖表頁籤切換邏輯）');
     }
 
     // 初始化篩選器

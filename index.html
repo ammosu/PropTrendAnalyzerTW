@@ -66,7 +66,7 @@
             </div>
         </section>
         
-        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s" role="search" aria-labelledby="filter-heading">
+        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
             <h5 id="filter-heading" class="mb-3"><i class="fas fa-filter" aria-hidden="true"></i> 篩選選項</h5>
             <div class="form-row">
                 <div class="col-md-3">
@@ -135,10 +135,10 @@
             </div>
         </section>
 
-        <div class="section-divider"></div>
-        
+        <div class="section-divider data-dependent-section" style="display: none;"></div>
+
         <!-- 圖表切換按鈕 -->
-        <section class="text-center mb-4 animate__animated animate__fadeIn animate__delay-2s" aria-labelledby="chart-heading">
+        <section id="chart-toggle-section" class="text-center mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" aria-labelledby="chart-heading" style="display: none;">
             <h4 id="chart-heading" class="mb-3"><i class="fas fa-chart-line" aria-hidden="true"></i> 數據分析視圖</h4>
             <div class="btn-group shadow-sm" role="group" aria-label="圖表類型切換">
                 <button id="showKeywordTrend" class="btn btn-primary" aria-label="顯示關鍵詞趨勢分析圖表" aria-pressed="true">
@@ -152,7 +152,7 @@
 
 
         <!-- 關鍵詞趨勢分析圖表容器 -->
-        <section id="keywordTrendContainer" class="animate__animated animate__fadeIn" role="region" aria-labelledby="keyword-trend-title">
+        <section id="keywordTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-trend-title" style="display: none;">
             <h2 id="keyword-trend-title"><i class="fas fa-chart-bar" aria-hidden="true"></i> 關鍵詞趨勢分析</h2>
             <div class="text-center mb-3">
                 <label for="month-slider" class="form-label">選擇月份以查看趨勢變化：</label>
@@ -172,7 +172,7 @@
         </section>
 
         <!-- 每月預期市場趨勢分佈圖表容器 -->
-        <section id="expectedTrendContainer" style="display: none;" class="animate__animated animate__fadeIn" role="region" aria-labelledby="expected-trend-title">
+        <section id="expectedTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="expected-trend-title" style="display: none;">
             <h2 id="expected-trend-title"><i class="fas fa-chart-pie" aria-hidden="true"></i> 每月預期市場趨勢分佈</h2>
             <div class="chart-container">
                 <canvas id="expectedTrendChart" width="600" height="400" role="img" aria-label="每月預期市場趨勢分佈圖表"></canvas>
@@ -187,9 +187,9 @@
             </div>
         </section>
 
-        <div class="section-divider"></div>
+        <div class="section-divider data-dependent-section" style="display: none;"></div>
 
-        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容">
+        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s data-dependent-section" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容" style="display: none;">
             <i class="fas fa-newspaper" aria-hidden="true"></i> 顯示/隱藏新聞內容
         </button>
 
