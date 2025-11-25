@@ -130,7 +130,7 @@ async function hasArticlesInDB() {
         const articles = await getArticlesFromDB();
         return articles && articles.length > 0;
     } catch (error) {
-        console.error('檢查資料庫錯誤:', error);
+        // 資料庫尚未初始化是正常情況，靜默處理
         return false;
     }
 }

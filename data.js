@@ -33,7 +33,8 @@ async function loadArticlesData() {
           return;
         }
       } catch (dbError) {
-        console.warn('從IndexedDB載入資料失敗:', dbError);
+        // IndexedDB 可能尚未初始化，這是正常情況
+        // 靜默處理，不顯示錯誤訊息
       }
     }
     
@@ -64,8 +65,8 @@ async function loadArticlesData() {
       
       console.log(`成功載入 ${articlesData.length} 篇文章`);
     } catch (fetchError) {
-      console.warn('無法從預設位置載入資料:', fetchError);
-      
+      // 沒有預設資料是正常情況，不顯示錯誤訊息
+
       // 如果沒有預設資料，顯示上傳提示
       const uploadStatus = document.getElementById('upload-status');
       if (uploadStatus) {

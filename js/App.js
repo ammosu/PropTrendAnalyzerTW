@@ -192,7 +192,7 @@ class App {
     // 初始化頁面
     initializePage() {
         if (!this.isInitialized) {
-            console.log('應用程式尚未初始化，延遲頁面初始化');
+            // 靜默等待初始化完成
             setTimeout(() => this.initializePage(), 100);
             return;
         }

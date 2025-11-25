@@ -18,7 +18,7 @@ app.use((req, res, next) => {
         "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
         "img-src 'self' data: blob: https:; " +
         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
-        "connect-src 'self'; " +
+        "connect-src 'self' https://stackpath.bootstrapcdn.com https://cdn.jsdelivr.net; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +
         "base-uri 'self'; " +
