@@ -1167,6 +1167,188 @@ canvas#trend, canvas#expectedTrendChart {
     color: #8e44ad;
 }
 
+/* 檢視模式切換按鈕樣式 */
+.btn-group .btn.active {
+    background-color: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+.btn-group .btn:hover {
+    background-color: #e9ecef;
+}
+
+.btn-group .btn.active:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+/* 列表檢視樣式 */
+.articles-list-view {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    margin: 0 auto;
+}
+
+.list-view-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.list-view-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.list-view-table th {
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+}
+
+.list-view-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.list-view-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.list-view-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.list-view-table td {
+    padding: 0.85rem 0.75rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.list-view-title {
+    font-weight: 600;
+    color: #2c3e50;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.list-view-publisher {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #667eea;
+    font-weight: 500;
+}
+
+.list-view-date {
+    color: #7f8c8d;
+    font-size: 0.85rem;
+}
+
+.list-view-trend {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.list-view-trend.trend-up {
+    background: rgba(46, 204, 113, 0.1);
+    color: #27ae60;
+}
+
+.list-view-trend.trend-down {
+    background: rgba(231, 76, 60, 0.1);
+    color: #c0392b;
+}
+
+.list-view-trend.trend-stable {
+    background: rgba(52, 152, 219, 0.1);
+    color: #2980b9;
+}
+
+.list-view-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    max-width: 200px;
+}
+
+.list-view-keyword {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.list-view-action-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.list-view-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* 快速日期篩選按鈕樣式 */
+.quick-date-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quick-date-btn {
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1.5px solid #dee2e6;
+    background: white;
+    color: #495057;
+}
+
+.quick-date-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.quick-date-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.quick-date-btn:active {
+    transform: translateY(0);
+}
+
+.quick-date-btn i {
+    font-size: 0.9rem;
+}
+
 /* 篩選標籤樣式 */
 #active-filters-tags {
     display: flex;

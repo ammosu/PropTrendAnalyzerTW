@@ -122,6 +122,17 @@ class UIComponents {
 
     // 渲染文章列表
     renderArticles(page) {
+        const viewMode = this.stateManager.getState('viewMode');
+
+        if (viewMode === 'list') {
+            this.renderArticlesList(page);
+        } else {
+            this.renderArticlesCards(page);
+        }
+    }
+
+    // 渲染文章卡片檢視
+    renderArticlesCards(page) {
         this.showLoading('正在載入文章...');
 
         // 更新載入狀態
@@ -169,6 +180,154 @@ class UIComponents {
             }
             this.hideLoading();
         }, 500);
+    }
+
+    // 渲染文章列表檢視
+    renderArticlesList(page) {
+        this.showLoading('正在載入文章...');
+
+        const articlesPerPage = this.stateManager.getState('articlesPerPage');
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+
+        const start = (page - 1) * articlesPerPage;
+        const end = start + articlesPerPage;
+        const currentArticles = filteredArticlesData.slice(start, end);
+        const articlesContainer = document.getElementById('articles');
+
+        // 安全地清空容器
+        while (articlesContainer.firstChild) {
+            articlesContainer.removeChild(articlesContainer.firstChild);
+        }
+
+        if (currentArticles.length === 0) {
+            const noArticlesMessage = this.createNoArticlesMessage();
+            articlesContainer.appendChild(noArticlesMessage);
+            this.hideLoading();
+            return;
+        }
+
+        // 創建列表檢視容器
+        const listViewContainer = this.securityUtils.createSafeElement('div', { class: 'articles-list-view' });
+        const table = this.securityUtils.createSafeElement('table', { class: 'list-view-table' });
+
+        // 表頭
+        const thead = this.securityUtils.createSafeElement('thead');
+        const headerRow = this.securityUtils.createSafeElement('tr');
+
+        const headers = ['標題', '媒體', '日期', '預期趨勢', '關鍵詞', '操作'];
+        headers.forEach(headerText => {
+            const th = this.securityUtils.createSafeElement('th', {}, headerText);
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // 表格內容
+        const tbody = this.securityUtils.createSafeElement('tbody');
+
+        currentArticles.forEach(article => {
+            const row = this.createListViewRow(article);
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        listViewContainer.appendChild(table);
+        articlesContainer.appendChild(listViewContainer);
+
+        setTimeout(() => {
+            this.hideLoading();
+        }, 300);
+    }
+
+    // 創建列表檢視的行
+    createListViewRow(article) {
+        const row = this.securityUtils.createSafeElement('tr');
+
+        // 標題
+        const titleCell = this.securityUtils.createSafeElement('td');
+        const titleDiv = this.securityUtils.createSafeElement('div', {
+            class: 'list-view-title',
+            title: article.title
+        }, article.title || '');
+        titleCell.appendChild(titleDiv);
+        row.appendChild(titleCell);
+
+        // 媒體
+        const publisherCell = this.securityUtils.createSafeElement('td');
+        const publisherSpan = this.securityUtils.createSafeElement('span', {
+            class: 'list-view-publisher'
+        }, article.publisher || '');
+        publisherCell.appendChild(publisherSpan);
+        row.appendChild(publisherCell);
+
+        // 日期
+        const dateCell = this.securityUtils.createSafeElement('td');
+        const dateSpan = this.securityUtils.createSafeElement('span', {
+            class: 'list-view-date'
+        }, this.formatDate(article.date));
+        dateCell.appendChild(dateSpan);
+        row.appendChild(dateCell);
+
+        // 預期趨勢
+        const trendCell = this.securityUtils.createSafeElement('td');
+        if (article.expectedMarketTrend) {
+            const trendClass = this.getTrendClass(article.expectedMarketTrend);
+            const trendSpan = this.securityUtils.createSafeElement('span', {
+                class: `list-view-trend ${trendClass}`
+            }, article.expectedMarketTrend);
+            trendCell.appendChild(trendSpan);
+        }
+        row.appendChild(trendCell);
+
+        // 關鍵詞
+        const keywordsCell = this.securityUtils.createSafeElement('td');
+        if (article.keywords && article.keywords.length > 0) {
+            const keywordsDiv = this.securityUtils.createSafeElement('div', { class: 'list-view-keywords' });
+            article.keywords.slice(0, 3).forEach(keyword => {
+                const keywordSpan = this.securityUtils.createSafeElement('span', {
+                    class: 'list-view-keyword'
+                }, keyword);
+                keywordsDiv.appendChild(keywordSpan);
+            });
+            if (article.keywords.length > 3) {
+                const moreSpan = this.securityUtils.createSafeElement('span', {
+                    class: 'list-view-keyword'
+                }, `+${article.keywords.length - 3}`);
+                keywordsDiv.appendChild(moreSpan);
+            }
+            keywordsCell.appendChild(keywordsDiv);
+        }
+        row.appendChild(keywordsCell);
+
+        // 操作
+        const actionCell = this.securityUtils.createSafeElement('td');
+        const viewBtn = this.securityUtils.createSafeElement('button', {
+            class: 'btn btn-primary btn-sm list-view-action-btn',
+            type: 'button'
+        });
+        const icon = this.securityUtils.createSafeElement('i', { class: 'fas fa-eye' });
+        viewBtn.appendChild(icon);
+        viewBtn.appendChild(document.createTextNode(' 查看'));
+
+        viewBtn.addEventListener('click', () => {
+            if (window.UIManager && window.UIManager.showArticleDetails) {
+                window.UIManager.showArticleDetails(article.id);
+            }
+        });
+
+        actionCell.appendChild(viewBtn);
+        row.appendChild(actionCell);
+
+        return row;
+    }
+
+    // 取得趨勢的 CSS class
+    getTrendClass(trend) {
+        if (trend === '上漲') return 'trend-up';
+        if (trend === '下跌') return 'trend-down';
+        if (trend === '平穩') return 'trend-stable';
+        return '';
     }
 
     // 創建文章卡片

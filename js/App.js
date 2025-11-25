@@ -69,6 +69,9 @@ class App {
         this.stateManager = window.StateManager;
         this.utilities = window.Utilities;
 
+        // 從 localStorage 載入檢視模式偏好
+        this.loadViewModePreference();
+
         // 初始化無障礙性管理器
         this.accessibilityManager = new AccessibilityManager(this.stateManager);
 
@@ -87,6 +90,19 @@ class App {
         this.eventHandlers.setAccessibilityManager(this.accessibilityManager);
 
         console.log('所有模組初始化完成（包含無障礙性管理器）');
+    }
+
+    // 載入檢視模式偏好
+    loadViewModePreference() {
+        try {
+            const savedViewMode = localStorage.getItem('viewMode');
+            if (savedViewMode === 'card' || savedViewMode === 'list') {
+                this.stateManager.state.viewMode = savedViewMode;
+                console.log(`載入檢視模式偏好: ${savedViewMode}`);
+            }
+        } catch (e) {
+            console.warn('無法載入檢視模式偏好:', e);
+        }
     }
 
     // 設定全域引用供向後相容
@@ -483,6 +499,26 @@ class App {
             document.querySelectorAll('.media-filter').forEach(checkbox => {
                 checkbox.addEventListener('change', () => this.eventHandlers.filterArticles());
             });
+        }
+
+        // 同步檢視模式按鈕狀態
+        this.syncViewModeButtons();
+    }
+
+    // 同步檢視模式按鈕狀態
+    syncViewModeButtons() {
+        const viewMode = this.stateManager.getState('viewMode');
+        const cardViewBtn = document.getElementById('view-mode-card');
+        const listViewBtn = document.getElementById('view-mode-list');
+
+        if (cardViewBtn && listViewBtn) {
+            if (viewMode === 'list') {
+                cardViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+            } else {
+                cardViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+            }
         }
     }
 

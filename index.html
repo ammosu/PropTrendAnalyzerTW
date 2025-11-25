@@ -134,7 +134,8 @@
                     <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 1rem;">
                         <i class="fas fa-list"></i> 共 <span id="filtered-count">0</span> 篇文章
                     </div>
-                    <div>
+                    <div class="d-flex align-items-center">
+                        <!-- 匯出按鈕 -->
                         <button id="export-csv-btn" class="btn btn-sm btn-outline-primary mr-2" title="匯出為 CSV">
                             <i class="fas fa-file-csv"></i> 匯出 CSV
                         </button>
@@ -156,6 +157,29 @@
                     <label for="end-date"><i class="far fa-calendar-alt" aria-hidden="true"></i> 結束日期：</label>
                     <input type="date" id="end-date" class="form-control" aria-label="選擇篩選結束日期">
                 </div>
+                <div class="col-md-6">
+                    <label class="d-block"><i class="fas fa-bolt" aria-hidden="true"></i> 快速選擇：</label>
+                    <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Month" title="最近1個月">
+                            最近1個月
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last3Months" title="最近3個月">
+                            最近3個月
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last6Months" title="最近6個月">
+                            最近6個月
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Year" title="最近1年">
+                            最近1年
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="all" title="全部時間">
+                            <i class="fas fa-infinity"></i> 全部
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row mt-3">
                 <div class="col-md-3">
                     <label for="keyword-filter"><i class="fas fa-search" aria-hidden="true"></i> 關鍵字：</label>
                     <div class="input-group">
@@ -274,7 +298,19 @@
 
         <div id="news-content" class="collapse">
             <main id="main-content" role="main">
-                <h2 id="articles-heading" class="mb-3 text-center"><i class="fas fa-list-alt" aria-hidden="true"></i> 新聞列表</h2>
+                <!-- 新聞列表標題與檢視模式切換 -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 id="articles-heading" class="mb-0"><i class="fas fa-list-alt" aria-hidden="true"></i> 新聞列表</h2>
+                    <!-- 檢視模式切換按鈕 -->
+                    <div class="btn-group" role="group" aria-label="檢視模式切換">
+                        <button id="view-mode-card" class="btn btn-sm btn-outline-primary active" title="卡片檢視" aria-label="切換為卡片檢視">
+                            <i class="fas fa-th-large"></i> 卡片
+                        </button>
+                        <button id="view-mode-list" class="btn btn-sm btn-outline-primary" title="列表檢視" aria-label="切換為列表檢視">
+                            <i class="fas fa-list"></i> 列表
+                        </button>
+                    </div>
+                </div>
                 <div id="articles" class="row" role="feed" aria-labelledby="articles-heading" aria-busy="false"></div>
 
                 <nav aria-label="頁面跳轉" id="pagination-options" class="mb-4 mt-4">

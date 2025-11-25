@@ -37,7 +37,8 @@ class StateManager {
             expectedTrendChart: null,
             currentChartType: constants.STATE.DEFAULT_CHART_TYPE,
             chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
-            savedMonthSliderState: null
+            savedMonthSliderState: null,
+            viewMode: 'card' // 'card' 或 'list'
         };
 
         /**
@@ -170,6 +171,23 @@ class StateManager {
     }
 
     /**
+     * 設定檢視模式
+     * @param {string} mode - 檢視模式 ('card' | 'list')
+     * @description 切換文章顯示為卡片檢視或列表檢視
+     */
+    setViewMode(mode) {
+        if (mode === 'card' || mode === 'list') {
+            this.updateState('viewMode', mode);
+            // 儲存到 localStorage
+            try {
+                localStorage.setItem('viewMode', mode);
+            } catch (e) {
+                console.warn('無法儲存檢視模式偏好:', e);
+            }
+        }
+    }
+
+    /**
      * 重置所有狀態為初始值
      * @description 清空所有文章資料、圖表實例，恢復預設設定
      */
@@ -183,7 +201,8 @@ class StateManager {
             expectedTrendChart: null,
             currentChartType: 'bar',
             chartAnimationDuration: 800,
-            savedMonthSliderState: null
+            savedMonthSliderState: null,
+            viewMode: 'card'
         };
         this.notify('reset', this.state, null);
     }

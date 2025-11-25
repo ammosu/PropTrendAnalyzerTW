@@ -39,6 +39,8 @@ class EventHandlers {
     // 初始化所有事件監聽器
     initializeEventListeners() {
         this.initializeFilterEvents();
+        this.initializeQuickDateFilters();
+        this.initializeViewModeToggle();
         this.initializeNavigationEvents();
         this.initializeChartEvents();
         this.initializeContentToggleEvents();
@@ -68,10 +70,16 @@ class EventHandlers {
         const sortOptionsEl = document.getElementById('sort-options');
 
         if (startDateEl) {
-            startDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DATE_FILTER_DEBOUNCE));
+            startDateEl.addEventListener('change', this.utilities.debounce(() => {
+                this.clearQuickDateSelection();
+                this.filterArticles();
+            }, this.constants.UI.DATE_FILTER_DEBOUNCE));
         }
         if (endDateEl) {
-            endDateEl.addEventListener('change', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DATE_FILTER_DEBOUNCE));
+            endDateEl.addEventListener('change', this.utilities.debounce(() => {
+                this.clearQuickDateSelection();
+                this.filterArticles();
+            }, this.constants.UI.DATE_FILTER_DEBOUNCE));
         }
         if (keywordFilterEl) {
             keywordFilterEl.addEventListener('input', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DEBOUNCE_DELAY));
@@ -84,6 +92,144 @@ class EventHandlers {
         document.querySelectorAll('.media-filter').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.filterArticles());
         });
+    }
+
+    // 初始化快速日期篩選
+    initializeQuickDateFilters() {
+        const quickDateButtons = document.querySelectorAll('.quick-date-btn');
+
+        quickDateButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const range = button.dataset.range;
+                this.applyQuickDateFilter(range);
+
+                // 更新按鈕選中狀態
+                quickDateButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    }
+
+    // 應用快速日期篩選
+    applyQuickDateFilter(range) {
+        const startDateEl = document.getElementById('start-date');
+        const endDateEl = document.getElementById('end-date');
+
+        if (!startDateEl || !endDateEl) return;
+
+        const today = new Date();
+        const dateRange = this.calculateDateRange(range, today);
+
+        if (dateRange) {
+            startDateEl.value = dateRange.start;
+            endDateEl.value = dateRange.end;
+        } else {
+            // "全部" 選項 - 清空日期
+            startDateEl.value = '';
+            endDateEl.value = '';
+        }
+
+        // 觸發篩選
+        this.filterArticles();
+    }
+
+    // 計算日期範圍
+    calculateDateRange(range, today) {
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        const endDate = formatDate(today);
+        let startDate;
+
+        switch (range) {
+            case 'last1Month':
+                // 最近1個月
+                const last1Month = new Date(today);
+                last1Month.setMonth(today.getMonth() - 1);
+                startDate = formatDate(last1Month);
+                break;
+
+            case 'last3Months':
+                // 最近3個月
+                const last3Months = new Date(today);
+                last3Months.setMonth(today.getMonth() - 3);
+                startDate = formatDate(last3Months);
+                break;
+
+            case 'last6Months':
+                // 最近6個月
+                const last6Months = new Date(today);
+                last6Months.setMonth(today.getMonth() - 6);
+                startDate = formatDate(last6Months);
+                break;
+
+            case 'last1Year':
+                // 最近1年
+                const last1Year = new Date(today);
+                last1Year.setFullYear(today.getFullYear() - 1);
+                startDate = formatDate(last1Year);
+                break;
+
+            case 'all':
+                // 全部 - 返回 null 表示清空
+                return null;
+
+            default:
+                return null;
+        }
+
+        return { start: startDate, end: endDate };
+    }
+
+    // 清除快速日期選擇狀態
+    clearQuickDateSelection() {
+        document.querySelectorAll('.quick-date-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+    }
+
+    // 初始化檢視模式切換
+    initializeViewModeToggle() {
+        const cardViewBtn = document.getElementById('view-mode-card');
+        const listViewBtn = document.getElementById('view-mode-list');
+
+        if (cardViewBtn) {
+            cardViewBtn.addEventListener('click', () => {
+                this.switchViewMode('card');
+            });
+        }
+
+        if (listViewBtn) {
+            listViewBtn.addEventListener('click', () => {
+                this.switchViewMode('list');
+            });
+        }
+    }
+
+    // 切換檢視模式
+    switchViewMode(mode) {
+        const cardViewBtn = document.getElementById('view-mode-card');
+        const listViewBtn = document.getElementById('view-mode-list');
+
+        // 更新按鈕狀態
+        if (mode === 'card') {
+            cardViewBtn?.classList.add('active');
+            listViewBtn?.classList.remove('active');
+        } else {
+            listViewBtn?.classList.add('active');
+            cardViewBtn?.classList.remove('active');
+        }
+
+        // 更新狀態
+        this.stateManager.setViewMode(mode);
+
+        // 重新渲染當前頁面
+        const currentPage = this.stateManager.getState('currentPage');
+        this.uiComponents.renderArticles(currentPage);
     }
 
     // 初始化導航相關事件
