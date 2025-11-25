@@ -23,8 +23,17 @@ class EventHandlers {
         this.cache = window.CacheManager;
         this.constants = window.Constants;
         this.validator = window.Validator;
+        this.accessibilityManager = null;
 
         this.initializeEventListeners();
+    }
+
+    /**
+     * 設定無障礙性管理器
+     * @param {AccessibilityManager} accessibilityManager - 無障礙性管理器實例
+     */
+    setAccessibilityManager(accessibilityManager) {
+        this.accessibilityManager = accessibilityManager;
     }
 
     // 初始化所有事件監聽器
@@ -405,11 +414,16 @@ class EventHandlers {
     updateChartButtons(activeButton, inactiveButtonId) {
         activeButton.classList.add('btn-primary');
         activeButton.classList.remove('btn-secondary');
-        
+
         const inactiveButton = document.getElementById(inactiveButtonId);
         if (inactiveButton) {
             inactiveButton.classList.add('btn-secondary');
             inactiveButton.classList.remove('btn-primary');
+        }
+
+        // 更新 ARIA 屬性
+        if (this.accessibilityManager) {
+            this.accessibilityManager.updateChartButtonsAria(activeButton.id);
         }
     }
 
@@ -503,8 +517,14 @@ class EventHandlers {
         }
         const icon = document.createElement('i');
         icon.className = 'fas fa-times-circle';
+        icon.setAttribute('aria-hidden', 'true');
         toggleButton.appendChild(icon);
         toggleButton.appendChild(document.createTextNode(' 隱藏新聞內容'));
+
+        // 更新 ARIA 屬性
+        if (this.accessibilityManager) {
+            this.accessibilityManager.updateNewsToggleAria(true);
+        }
     }
 
     // 隱藏新聞內容
@@ -529,24 +549,43 @@ class EventHandlers {
         }
         const icon = document.createElement('i');
         icon.className = 'fas fa-newspaper';
+        icon.setAttribute('aria-hidden', 'true');
         toggleButton.appendChild(icon);
         toggleButton.appendChild(document.createTextNode(' 顯示新聞內容'));
+
+        // 更新 ARIA 屬性
+        if (this.accessibilityManager) {
+            this.accessibilityManager.updateNewsToggleAria(false);
+        }
     }
 
     // 處理滑桿變化
     handleSliderChange() {
         const monthSlider = document.getElementById('month-slider');
         const selectedMonthLabel = document.getElementById('selected-month');
-        
+
         if (!monthSlider || !selectedMonthLabel) return;
-        
+
         const filteredData = this.stateManager.getState('filteredArticlesData');
         const articlesData = this.stateManager.getState('articlesData');
         const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
-        
+
         if (months && months.length > monthSlider.value) {
-            selectedMonthLabel.textContent = months[monthSlider.value];
-            this.chartManager.renderTrendChart(months[monthSlider.value]);
+            const monthText = months[monthSlider.value];
+            const formattedMonth = this.utilities.formatMonthDisplay(monthText);
+
+            selectedMonthLabel.textContent = formattedMonth;
+            this.chartManager.renderTrendChart(monthText);
+
+            // 更新月份滑動器的 ARIA 屬性
+            if (this.accessibilityManager) {
+                this.accessibilityManager.updateMonthSliderAria(
+                    parseInt(monthSlider.value),
+                    0,
+                    parseInt(monthSlider.max),
+                    formattedMonth
+                );
+            }
         }
     }
 

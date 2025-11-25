@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +16,7 @@
         form-action 'self';
         upgrade-insecure-requests;">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="description" content="台灣房地產市場新聞趨勢分析工具，提供房市新聞摘要與市場預期走向分析">
     <title>房市新聞摘要與趨勢分析</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,9 +25,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 跳過導航連結 -->
+    <a href="#main-content" class="skip-to-main-content sr-only sr-only-focusable">跳到主要內容</a>
+
     <div class="container mt-4">
-        <h1 class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
-        <p class="text-center text-muted mb-4 animate__animated animate__fadeIn animate__delay-1s">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
+        <header role="banner">
+            <h1 id="page-title" class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
+            <p class="text-center text-muted mb-4 animate__animated animate__fadeIn animate__delay-1s">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
+        </header>
         
         <!-- 測試SVG圖片 -->
         <div class="text-center mb-3" id="svg-test" style="display:none;">
@@ -35,51 +41,51 @@
         </div>
         
         <!-- CSV上傳區域 -->
-        <div id="csv-upload-section" class="mb-4 animate__animated animate__fadeIn animate__delay-1s">
+        <section id="csv-upload-section" class="mb-4 animate__animated animate__fadeIn animate__delay-1s" aria-labelledby="upload-heading">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-file-upload me-2"></i> 上傳CSV資料</h5>
+                    <h5 id="upload-heading" class="mb-0"><i class="fas fa-file-upload me-2" aria-hidden="true"></i> 上傳CSV資料</h5>
                 </div>
                 <div class="card-body">
-                    <form id="csv-upload-form">
+                    <form id="csv-upload-form" aria-label="CSV檔案上傳表單">
                         <div class="form-group">
                             <label for="csv-file" class="font-weight-bold">選擇CSV檔案：</label>
                             <div class="custom-file mb-3">
-                                <input type="file" class="custom-file-input" id="csv-file" accept=".csv">
+                                <input type="file" class="custom-file-input" id="csv-file" accept=".csv" aria-describedby="csv-file-help" aria-required="true">
                                 <label class="custom-file-label" for="csv-file">選擇檔案...</label>
                             </div>
-                            <small class="form-text text-muted"><i class="fas fa-info-circle"></i> 請上傳包含新聞資料的CSV檔案。支援標題、摘要、關鍵詞、日期等欄位。</small>
+                            <small id="csv-file-help" class="form-text text-muted"><i class="fas fa-info-circle" aria-hidden="true"></i> 請上傳包含新聞資料的CSV檔案。支援標題、摘要、關鍵詞、日期等欄位。檔案大小限制為1GB。</small>
                         </div>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-cloud-upload-alt me-1"></i> 上傳並處理</button>
+                        <button type="submit" class="btn btn-primary" aria-label="上傳並處理CSV檔案"><i class="fas fa-cloud-upload-alt me-1" aria-hidden="true"></i> 上傳並處理</button>
                     </form>
-                    <div id="upload-status" class="mt-3"></div>
+                    <div id="upload-status" class="mt-3" role="status" aria-live="polite" aria-atomic="true"></div>
                 </div>
             </div>
-        </div>
+        </section>
         
-        <div id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s">
-            <h5 class="mb-3"><i class="fas fa-filter"></i> 篩選選項</h5>
+        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s" role="search" aria-labelledby="filter-heading">
+            <h5 id="filter-heading" class="mb-3"><i class="fas fa-filter" aria-hidden="true"></i> 篩選選項</h5>
             <div class="form-row">
                 <div class="col-md-3">
-                    <label for="start-date"><i class="far fa-calendar-alt"></i> 起始日期：</label>
-                    <input type="date" id="start-date" class="form-control">
+                    <label for="start-date"><i class="far fa-calendar-alt" aria-hidden="true"></i> 起始日期：</label>
+                    <input type="date" id="start-date" class="form-control" aria-label="選擇篩選起始日期">
                 </div>
                 <div class="col-md-3">
-                    <label for="end-date"><i class="far fa-calendar-alt"></i> 結束日期：</label>
-                    <input type="date" id="end-date" class="form-control">
+                    <label for="end-date"><i class="far fa-calendar-alt" aria-hidden="true"></i> 結束日期：</label>
+                    <input type="date" id="end-date" class="form-control" aria-label="選擇篩選結束日期">
                 </div>
                 <div class="col-md-3">
-                    <label for="keyword-filter"><i class="fas fa-search"></i> 關鍵字：</label>
+                    <label for="keyword-filter"><i class="fas fa-search" aria-hidden="true"></i> 關鍵字：</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <span class="input-group-text" id="keyword-filter-icon"><i class="fas fa-search" aria-hidden="true"></i></span>
                         </div>
-                        <input type="text" id="keyword-filter" class="form-control" placeholder="輸入關鍵字">
+                        <input type="text" id="keyword-filter" class="form-control" placeholder="輸入關鍵字" aria-label="輸入關鍵字進行篩選" aria-describedby="keyword-filter-icon">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="sort-options"><i class="fas fa-sort"></i> 排序依據：</label>
-                    <select id="sort-options" class="form-control">
+                    <label for="sort-options"><i class="fas fa-sort" aria-hidden="true"></i> 排序依據：</label>
+                    <select id="sort-options" class="form-control" aria-label="選擇文章排序方式">
                         <option value="date-desc">時間（最新到最舊）</option>
                         <option value="date-asc">時間（最舊到最新）</option>
                         <option value="title-asc">名稱（A到Z）</option>
@@ -90,129 +96,129 @@
             
             <!-- 折疊區域 -->
             <div class="mb-3 mt-3">
-                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#advanced-filters" aria-expanded="false" aria-controls="advanced-filters">
-                    <i class="fas fa-angle-down me-1"></i> 進階篩選
+                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#advanced-filters" aria-expanded="false" aria-controls="advanced-filters" aria-label="顯示或隱藏進階篩選選項">
+                    <i class="fas fa-angle-down me-1" aria-hidden="true"></i> 進階篩選
                 </button>
             </div>
-
-
 
             <div class="collapse" id="advanced-filters">
                 <div class="form-row">
                     <div class="col-md-12">
-                        <label><i class="fas fa-newspaper"></i> 新聞媒體：</label>
-                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
+                        <label id="media-filter-label"><i class="fas fa-newspaper" aria-hidden="true"></i> 新聞媒體：</label>
+                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
                             <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="中國時報" checked name="media-filter-chinatimes" id="media-filter-chinatimes"> 
-                                <i class="fas fa-check-circle"></i> 中國時報
+                                <input type="checkbox" class="media-filter" value="中國時報" checked name="media-filter-chinatimes" id="media-filter-chinatimes" aria-label="篩選中國時報新聞">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i> 中國時報
                             </label>
                             <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked name="media-filter-united-daily" id="media-filter-united-daily"> 
-                                <i class="fas fa-check-circle"></i> 聯合新聞網
+                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked name="media-filter-united-daily" id="media-filter-united-daily" aria-label="篩選聯合新聞網新聞">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i> 聯合新聞網
                             </label>
                             <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="工商時報" checked name="media-filter-commercial-times" id="media-filter-commercial-times"> 
-                                <i class="fas fa-check-circle"></i> 工商時報
+                                <input type="checkbox" class="media-filter" value="工商時報" checked name="media-filter-commercial-times" id="media-filter-commercial-times" aria-label="篩選工商時報新聞">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i> 工商時報
                             </label>
                             <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="自由時報" checked name="media-filter-liberty-times" id="media-filter-liberty-times"> 
-                                <i class="fas fa-check-circle"></i> 自由時報
+                                <input type="checkbox" class="media-filter" value="自由時報" checked name="media-filter-liberty-times" id="media-filter-liberty-times" aria-label="篩選自由時報新聞">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i> 自由時報
                             </label>
                             <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="風傳媒" checked name="media-filter-storm" id="media-filter-storm"> 
-                                <i class="fas fa-check-circle"></i> 風傳媒
+                                <input type="checkbox" class="media-filter" value="風傳媒" checked name="media-filter-storm" id="media-filter-storm" aria-label="篩選風傳媒新聞">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i> 風傳媒
                             </label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div class="section-divider"></div>
         
         <!-- 圖表切換按鈕 -->
-        <div class="text-center mb-4 animate__animated animate__fadeIn animate__delay-2s">
-            <h4 class="mb-3"><i class="fas fa-chart-line"></i> 數據分析視圖</h4>
-            <div class="btn-group shadow-sm" role="group">
-                <button id="showKeywordTrend" class="btn btn-primary">
-                    <i class="fas fa-chart-bar me-1"></i> 關鍵詞趨勢分析
+        <section class="text-center mb-4 animate__animated animate__fadeIn animate__delay-2s" aria-labelledby="chart-heading">
+            <h4 id="chart-heading" class="mb-3"><i class="fas fa-chart-line" aria-hidden="true"></i> 數據分析視圖</h4>
+            <div class="btn-group shadow-sm" role="group" aria-label="圖表類型切換">
+                <button id="showKeywordTrend" class="btn btn-primary" aria-label="顯示關鍵詞趨勢分析圖表" aria-pressed="true">
+                    <i class="fas fa-chart-bar me-1" aria-hidden="true"></i> 關鍵詞趨勢分析
                 </button>
-                <button id="showExpectedTrend" class="btn btn-secondary">
-                    <i class="fas fa-chart-pie me-1"></i> 每月預期市場趨勢分佈
+                <button id="showExpectedTrend" class="btn btn-secondary" aria-label="顯示每月預期市場趨勢分佈圖表" aria-pressed="false">
+                    <i class="fas fa-chart-pie me-1" aria-hidden="true"></i> 每月預期市場趨勢分佈
                 </button>
             </div>
-        </div>
+        </section>
 
 
         <!-- 關鍵詞趨勢分析圖表容器 -->
-        <div id="keywordTrendContainer" class="animate__animated animate__fadeIn">
-            <h1><i class="fas fa-chart-bar"></i> 關鍵詞趨勢分析</h1>
+        <section id="keywordTrendContainer" class="animate__animated animate__fadeIn" role="region" aria-labelledby="keyword-trend-title">
+            <h2 id="keyword-trend-title"><i class="fas fa-chart-bar" aria-hidden="true"></i> 關鍵詞趨勢分析</h2>
             <div class="text-center mb-3">
                 <label for="month-slider" class="form-label">選擇月份以查看趨勢變化：</label>
-                <div class="d-flex align-items-center justify-content-center">
-                    <button id="prev-month" class="btn btn-secondary"><i class="fas fa-chevron-left"></i></button>
-                    <input type="range" id="month-slider" class="mx-3">
-                    <button id="next-month" class="btn btn-secondary"><i class="fas fa-chevron-right"></i></button>
-                    <span id="selected-month" class="badge"></span>
+                <div class="d-flex align-items-center justify-content-center" role="group" aria-label="月份選擇控制項">
+                    <button id="prev-month" class="btn btn-secondary" aria-label="上一個月"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                    <input type="range" id="month-slider" class="mx-3" aria-label="選擇月份" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" aria-live="polite">
+                    <button id="next-month" class="btn btn-secondary" aria-label="下一個月"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                    <span id="selected-month" class="badge" role="status" aria-live="polite" aria-atomic="true"></span>
                 </div>
             </div>
             <div class="chart-container">
-                <canvas id="trend" width="600" height="400"></canvas>
+                <canvas id="trend" width="600" height="400" role="img" aria-label="關鍵詞出現次數趨勢圖表"></canvas>
             </div>
             <div class="text-muted text-center mt-3">
-                <small><i class="fas fa-info-circle"></i> 此圖表顯示選定月份中出現頻率最高的關鍵詞</small>
+                <small><i class="fas fa-info-circle" aria-hidden="true"></i> 此圖表顯示選定月份中出現頻率最高的關鍵詞</small>
             </div>
-        </div>
+        </section>
 
         <!-- 每月預期市場趨勢分佈圖表容器 -->
-        <div id="expectedTrendContainer" style="display: none;" class="animate__animated animate__fadeIn">
-            <h3><i class="fas fa-chart-pie"></i> 每月預期市場趨勢分佈</h3>
+        <section id="expectedTrendContainer" style="display: none;" class="animate__animated animate__fadeIn" role="region" aria-labelledby="expected-trend-title">
+            <h2 id="expected-trend-title"><i class="fas fa-chart-pie" aria-hidden="true"></i> 每月預期市場趨勢分佈</h2>
             <div class="chart-container">
-                <canvas id="expectedTrendChart" width="600" height="400"></canvas>
+                <canvas id="expectedTrendChart" width="600" height="400" role="img" aria-label="每月預期市場趨勢分佈圖表"></canvas>
             </div>
             <div class="text-center mt-3">
-                <button id="toggleChartType" class="btn btn-primary">
-                    <i class="fas fa-exchange-alt me-1"></i> 切換到折線圖
+                <button id="toggleChartType" class="btn btn-primary" aria-label="切換圖表類型">
+                    <i class="fas fa-exchange-alt me-1" aria-hidden="true"></i> 切換到折線圖
                 </button>
             </div>
             <div class="text-muted text-center mt-3">
-                <small><i class="fas fa-info-circle"></i> 此圖表顯示每月新聞中預期市場趨勢的分佈情況</small>
+                <small><i class="fas fa-info-circle" aria-hidden="true"></i> 此圖表顯示每月新聞中預期市場趨勢的分佈情況</small>
             </div>
-        </div>
+        </section>
 
         <div class="section-divider"></div>
 
-        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s">
-            <i class="fas fa-newspaper"></i> 顯示/隱藏新聞內容
+        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容">
+            <i class="fas fa-newspaper" aria-hidden="true"></i> 顯示/隱藏新聞內容
         </button>
-        
+
         <div id="news-content" class="collapse">
-            <h4 class="mb-3 text-center"><i class="fas fa-list-alt"></i> 新聞列表</h4>
-            <div id="articles" class="row"></div>
-            
-            <div id="pagination-options" class="mb-4 mt-4">
-                <div class="form-row align-items-end">
-                    <div class="col-md-3">
-                        <label for="jump-page"><i class="fas fa-file-alt"></i> 跳轉至頁碼：</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+            <main id="main-content" role="main">
+                <h2 id="articles-heading" class="mb-3 text-center"><i class="fas fa-list-alt" aria-hidden="true"></i> 新聞列表</h2>
+                <div id="articles" class="row" role="feed" aria-labelledby="articles-heading" aria-busy="false"></div>
+
+                <nav aria-label="頁面跳轉" id="pagination-options" class="mb-4 mt-4">
+                    <div class="form-row align-items-end">
+                        <div class="col-md-3">
+                            <label for="jump-page"><i class="fas fa-file-alt" aria-hidden="true"></i> 跳轉至頁碼：</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="jump-page-icon"><i class="fas fa-hashtag" aria-hidden="true"></i></span>
+                                </div>
+                                <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1" aria-label="輸入要跳轉的頁碼" aria-describedby="jump-page-icon">
                             </div>
-                            <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1">
+                        </div>
+                        <div class="col-md-3">
+                            <button id="jump-button" class="btn btn-secondary btn-block" aria-label="跳轉到指定頁碼">
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i> 跳轉
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <button id="jump-button" class="btn btn-secondary btn-block">
-                            <i class="fas fa-arrow-right"></i> 跳轉
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="pagination" id="pagination"></div>
+                </nav>
+
+                <nav class="pagination" id="pagination" aria-label="文章分頁導航"></nav>
+            </main>
         </div>
 
-        <footer class="mt-5 mb-3 text-center text-muted">
+        <footer role="contentinfo" class="mt-5 mb-3 text-center text-muted">
             <p><small>© 2025 房市新聞摘要與趨勢分析 | 資料僅供參考，不構成投資建議</small></p>
         </footer>
     </div>
@@ -230,6 +236,7 @@
     <script src="js/modules/Utilities.js"></script>
     <script src="js/modules/CacheManager.js"></script>
     <script src="js/modules/StateManager.js"></script>
+    <script src="js/modules/AccessibilityManager.js"></script>
     <script src="js/modules/UIComponents.js"></script>
     <script src="js/modules/ChartManager.js"></script>
     <script src="js/modules/EventHandlers.js"></script>

@@ -6,8 +6,9 @@ class App {
         this.chartManager = null;
         this.eventHandlers = null;
         this.utilities = null;
+        this.accessibilityManager = null;
         this.isInitialized = false;
-        
+
         this.initialize();
     }
 
@@ -55,27 +56,37 @@ class App {
     // 初始化所有模組
     initializeModules() {
         // 檢查依賴是否已載入
-        if (typeof StateManager === 'undefined' || 
-            typeof UIComponents === 'undefined' || 
-            typeof ChartManager === 'undefined' || 
-            typeof EventHandlers === 'undefined' || 
-            typeof Utilities === 'undefined') {
+        if (typeof StateManager === 'undefined' ||
+            typeof UIComponents === 'undefined' ||
+            typeof ChartManager === 'undefined' ||
+            typeof EventHandlers === 'undefined' ||
+            typeof Utilities === 'undefined' ||
+            typeof AccessibilityManager === 'undefined') {
             throw new Error('必要的模組尚未載入完成');
         }
 
         // 初始化模組實例
         this.stateManager = window.StateManager;
         this.utilities = window.Utilities;
+
+        // 初始化無障礙性管理器
+        this.accessibilityManager = new AccessibilityManager(this.stateManager);
+
+        // 初始化 UI 元件和圖表管理器
         this.uiComponents = new UIComponents(this.stateManager);
         this.chartManager = new ChartManager(this.stateManager, this.uiComponents);
         this.eventHandlers = new EventHandlers(
-            this.stateManager, 
-            this.uiComponents, 
-            this.chartManager, 
+            this.stateManager,
+            this.uiComponents,
+            this.chartManager,
             this.utilities
         );
 
-        console.log('所有模組初始化完成');
+        // 將無障礙性管理器設定到需要的模組
+        this.uiComponents.setAccessibilityManager(this.accessibilityManager);
+        this.eventHandlers.setAccessibilityManager(this.accessibilityManager);
+
+        console.log('所有模組初始化完成（包含無障礙性管理器）');
     }
 
     // 設定全域引用供向後相容

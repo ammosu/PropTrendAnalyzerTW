@@ -17,18 +17,37 @@ class UIComponents {
         this.securityUtils = window.SecurityUtils;
         this.utilities = window.Utilities;
         this.constants = window.Constants;
+        this.accessibilityManager = null;
+    }
+
+    /**
+     * 設定無障礙性管理器
+     * @param {AccessibilityManager} accessibilityManager - 無障礙性管理器實例
+     */
+    setAccessibilityManager(accessibilityManager) {
+        this.accessibilityManager = accessibilityManager;
     }
 
     // 顯示載入動畫
     showLoading(message = '載入中...') {
         if (document.getElementById('loading-overlay')) {
-            document.getElementById('loading-message').textContent = message;
-            document.getElementById('loading-overlay').style.display = 'flex';
+            const overlay = document.getElementById('loading-overlay');
+            const messageEl = document.getElementById('loading-message');
+            messageEl.textContent = message;
+            overlay.style.display = 'flex';
+
+            // 向螢幕閱讀器宣告
+            if (this.accessibilityManager) {
+                this.accessibilityManager.announceToScreenReader(message);
+            }
             return;
         }
-        
+
         const loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'loading-overlay';
+        loadingOverlay.setAttribute('role', 'alert');
+        loadingOverlay.setAttribute('aria-live', 'assertive');
+        loadingOverlay.setAttribute('aria-busy', 'true');
         loadingOverlay.style.cssText = `
             position: fixed;
             top: 0;
@@ -42,9 +61,10 @@ class UIComponents {
             z-index: 9999;
             flex-direction: column;
         `;
-        
+
         const spinner = document.createElement('div');
         spinner.className = 'spinner';
+        spinner.setAttribute('aria-hidden', 'true');
         spinner.style.cssText = `
             border: 4px solid rgba(0, 0, 0, 0.1);
             width: 36px;
@@ -54,7 +74,7 @@ class UIComponents {
             animation: spin 1s linear infinite;
             margin-bottom: 10px;
         `;
-        
+
         const loadingMessage = document.createElement('div');
         loadingMessage.id = 'loading-message';
         loadingMessage.textContent = message;
@@ -62,7 +82,7 @@ class UIComponents {
             color: #3498db;
             font-weight: bold;
         `;
-        
+
         const style = document.createElement('style');
         style.textContent = `
             @keyframes spin {
@@ -70,36 +90,53 @@ class UIComponents {
                 100% { transform: rotate(360deg); }
             }
         `;
-        
+
         document.head.appendChild(style);
         loadingOverlay.appendChild(spinner);
         loadingOverlay.appendChild(loadingMessage);
         document.body.appendChild(loadingOverlay);
+
+        // 向螢幕閱讀器宣告
+        if (this.accessibilityManager) {
+            this.accessibilityManager.announceToScreenReader(message, 'assertive');
+        }
     }
 
     // 隱藏載入動畫
     hideLoading() {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
+            loadingOverlay.setAttribute('aria-busy', 'false');
             loadingOverlay.style.opacity = '0';
             loadingOverlay.style.transition = 'opacity 0.5s';
             setTimeout(() => {
                 loadingOverlay.style.display = 'none';
             }, 500);
+
+            // 向螢幕閱讀器宣告完成
+            if (this.accessibilityManager) {
+                this.accessibilityManager.announceToScreenReader('載入完成');
+            }
         }
     }
 
     // 渲染文章列表
     renderArticles(page) {
         this.showLoading('正在載入文章...');
-        
+
+        // 更新載入狀態
+        if (this.accessibilityManager) {
+            this.accessibilityManager.updateArticlesLoadingState(true);
+        }
+
         const articlesPerPage = this.stateManager.getState('articlesPerPage');
         const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
-        
+
         const start = (page - 1) * articlesPerPage;
         const end = start + articlesPerPage;
         const currentArticles = filteredArticlesData.slice(start, end);
         const articlesContainer = document.getElementById('articles');
+
         // 安全地清空容器
         while (articlesContainer.firstChild) {
             articlesContainer.removeChild(articlesContainer.firstChild);
@@ -108,35 +145,48 @@ class UIComponents {
         if (currentArticles.length === 0) {
             const noArticlesMessage = this.createNoArticlesMessage();
             articlesContainer.appendChild(noArticlesMessage);
+
+            if (this.accessibilityManager) {
+                this.accessibilityManager.updateArticlesLoadingState(false);
+            }
             this.hideLoading();
             return;
         }
 
         const fragment = document.createDocumentFragment();
-        
+
         currentArticles.forEach((article, index) => {
             const articleCard = this.createArticleCard(article, index);
             fragment.appendChild(articleCard);
         });
-        
+
         articlesContainer.appendChild(fragment);
-        setTimeout(() => this.hideLoading(), 500);
+
+        // 更新載入完成狀態
+        setTimeout(() => {
+            if (this.accessibilityManager) {
+                this.accessibilityManager.updateArticlesLoadingState(false);
+            }
+            this.hideLoading();
+        }, 500);
     }
 
     // 創建文章卡片
     createArticleCard(article, index) {
-        const articleCard = document.createElement('div');
+        const articleCard = document.createElement('article');
         articleCard.className = this.constants.CSS_CLASSES.ARTICLE_CARD_COLUMN;
-        
+        articleCard.setAttribute('role', 'article');
+        articleCard.setAttribute('aria-labelledby', `article-title-${article.id}`);
+
         // 直接使用安全的卡片創建方法
         const secureCard = this.createSecureArticleCard(article, index);
         articleCard.appendChild(secureCard);
-        
+
         setTimeout(() => {
             articleCard.classList.add('animate__animated', 'animate__fadeIn');
             articleCard.style.animationDelay = `${index * 0.1}s`;
         }, 10);
-        
+
         return articleCard;
     }
 
@@ -204,11 +254,35 @@ class UIComponents {
         const button = document.createElement('button');
         button.textContent = text;
         button.className = `btn btn-secondary mx-1 ${isActive ? 'active' : ''}`;
+
+        // 設定 ARIA 屬性
+        if (isActive) {
+            button.setAttribute('aria-current', 'page');
+            button.setAttribute('aria-label', `目前在第 ${page} 頁`);
+        } else {
+            if (text === '上一頁') {
+                button.setAttribute('aria-label', `前往第 ${page} 頁（上一頁）`);
+            } else if (text === '下一頁') {
+                button.setAttribute('aria-label', `前往第 ${page} 頁（下一頁）`);
+            } else {
+                button.setAttribute('aria-label', `前往第 ${page} 頁`);
+            }
+        }
+
         button.addEventListener('click', () => {
             this.stateManager.setCurrentPage(page);
             this.renderArticles(page);
             this.renderPagination();
+
+            // 更新分頁 ARIA 狀態
+            if (this.accessibilityManager) {
+                const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+                const articlesPerPage = this.stateManager.getState('articlesPerPage');
+                const totalPages = Math.ceil(filteredArticlesData.length / articlesPerPage);
+                this.accessibilityManager.updatePaginationAria(page, totalPages);
+            }
         });
+
         return button;
     }
 
@@ -216,17 +290,29 @@ class UIComponents {
     showArticleDetails(articleId) {
         const articlesData = this.stateManager.getState('articlesData');
         const article = articlesData.find(a => a.id === articleId);
-        
+
         if (article) {
             // 使用安全的 DOM 創建方式
             const modal = this.createArticleModal(article);
             document.body.appendChild(modal);
-            
+
+            // 設定焦點陷阱
+            if (this.accessibilityManager) {
+                $(modal).on('shown.bs.modal', () => {
+                    this.accessibilityManager.setupFocusTrap(modal);
+                    this.accessibilityManager.announceToScreenReader(`已開啟文章：${article.title}`);
+                });
+            }
+
             // 顯示 Modal
             $(modal).modal('show');
-            
+
             // 設定關閉事件
-            $(modal).on('hidden.bs.modal', function () {
+            $(modal).on('hidden.bs.modal', () => {
+                if (this.accessibilityManager) {
+                    this.accessibilityManager.removeFocusTrap(modal);
+                    this.accessibilityManager.announceToScreenReader('已關閉文章詳情');
+                }
                 modal.remove();
             });
         }
@@ -559,27 +645,30 @@ class UIComponents {
     // 創建卡片主體
     createCardBody(article) {
         const cardBody = this.securityUtils.createSafeElement('div', { class: 'card-body d-flex flex-column' });
-        
+
         // 標題
-        const title = this.securityUtils.createSafeElement('h5', { class: 'card-title' }, article.title || '');
+        const title = this.securityUtils.createSafeElement('h5', {
+            class: 'card-title',
+            id: `article-title-${article.id}`
+        }, article.title || '');
         cardBody.appendChild(title);
-        
+
         // 摘要
-        const summaryText = article.summary ? 
+        const summaryText = article.summary ?
             (article.summary.length > 100 ? article.summary.substring(0, 100) + '...' : article.summary) : '';
         const summary = this.securityUtils.createSafeElement('p', { class: 'card-text flex-grow-1' }, summaryText);
         cardBody.appendChild(summary);
-        
+
         // 關鍵詞
         if (article.keywords && article.keywords.length > 0) {
             const keywordsContainer = this.createKeywordsContainer(article.keywords);
             cardBody.appendChild(keywordsContainer);
         }
-        
+
         // 頁腳
         const footer = this.createCardFooter(article);
         cardBody.appendChild(footer);
-        
+
         return cardBody;
     }
 

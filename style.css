@@ -1,3 +1,84 @@
+/* Accessibility Styles */
+/* Skip to main content link */
+.skip-to-main-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background-color: #3498db;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+    z-index: 10001;
+    font-weight: 600;
+    transition: top 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.skip-to-main-content:focus {
+    top: 0;
+    outline: 3px solid #f39c12;
+    outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* Enhanced focus styles for keyboard navigation */
+*:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Specific focus styles for interactive elements */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[role="button"]:focus {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+}
+
+/* High contrast focus for better visibility */
+.btn:focus,
+.form-control:focus {
+    outline: 3px solid #f39c12;
+    outline-offset: 2px;
+}
+
+/* Remove outline for mouse users only */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
+}
+
 /* General Styles */
 :root {
     /* Primary Colors */
