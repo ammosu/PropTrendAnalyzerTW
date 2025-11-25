@@ -1012,6 +1012,232 @@ canvas#trend, canvas#expectedTrendChart {
     margin-bottom: 1rem;
 }
 
+/* 上傳進度條樣式 */
+#upload-progress-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+#upload-progress-bar {
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    font-weight: 600;
+    color: white;
+    transition: width 0.3s ease;
+}
+
+#upload-progress-text {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* 資料統計卡片樣式 - 重新設計 */
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--card-color-start), var(--card-color-end));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
+}
+
+/* 統計圖示區域 */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* 統計內容區域 */
+.stat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.5px;
+}
+
+.stat-value.small-text {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* 各種顏色主題 */
+.stat-card-blue {
+    --card-color-start: #3498db;
+    --card-color-end: #2980b9;
+}
+
+.stat-card-blue .stat-icon {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.15));
+    color: #3498db;
+}
+
+.stat-card-blue .stat-value {
+    color: #2980b9;
+}
+
+.stat-card-green {
+    --card-color-start: #27ae60;
+    --card-color-end: #229954;
+}
+
+.stat-card-green .stat-icon {
+    background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(34, 153, 84, 0.15));
+    color: #27ae60;
+}
+
+.stat-card-green .stat-value {
+    color: #229954;
+}
+
+.stat-card-orange {
+    --card-color-start: #f39c12;
+    --card-color-end: #e67e22;
+}
+
+.stat-card-orange .stat-icon {
+    background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.15));
+    color: #f39c12;
+}
+
+.stat-card-orange .stat-value {
+    color: #e67e22;
+}
+
+.stat-card-purple {
+    --card-color-start: #9b59b6;
+    --card-color-end: #8e44ad;
+}
+
+.stat-card-purple .stat-icon {
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(142, 68, 173, 0.15));
+    color: #9b59b6;
+}
+
+.stat-card-purple .stat-value {
+    color: #8e44ad;
+}
+
+/* 篩選標籤樣式 */
+#active-filters-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    background-color: rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    color: var(--primary-dark);
+    animation: fadeIn 0.3s ease-in;
+    transition: all var(--transition-fast);
+}
+
+.filter-tag:hover {
+    background-color: rgba(52, 152, 219, 0.2);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-tag .remove-filter {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    color: var(--danger);
+    font-weight: bold;
+    transition: transform var(--transition-fast);
+}
+
+.filter-tag .remove-filter:hover {
+    transform: scale(1.2);
+}
+
+/* 匯出按鈕樣式 */
+#export-csv-btn, #export-json-btn {
+    transition: all var(--transition-fast);
+}
+
+#export-csv-btn:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+#export-json-btn:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 篩選結果數量徽章樣式 */
+#filter-result-count {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
 /* 文章詳情 Modal 樣式 */
 .modal-dialog.modal-lg {
     max-width: 800px;

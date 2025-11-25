@@ -147,8 +147,14 @@ class App {
     // 訂閱狀態變化
     subscribeToStateChanges() {
         this.stateManager.subscribe((stateKey, newValue, oldValue) => {
-            console.log(`狀態變更: ${stateKey}`, { newValue, oldValue });
-            
+            // 只記錄重要的狀態變更，避免過多 console 訊息
+            const importantStates = ['articlesData', 'filteredArticlesData'];
+            if (importantStates.includes(stateKey)) {
+                console.log(`狀態變更: ${stateKey}`, {
+                    count: Array.isArray(newValue) ? newValue.length : 'N/A'
+                });
+            }
+
             // 根據狀態變化執行相應操作
             switch (stateKey) {
                 case 'articlesData':
@@ -169,12 +175,156 @@ class App {
     // 處理文章資料載入完成
     handleArticlesDataLoaded() {
         console.log('文章資料載入完成，更新 UI');
-        
+
         // 初始化篩選器
         this.initializeFilters();
-        
+
         // 初始化新聞內容切換狀態
         this.initializeNewsContentState();
+
+        // 更新資料統計
+        this.updateDataStatistics();
+
+        // 初始化匯出功能
+        this.initializeExportButtons();
+    }
+
+    // 更新資料統計
+    updateDataStatistics() {
+        const articlesData = this.stateManager.getState('articlesData');
+        if (articlesData && articlesData.length > 0 && window.csvUploader) {
+            window.csvUploader.updateDataSummary(articlesData);
+        }
+
+        // 更新篩選結果數量
+        const filteredData = this.stateManager.getState('filteredArticlesData');
+        if (filteredData && this.eventHandlers) {
+            this.eventHandlers.updateFilterResultCount(filteredData.length);
+        }
+    }
+
+    // 初始化匯出按鈕
+    initializeExportButtons() {
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const exportJsonBtn = document.getElementById('export-json-btn');
+
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', () => this.exportData('csv'));
+        }
+
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener('click', () => this.exportData('json'));
+        }
+    }
+
+    // 匯出資料
+    exportData(format) {
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+
+        if (!filteredArticlesData || filteredArticlesData.length === 0) {
+            alert('沒有可匯出的資料');
+            return;
+        }
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `articles_export_${timestamp}.${format}`;
+
+        if (format === 'csv') {
+            this.exportToCSV(filteredArticlesData, filename);
+        } else if (format === 'json') {
+            this.exportToJSON(filteredArticlesData, filename);
+        }
+    }
+
+    // 匯出為 CSV
+    exportToCSV(data, filename) {
+        // CSV 標頭
+        const headers = ['ID', '標題', '摘要', '關鍵詞', '日期', '發布單位', '作者', '預期趨勢', '網址'];
+
+        // 轉換資料為 CSV 格式
+        const csvRows = [headers.join(',')];
+
+        data.forEach(article => {
+            const row = [
+                article.id || '',
+                this.escapeCSVField(article.title || ''),
+                this.escapeCSVField(article.summary || ''),
+                this.escapeCSVField((article.keywords || []).join('; ')),
+                article.date || '',
+                this.escapeCSVField(article.publisher || ''),
+                this.escapeCSVField(article.author || ''),
+                this.escapeCSVField(article.expectedMarketTrend || ''),
+                article.url || ''
+            ];
+            csvRows.push(row.join(','));
+        });
+
+        const csvContent = csvRows.join('\n');
+
+        // 添加 BOM 以支援中文
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+        this.downloadFile(blob, filename);
+    }
+
+    // 匯出為 JSON
+    exportToJSON(data, filename) {
+        // 簡化資料結構，只保留重要欄位
+        const simplifiedData = data.map(article => ({
+            id: article.id,
+            title: article.title,
+            summary: article.summary,
+            keywords: article.keywords,
+            date: article.date,
+            publisher: article.publisher,
+            author: article.author,
+            expectedMarketTrend: article.expectedMarketTrend,
+            url: article.url
+        }));
+
+        const jsonContent = JSON.stringify(simplifiedData, null, 2);
+        const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+
+        this.downloadFile(blob, filename);
+    }
+
+    // 轉義 CSV 欄位
+    escapeCSVField(field) {
+        if (field === null || field === undefined) return '';
+
+        const str = String(field);
+
+        // 如果包含逗號、引號或換行符，需要用引號包圍並轉義內部引號
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+
+        return str;
+    }
+
+    // 下載檔案
+    downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+
+        document.body.appendChild(link);
+        link.click();
+
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        // 顯示成功訊息
+        this.uiComponents.showLoading(`正在匯出 ${filename}...`);
+        setTimeout(() => {
+            this.uiComponents.hideLoading();
+        }, 1000);
     }
 
     // 處理過濾後文章變化

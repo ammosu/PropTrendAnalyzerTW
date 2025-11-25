@@ -192,6 +192,16 @@ class EventHandlers {
             console.log('使用快取的篩選結果');
             this.stateManager.setFilteredArticles(cachedResult);
             this.stateManager.setCurrentPage(1);
+
+            // 更新篩選結果數量和標籤（即使使用快取也要更新）
+            this.updateFilterResultCount(cachedResult.length);
+            this.updateFilterTags({
+                startDate,
+                endDate,
+                keyword,
+                selectedMedia
+            });
+
             this.uiComponents.renderArticles(1);
             this.uiComponents.renderPagination();
             this.initializeMonthSlider();
@@ -242,11 +252,112 @@ class EventHandlers {
         this.stateManager.setFilteredArticles(filteredArticles);
         this.stateManager.setCurrentPage(1);
 
+        // 更新篩選結果數量
+        this.updateFilterResultCount(filteredArticles.length);
+
+        // 更新篩選標籤
+        this.updateFilterTags({
+            startDate,
+            endDate,
+            keyword,
+            selectedMedia
+        });
+
         this.uiComponents.renderArticles(1);
         this.uiComponents.renderPagination();
 
         this.initializeMonthSlider();
         this.chartManager.renderExpectedTrendChart();
+    }
+
+    // 更新篩選結果數量顯示
+    updateFilterResultCount(count) {
+        const countElement = document.getElementById('filtered-count');
+        if (countElement) {
+            countElement.textContent = count;
+
+            // 添加動畫效果
+            const badge = document.getElementById('filter-result-count');
+            if (badge) {
+                badge.classList.remove('pulse');
+                // 強制重繪
+                void badge.offsetWidth;
+                badge.classList.add('pulse');
+            }
+        }
+    }
+
+    // 更新篩選標籤
+    updateFilterTags(filters) {
+        const tagsContainer = document.getElementById('active-filters-tags');
+        if (!tagsContainer) return;
+
+        // 清空現有標籤
+        while (tagsContainer.firstChild) {
+            tagsContainer.removeChild(tagsContainer.firstChild);
+        }
+
+        // 日期篩選標籤
+        if (filters.startDate) {
+            this.addFilterTag(tagsContainer, '起始日期', filters.startDate, () => {
+                document.getElementById('start-date').value = '';
+                this.filterArticles();
+            });
+        }
+
+        if (filters.endDate) {
+            this.addFilterTag(tagsContainer, '結束日期', filters.endDate, () => {
+                document.getElementById('end-date').value = '';
+                this.filterArticles();
+            });
+        }
+
+        // 關鍵字篩選標籤
+        if (filters.keyword) {
+            this.addFilterTag(tagsContainer, '關鍵字', filters.keyword, () => {
+                document.getElementById('keyword-filter').value = '';
+                this.filterArticles();
+            });
+        }
+
+        // 媒體篩選標籤：如果有篩選（不是全選），顯示摘要標籤
+        if (filters.selectedMedia && filters.selectedMedia.length > 0) {
+            const allMediaCheckboxes = document.querySelectorAll('.media-filter');
+            const allMediaCount = allMediaCheckboxes.length;
+
+            // 只有在部分選擇時才顯示標籤（提示用戶在進階篩選中調整）
+            if (filters.selectedMedia.length < allMediaCount) {
+                this.addFilterTag(
+                    tagsContainer,
+                    '媒體篩選',
+                    `已選 ${filters.selectedMedia.length}/${allMediaCount}（在進階篩選中調整）`,
+                    () => {
+                        // 點擊移除時，全選所有媒體
+                        document.querySelectorAll('.media-filter').forEach(cb => cb.checked = true);
+                        this.filterArticles();
+                    }
+                );
+            }
+        }
+    }
+
+    // 添加篩選標籤
+    addFilterTag(container, label, value, onRemove) {
+        const tag = document.createElement('div');
+        tag.className = 'filter-tag';
+
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = `${label}: ${value}`;
+        tag.appendChild(labelSpan);
+
+        const removeIcon = document.createElement('span');
+        removeIcon.className = 'remove-filter';
+        removeIcon.textContent = '×';
+        removeIcon.title = '移除此篩選條件';
+        removeIcon.addEventListener('click', onRemove);
+
+        tag.appendChild(removeIcon);
+        container.appendChild(tag);
     }
 
     // 處理頁面跳轉

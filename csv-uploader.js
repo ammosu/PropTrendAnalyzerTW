@@ -304,15 +304,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 try {
                     // 安全驗證上傳的文件
                     await validateUploadedFile(file);
-                    
-                    // 顯示驗證成功並開始處理
-                    showUploadStatus('正在驗證和處理檔案...', 'info');
-                    
+
+                    // 顯示進度條
+                    showProgressBar();
+                    updateProgress(10, '驗證完成，開始讀取檔案...');
+
                 } catch (error) {
+                    hideProgressBar();
                     showUploadStatus(error.message, 'danger');
                     return;
                 }
-                
+
                 // 使用 PapaParse 解析 CSV 檔案
                 Papa.parse(file, {
                     header: true,
@@ -320,24 +322,27 @@ document.addEventListener('DOMContentLoaded', async function() {
                     complete: async function(results) {
                         if (results.errors.length > 0) {
                             const errorMsg = results.errors[0].message || '未知解析錯誤';
+                            hideProgressBar();
                             showUploadStatus(`CSV解析錯誤：${errorMsg}`, 'danger');
                             return;
                         }
-                        
+
                         try {
-                            showUploadStatus('正在處理資料...', 'info');
-                            
+                            updateProgress(30, 'CSV 解析完成，處理資料中...');
+
                             // 轉換 CSV 資料為應用程式所需的格式
                             const articlesData = processCSVData(results.data);
-                            
-                            showUploadStatus('正在儲存到資料庫...', 'info');
-                            
+
+                            updateProgress(60, '資料處理完成，儲存到資料庫...');
+
                             // 儲存到 IndexedDB
                             const count = await saveArticlesToDB(articlesData);
-                            
+
+                            updateProgress(80, '儲存完成，更新介面...');
+
                             // 設定文章資料
                             setArticlesData(articlesData);
-                            
+
                             // 確保月份滑桿寬度調整（如果函數存在）
                             if (typeof adjustSliderWidth === 'function') {
                                 const months = getMonthRange(articlesData);
@@ -345,16 +350,28 @@ document.addEventListener('DOMContentLoaded', async function() {
                                     adjustSliderWidth(months.length);
                                 }
                             }
-                            
-                            // 創建成功訊息和清除按鈕
-                            showSuccessWithClearButton(count);
-                            
+
+                            updateProgress(90, '計算統計資料...');
+
+                            // 更新資料統計
+                            updateDataSummary(articlesData);
+
+                            updateProgress(100, '上傳完成！');
+
+                            // 等待一下再隱藏進度條
+                            setTimeout(() => {
+                                hideProgressBar();
+                                // 創建成功訊息和清除按鈕
+                                showSuccessWithClearButton(count);
+                            }, 500);
+
                             // 清空檔案輸入
                             fileInput.value = '';
-                            
+
                         } catch (error) {
                             console.error('處理CSV資料時發生錯誤:', error);
                             const errorMsg = error.message || error.toString();
+                            hideProgressBar();
                             showUploadStatus(`處理資料時發生錯誤：${errorMsg}`, 'danger');
                         }
                     },
@@ -795,9 +812,116 @@ function generateRealEstateSVG(bgColor, textColor, title) {
     </svg>`;
 }
 
+// 顯示進度條
+function showProgressBar() {
+    const progressContainer = document.getElementById('upload-progress-container');
+    if (progressContainer) {
+        progressContainer.style.display = 'block';
+    }
+}
+
+// 隱藏進度條
+function hideProgressBar() {
+    const progressContainer = document.getElementById('upload-progress-container');
+    if (progressContainer) {
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            // 重置進度條
+            updateProgress(0, '');
+        }, 500);
+    }
+}
+
+// 更新進度條
+function updateProgress(percent, message) {
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressText = document.getElementById('upload-progress-text');
+    const progressMessage = document.getElementById('upload-progress-message');
+
+    if (progressBar) {
+        progressBar.style.width = percent + '%';
+        progressBar.setAttribute('aria-valuenow', percent);
+    }
+
+    if (progressText) {
+        progressText.textContent = percent + '%';
+    }
+
+    if (progressMessage) {
+        progressMessage.textContent = message;
+    }
+}
+
+// 數字動畫計數
+function animateValue(element, start, end, duration) {
+    if (!element) return;
+
+    const range = end - start;
+    const increment = range / (duration / 16); // 60fps
+    let current = start;
+
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+    }, 16);
+}
+
+// 更新資料統計摘要
+function updateDataSummary(articles) {
+    if (!articles || articles.length === 0) return;
+
+    // 總文章數 - 使用動畫效果
+    const totalCount = document.getElementById('total-articles-count');
+    if (totalCount) {
+        const currentValue = parseInt(totalCount.textContent) || 0;
+        animateValue(totalCount, currentValue, articles.length, 800);
+    }
+
+    // 日期範圍
+    const dates = articles.map(a => new Date(a.date)).filter(d => !isNaN(d.getTime()));
+    if (dates.length > 0) {
+        const minDate = new Date(Math.min(...dates));
+        const maxDate = new Date(Math.max(...dates));
+        const dateRange = document.getElementById('date-range-display');
+        if (dateRange) {
+            // 格式化日期，更簡潔的顯示
+            const formatDate = (date) => {
+                return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+            };
+            dateRange.textContent = `${formatDate(minDate)} ~ ${formatDate(maxDate)}`;
+        }
+    }
+
+    // 關鍵詞數量 - 使用動畫效果
+    const allKeywords = new Set();
+    articles.forEach(article => {
+        if (article.keywords && Array.isArray(article.keywords)) {
+            article.keywords.forEach(kw => allKeywords.add(kw));
+        }
+    });
+    const keywordsCount = document.getElementById('keywords-count');
+    if (keywordsCount) {
+        const currentValue = parseInt(keywordsCount.textContent) || 0;
+        animateValue(keywordsCount, currentValue, allKeywords.size, 800);
+    }
+
+    // 媒體來源數量 - 使用動畫效果
+    const publishers = new Set(articles.map(a => a.publisher).filter(p => p));
+    const publishersCount = document.getElementById('publishers-count');
+    if (publishersCount) {
+        const currentValue = parseInt(publishersCount.textContent) || 0;
+        animateValue(publishersCount, currentValue, publishers.size, 800);
+    }
+}
+
 // 導出函數供其他模塊使用
 window.csvUploader = {
     getArticlesFromDB,
     clearArticlesDB,
-    hasArticlesInDB
+    hasArticlesInDB,
+    updateDataSummary
 };
