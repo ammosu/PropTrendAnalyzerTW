@@ -97,7 +97,7 @@ class ErrorHandler {
     // 主要錯誤處理函數
     handleError(errorInfo, context = '', showToUser = true) {
         try {
-            // 清理錯誤信息
+            // 清理錯誤資訊
             const cleanErrorInfo = this.sanitizeErrorInfo(errorInfo);
             
             // 記錄錯誤
@@ -106,7 +106,7 @@ class ErrorHandler {
             // 添加到錯誤隊列
             this.addToErrorQueue(cleanErrorInfo);
             
-            // 向用戶顯示友好錯誤信息
+            // 向用戶顯示友好錯誤資訊
             if (showToUser) {
                 this.showUserFriendlyError(cleanErrorInfo);
             }
@@ -120,7 +120,7 @@ class ErrorHandler {
         }
     }
 
-    // 清理錯誤信息
+    // 清理錯誤資訊
     sanitizeErrorInfo(errorInfo) {
         const sanitized = {};
         
@@ -138,7 +138,7 @@ class ErrorHandler {
         }
         
         if (errorInfo.stack) {
-            // 清理堆疊追蹤，移除敏感信息
+            // 清理堆疊追蹤，移除敏感資訊
             sanitized.stack = this.sanitizeStackTrace(errorInfo.stack);
         }
         
@@ -156,7 +156,7 @@ class ErrorHandler {
             return '';
         }
         
-        // 移除潛在的敏感信息
+        // 移除潛在的敏感資訊
         let cleaned = str
             .replace(/password[=:]\s*[^\s&]+/gi, 'password=[REDACTED]')
             .replace(/token[=:]\s*[^\s&]+/gi, 'token=[REDACTED]')
@@ -214,13 +214,13 @@ class ErrorHandler {
         }
     }
 
-    // 向用戶顯示友好錯誤信息
+    // 向用戶顯示友好錯誤資訊
     showUserFriendlyError(errorInfo) {
         const userMessage = this.getUserFriendlyMessage(errorInfo);
         this.showErrorToast(userMessage, 'error');
     }
 
-    // 取得用戶友好的錯誤信息
+    // 取得用戶友好的錯誤資訊
     getUserFriendlyMessage(errorInfo) {
         const errorTypeMap = {
             'NetworkError': '網路連線發生問題，請檢查網路設定後重試',
@@ -252,7 +252,7 @@ class ErrorHandler {
             return '權限不足，請檢查瀏覽器設定';
         }
         
-        // 預設錯誤信息
+        // 預設錯誤資訊
         return '發生未預期的錯誤，請稍後再試或重新整理頁面';
     }
 

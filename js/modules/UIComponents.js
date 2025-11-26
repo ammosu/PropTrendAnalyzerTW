@@ -849,7 +849,7 @@ class UIComponents {
     createCardFooter(article) {
         const footer = this.securityUtils.createSafeElement('div', { class: 'card-footer bg-transparent border-0 p-0' });
         
-        // 日期和作者信息
+        // 日期和作者資訊
         const infoContainer = this.securityUtils.createSafeElement('p', { class: 'text-muted mb-2' });
         
         const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });

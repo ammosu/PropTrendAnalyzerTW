@@ -67,8 +67,8 @@ node convert-csv.js
 ## 數據載入流程
 
 1. 頁面載入時，`data.js`中的`loadArticlesData()`函數被調用
-2. 該函數首先載入`metadata.json`獲取元數據
-3. 然後載入`all_articles.json`獲取所有文章數據
+2. 該函數首先載入`metadata.json`取得元數據
+3. 然後載入`all_articles.json`取得所有文章數據
 4. 數據載入完成後，調用`initializePage()`函數初始化頁面
 5. 頁面元素（文章列表、分頁、圖表等）被渲染
 

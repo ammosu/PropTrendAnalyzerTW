@@ -757,7 +757,7 @@ class EventHandlers {
             this.showChartContainer(keywordCloudContainer);
             this.updateChartButtons(event.target, 'showKeywordTrend', 'showExpectedTrend');
 
-            // 獲取當前滑桿值
+            // 取得當前滑桿值
             const cloudSizeSlider = document.getElementById('cloud-size-slider');
             const topN = cloudSizeSlider ? parseInt(cloudSizeSlider.value) : 50;
 
