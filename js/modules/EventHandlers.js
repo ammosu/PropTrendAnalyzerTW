@@ -41,6 +41,7 @@ class EventHandlers {
         this.initializeFilterEvents();
         this.initializeQuickDateFilters();
         this.initializeViewModeToggle();
+        this.initializeDarkModeToggle();
         this.initializeNavigationEvents();
         this.initializeChartEvents();
         this.initializeContentToggleEvents();
@@ -232,6 +233,76 @@ class EventHandlers {
         this.uiComponents.renderArticles(currentPage);
     }
 
+    // 初始化深色模式切換
+    initializeDarkModeToggle() {
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                this.toggleDarkMode();
+            });
+        }
+    }
+
+    // 切換深色模式
+    toggleDarkMode() {
+        const currentDarkMode = this.stateManager.getState('darkMode');
+        const newDarkMode = !currentDarkMode;
+
+        // 更新狀態
+        this.stateManager.updateState('darkMode', newDarkMode);
+
+        // 應用深色模式
+        this.applyDarkMode(newDarkMode);
+
+        // 保存到 localStorage
+        try {
+            localStorage.setItem('darkMode', newDarkMode ? 'true' : 'false');
+        } catch (e) {
+            console.warn('無法保存深色模式偏好:', e);
+        }
+
+        console.log(`深色模式已${newDarkMode ? '開啟' : '關閉'}`);
+    }
+
+    // 應用深色模式
+    applyDarkMode(isDark) {
+        const htmlElement = document.documentElement;
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const icon = darkModeToggle?.querySelector('i');
+        const text = darkModeToggle?.querySelector('.dark-mode-text');
+
+        if (isDark) {
+            // 啟用深色模式
+            htmlElement.setAttribute('data-theme', 'dark');
+            if (icon) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            if (text) {
+                text.textContent = '淺色模式';
+            }
+            if (darkModeToggle) {
+                darkModeToggle.setAttribute('aria-label', '切換為淺色模式');
+                darkModeToggle.setAttribute('title', '切換為淺色模式');
+            }
+        } else {
+            // 停用深色模式
+            htmlElement.removeAttribute('data-theme');
+            if (icon) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            if (text) {
+                text.textContent = '深色模式';
+            }
+            if (darkModeToggle) {
+                darkModeToggle.setAttribute('aria-label', '切換為深色模式');
+                darkModeToggle.setAttribute('title', '切換為深色模式');
+            }
+        }
+    }
+
     // 初始化導航相關事件
     initializeNavigationEvents() {
         const jumpButton = document.getElementById('jump-button');
@@ -244,7 +315,9 @@ class EventHandlers {
     initializeChartEvents() {
         const showKeywordTrendBtn = document.getElementById('showKeywordTrend');
         const showExpectedTrendBtn = document.getElementById('showExpectedTrend');
+        const showKeywordCloudBtn = document.getElementById('showKeywordCloud');
         const toggleChartTypeBtn = document.getElementById('toggleChartType');
+        const cloudSizeSlider = document.getElementById('cloud-size-slider');
 
         if (showKeywordTrendBtn) {
             showKeywordTrendBtn.addEventListener('click', (e) => this.handleShowKeywordTrend(e));
@@ -252,8 +325,14 @@ class EventHandlers {
         if (showExpectedTrendBtn) {
             showExpectedTrendBtn.addEventListener('click', (e) => this.handleShowExpectedTrend(e));
         }
+        if (showKeywordCloudBtn) {
+            showKeywordCloudBtn.addEventListener('click', (e) => this.handleShowKeywordCloud(e));
+        }
         if (toggleChartTypeBtn) {
             toggleChartTypeBtn.addEventListener('click', () => this.chartManager.toggleChartType());
+        }
+        if (cloudSizeSlider) {
+            cloudSizeSlider.addEventListener('input', (e) => this.handleCloudSizeChange(e));
         }
     }
 
@@ -597,20 +676,26 @@ class EventHandlers {
     handleShowKeywordTrend(event) {
         const keywordTrendContainer = document.getElementById('keywordTrendContainer');
         const expectedTrendContainer = document.getElementById('expectedTrendContainer');
-        
+        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
+
         if (!keywordTrendContainer || !expectedTrendContainer) return;
-        
+
         this.uiComponents.showLoading('正在載入關鍵詞趨勢分析...');
-        
+
         setTimeout(() => {
+            // 隱藏其他容器
+            if (keywordCloudContainer && keywordCloudContainer.style.display !== 'none') {
+                keywordCloudContainer.style.display = 'none';
+            }
+
             if (expectedTrendContainer.style.display !== 'none') {
                 this.switchChartContainers(expectedTrendContainer, keywordTrendContainer, () => {
-                    this.updateChartButtons(event.target, 'showExpectedTrend');
+                    this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
                     this.restoreMonthSliderState();
                 });
             } else {
                 this.showChartContainer(keywordTrendContainer);
-                this.updateChartButtons(event.target, 'showExpectedTrend');
+                this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
                 this.adjustSliderForKeywordTrend();
             }
         }, 300);
@@ -620,25 +705,81 @@ class EventHandlers {
     handleShowExpectedTrend(event) {
         const keywordTrendContainer = document.getElementById('keywordTrendContainer');
         const expectedTrendContainer = document.getElementById('expectedTrendContainer');
-        
+        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
+
         if (!keywordTrendContainer || !expectedTrendContainer) return;
-        
+
         this.uiComponents.showLoading('正在載入市場趨勢分佈...');
-        
+
         this.saveCurrentMonthSliderState();
-        
+
         setTimeout(() => {
+            // 隱藏其他容器
+            if (keywordCloudContainer && keywordCloudContainer.style.display !== 'none') {
+                keywordCloudContainer.style.display = 'none';
+            }
+
             if (keywordTrendContainer.style.display !== 'none') {
                 this.switchChartContainers(keywordTrendContainer, expectedTrendContainer, () => {
-                    this.updateChartButtons(event.target, 'showKeywordTrend');
+                    this.updateChartButtons(event.target, 'showKeywordTrend', 'showKeywordCloud');
                     this.chartManager.renderExpectedTrendChart();
                 });
             } else {
                 this.showChartContainer(expectedTrendContainer);
-                this.updateChartButtons(event.target, 'showKeywordTrend');
+                this.updateChartButtons(event.target, 'showKeywordTrend', 'showKeywordCloud');
                 this.chartManager.renderExpectedTrendChart();
             }
         }, 300);
+    }
+
+    // 處理顯示關鍵詞詞雲
+    handleShowKeywordCloud(event) {
+        const keywordTrendContainer = document.getElementById('keywordTrendContainer');
+        const expectedTrendContainer = document.getElementById('expectedTrendContainer');
+        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
+
+        if (!keywordCloudContainer) return;
+
+        this.uiComponents.showLoading('正在載入關鍵詞詞雲...');
+
+        this.saveCurrentMonthSliderState();
+
+        setTimeout(() => {
+            // 隱藏其他容器
+            if (keywordTrendContainer && keywordTrendContainer.style.display !== 'none') {
+                keywordTrendContainer.style.display = 'none';
+            }
+            if (expectedTrendContainer && expectedTrendContainer.style.display !== 'none') {
+                expectedTrendContainer.style.display = 'none';
+            }
+
+            // 顯示詞雲容器
+            this.showChartContainer(keywordCloudContainer);
+            this.updateChartButtons(event.target, 'showKeywordTrend', 'showExpectedTrend');
+
+            // 獲取當前滑桿值
+            const cloudSizeSlider = document.getElementById('cloud-size-slider');
+            const topN = cloudSizeSlider ? parseInt(cloudSizeSlider.value) : 50;
+
+            // 渲染詞雲
+            this.chartManager.renderKeywordCloud(topN);
+        }, 300);
+    }
+
+    // 處理詞雲大小變更
+    handleCloudSizeChange(event) {
+        const value = event.target.value;
+        const valueDisplay = document.getElementById('cloud-size-value');
+
+        if (valueDisplay) {
+            valueDisplay.textContent = value;
+        }
+
+        // 使用防抖來避免過於頻繁的重新渲染
+        clearTimeout(this.cloudSizeChangeTimeout);
+        this.cloudSizeChangeTimeout = setTimeout(() => {
+            this.chartManager.renderKeywordCloud(parseInt(value));
+        }, 500);
     }
 
     // 切換圖表容器
@@ -668,15 +809,19 @@ class EventHandlers {
     }
 
     // 更新圖表按鈕狀態
-    updateChartButtons(activeButton, inactiveButtonId) {
-        activeButton.classList.add('btn-primary');
-        activeButton.classList.remove('btn-secondary');
+    updateChartButtons(activeButton, ...inactiveButtonIds) {
+        // 添加活躍狀態
+        activeButton.classList.add('active');
+        activeButton.setAttribute('aria-pressed', 'true');
 
-        const inactiveButton = document.getElementById(inactiveButtonId);
-        if (inactiveButton) {
-            inactiveButton.classList.add('btn-secondary');
-            inactiveButton.classList.remove('btn-primary');
-        }
+        // 移除所有不活躍按鈕的活躍狀態
+        inactiveButtonIds.forEach(buttonId => {
+            const inactiveButton = document.getElementById(buttonId);
+            if (inactiveButton) {
+                inactiveButton.classList.remove('active');
+                inactiveButton.setAttribute('aria-pressed', 'false');
+            }
+        });
 
         // 更新 ARIA 屬性
         if (this.accessibilityManager) {

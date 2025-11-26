@@ -14,6 +14,7 @@
         object-src 'none';
         base-uri 'self';
         form-action 'self';
+        worker-src 'self' blob:;
         upgrade-insecure-requests;">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="description" content="台灣房地產市場新聞趨勢分析工具，提供房市新聞摘要與市場預期走向分析">
@@ -33,6 +34,13 @@
 
     <div class="container mt-4">
         <header role="banner">
+            <!-- 深色模式切換按鈕 -->
+            <div class="dark-mode-toggle-container">
+                <button id="dark-mode-toggle" class="btn btn-sm btn-outline-secondary" aria-label="切換深色模式" title="切換深色模式">
+                    <i class="fas fa-moon" aria-hidden="true"></i>
+                    <span class="dark-mode-text">深色模式</span>
+                </button>
+            </div>
             <h1 id="page-title" class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
             <p class="text-center text-muted mb-4 animate__animated animate__fadeIn animate__delay-1s">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
         </header>
@@ -243,12 +251,18 @@
         <!-- 圖表切換按鈕 -->
         <section id="chart-toggle-section" class="text-center mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" aria-labelledby="chart-heading" style="display: none;">
             <h4 id="chart-heading" class="mb-3"><i class="fas fa-chart-line" aria-hidden="true"></i> 數據分析視圖</h4>
-            <div class="btn-group shadow-sm" role="group" aria-label="圖表類型切換">
-                <button id="showKeywordTrend" class="btn btn-primary" aria-label="顯示關鍵詞趨勢分析圖表" aria-pressed="true">
-                    <i class="fas fa-chart-bar me-1" aria-hidden="true"></i> 關鍵詞趨勢分析
+            <div class="chart-toggle-btn-group" role="group" aria-label="圖表類型切換">
+                <button id="showKeywordTrend" class="btn btn-outline-primary chart-toggle-btn active" aria-label="顯示關鍵詞趨勢分析圖表" aria-pressed="true">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <span class="btn-text">關鍵詞趨勢分析</span>
                 </button>
-                <button id="showExpectedTrend" class="btn btn-secondary" aria-label="顯示每月預期市場趨勢分佈圖表" aria-pressed="false">
-                    <i class="fas fa-chart-pie me-1" aria-hidden="true"></i> 每月預期市場趨勢分佈
+                <button id="showExpectedTrend" class="btn btn-outline-primary chart-toggle-btn" aria-label="顯示每月預期市場趨勢分佈圖表" aria-pressed="false">
+                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    <span class="btn-text">每月預期市場趨勢分佈</span>
+                </button>
+                <button id="showKeywordCloud" class="btn btn-outline-primary chart-toggle-btn" aria-label="顯示關鍵詞詞雲視覺化" aria-pressed="false">
+                    <i class="fas fa-font" aria-hidden="true"></i>
+                    <span class="btn-text">關鍵詞詞雲</span>
                 </button>
             </div>
         </section>
@@ -287,6 +301,21 @@
             </div>
             <div class="text-muted text-center mt-3">
                 <small><i class="fas fa-info-circle" aria-hidden="true"></i> 此圖表顯示每月新聞中預期市場趨勢的分佈情況</small>
+            </div>
+        </section>
+
+        <!-- 關鍵詞詞雲視覺化容器 -->
+        <section id="keywordCloudContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-cloud-title" style="display: none;">
+            <h2 id="keyword-cloud-title"><i class="fas fa-cloud" aria-hidden="true"></i> 關鍵詞詞雲視覺化</h2>
+            <div class="cloud-controls text-center mb-3">
+                <label for="cloud-size-slider" class="form-label">顯示關鍵詞數量：<span id="cloud-size-value">50</span></label>
+                <input type="range" id="cloud-size-slider" class="form-range cloud-slider" min="20" max="100" step="10" value="50" aria-label="選擇顯示的關鍵詞數量">
+            </div>
+            <div class="wordcloud-container">
+                <canvas id="keywordCloudCanvas" width="800" height="500" role="img" aria-label="關鍵詞詞雲視覺化圖表"></canvas>
+            </div>
+            <div class="text-muted text-center mt-3">
+                <small><i class="fas fa-info-circle" aria-hidden="true"></i> 此詞雲顯示所有文章中出現頻率最高的關鍵詞，字體大小代表出現次數</small>
             </div>
         </section>
 
@@ -345,6 +374,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js"></script>
     
     <!-- 引入模組化的 JavaScript 檔案 -->
     <script src="js/modules/Constants.js"></script>

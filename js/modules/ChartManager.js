@@ -367,25 +367,136 @@ class ChartManager {
     // 切換圖表類型
     toggleChartType() {
         this.uiComponents.showLoading('正在切換圖表類型...');
-        
+
         const newType = this.stateManager.toggleChartType();
-        
+
         const toggleButton = document.getElementById('toggleChartType');
         if (toggleButton) {
-            toggleButton.innerHTML = newType === 'bar' ? 
-                '<i class="fas fa-exchange-alt me-1"></i> 切換到折線圖' : 
+            toggleButton.innerHTML = newType === 'bar' ?
+                '<i class="fas fa-exchange-alt me-1"></i> 切換到折線圖' :
                 '<i class="fas fa-exchange-alt me-1"></i> 切換到柱狀圖';
-            
+
             toggleButton.classList.add('animate__animated', 'animate__pulse');
             setTimeout(() => {
                 toggleButton.classList.remove('animate__animated', 'animate__pulse');
             }, 1000);
         }
-        
+
         setTimeout(() => {
             this.renderExpectedTrendChart();
             this.uiComponents.hideLoading();
         }, 300);
+    }
+
+    // 渲染關鍵詞詞雲
+    renderKeywordCloud(topN = 50) {
+        this.uiComponents.showLoading('正在生成關鍵詞詞雲...');
+
+        let filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+
+        // 如果過濾資料為空，嘗試使用原始資料
+        if (!filteredArticlesData || filteredArticlesData.length === 0) {
+            const articlesData = this.stateManager.getState('articlesData');
+            if (articlesData && articlesData.length > 0) {
+                console.log('使用原始文章資料渲染詞雲');
+                filteredArticlesData = articlesData;
+            } else {
+                console.warn('沒有可用的文章資料，無法渲染詞雲');
+                this.showEmptyWordCloud('無可用的關鍵詞資料');
+                this.uiComponents.hideLoading();
+                return;
+            }
+        }
+
+        // 統計所有關鍵詞出現次數
+        const keywordCounts = {};
+
+        filteredArticlesData.forEach(article => {
+            if (article.keywords && Array.isArray(article.keywords)) {
+                article.keywords.forEach(keyword => {
+                    if (keyword && keyword.trim()) {
+                        keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                    }
+                });
+            }
+        });
+
+        if (Object.keys(keywordCounts).length === 0) {
+            this.showEmptyWordCloud('此篩選條件無關鍵詞資料');
+            this.uiComponents.hideLoading();
+            return;
+        }
+
+        // 排序並取前 N 個關鍵詞
+        const sortedKeywords = Object.entries(keywordCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, topN);
+
+        // 準備詞雲資料格式：[['關鍵詞', 權重], ...]
+        const wordCloudData = sortedKeywords.map(([keyword, count]) => [keyword, count]);
+
+        // 檢查是否載入了 WordCloud
+        if (typeof WordCloud === 'undefined') {
+            console.error('WordCloud 庫未載入');
+            this.showEmptyWordCloud('詞雲庫載入失敗');
+            this.uiComponents.hideLoading();
+            return;
+        }
+
+        // 取得 canvas 元素
+        const canvas = document.getElementById('keywordCloudCanvas');
+        if (!canvas) {
+            console.error('找不到詞雲 canvas 元素');
+            this.uiComponents.hideLoading();
+            return;
+        }
+
+        // 清空 canvas
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 生成顏色函數（使用漸層色）
+        const colors = [
+            '#3498db', '#2ecc71', '#9b59b6', '#e74c3c', '#f39c12',
+            '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'
+        ];
+
+        // 渲染詞雲
+        WordCloud(canvas, {
+            list: wordCloudData,
+            gridSize: Math.round(16 * canvas.width / 1024),
+            weightFactor: function(size) {
+                // 根據 canvas 大小動態調整權重
+                return Math.pow(size, 0.5) * canvas.width / 40;
+            },
+            fontFamily: '"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif',
+            color: function() {
+                return colors[Math.floor(Math.random() * colors.length)];
+            },
+            rotateRatio: 0.3,
+            rotationSteps: 2,
+            backgroundColor: 'transparent',
+            minSize: 12,
+            drawOutOfBound: false,
+            shrinkToFit: true
+        });
+
+        console.log(`詞雲渲染完成，包含 ${wordCloudData.length} 個關鍵詞`);
+        this.uiComponents.hideLoading();
+    }
+
+    // 顯示空詞雲提示
+    showEmptyWordCloud(message) {
+        const canvas = document.getElementById('keywordCloudCanvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '18px "Noto Sans TC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#7f8c8d';
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
     }
 }
 

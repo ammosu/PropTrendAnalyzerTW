@@ -72,6 +72,9 @@ class App {
         // 從 localStorage 載入檢視模式偏好
         this.loadViewModePreference();
 
+        // 從 localStorage 載入深色模式偏好
+        this.loadDarkModePreference();
+
         // 初始化無障礙性管理器
         this.accessibilityManager = new AccessibilityManager(this.stateManager);
 
@@ -89,7 +92,19 @@ class App {
         this.uiComponents.setAccessibilityManager(this.accessibilityManager);
         this.eventHandlers.setAccessibilityManager(this.accessibilityManager);
 
+        // 同步深色模式按鈕狀態
+        this.syncDarkModeButton();
+
         console.log('所有模組初始化完成（包含無障礙性管理器）');
+    }
+
+    // 同步深色模式按鈕狀態
+    syncDarkModeButton() {
+        const isDarkMode = this.stateManager.getState('darkMode');
+        if (isDarkMode && this.eventHandlers) {
+            // 確保按鈕狀態與已載入的偏好一致
+            this.eventHandlers.applyDarkMode(isDarkMode);
+        }
     }
 
     // 載入檢視模式偏好
@@ -102,6 +117,27 @@ class App {
             }
         } catch (e) {
             console.warn('無法載入檢視模式偏好:', e);
+        }
+    }
+
+    // 載入深色模式偏好
+    loadDarkModePreference() {
+        try {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const isDarkMode = savedDarkMode === 'true';
+
+            // 更新狀態
+            this.stateManager.state.darkMode = isDarkMode;
+
+            // 立即應用深色模式（在 EventHandlers 初始化之前）
+            if (isDarkMode) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                console.log('載入深色模式偏好: 開啟');
+            } else {
+                console.log('載入深色模式偏好: 關閉');
+            }
+        } catch (e) {
+            console.warn('無法載入深色模式偏好:', e);
         }
     }
 

@@ -38,7 +38,8 @@ class StateManager {
             currentChartType: constants.STATE.DEFAULT_CHART_TYPE,
             chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
             savedMonthSliderState: null,
-            viewMode: 'card' // 'card' 或 'list'
+            viewMode: 'card', // 'card' 或 'list'
+            darkMode: false // 深色模式狀態
         };
 
         /**

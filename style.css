@@ -85,55 +85,113 @@ textarea:focus,
     --primary: #3498db;
     --primary-light: #5dade2;
     --primary-dark: #2980b9;
-    
+
     /* Secondary Colors */
     --secondary: #2ecc71;
     --secondary-light: #58d68d;
     --secondary-dark: #27ae60;
-    
+
     /* Neutral Colors */
     --neutral-dark: #34495e;
     --neutral-medium: #7f8c8d;
     --neutral-light: #ecf0f1;
-    
+
     /* Functional Colors */
     --info: #3498db;
     --success: #2ecc71;
     --warning: #f39c12;
     --danger: #e74c3c;
-    
+
     /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
-    
+
     /* Spacing */
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
     --space-md: 1rem;
     --space-lg: 1.5rem;
     --space-xl: 2rem;
-    
+
     /* Transitions */
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
-    
+
     /* Border Radius */
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
     --radius-round: 50%;
+
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #ecf0f1;
+
+    /* Text Colors */
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+
+    /* Border Colors */
+    --border-color: #e0e0e0;
+    --border-light: #f0f0f0;
+}
+
+/* Dark Mode Colors */
+[data-theme="dark"] {
+    /* Primary Colors - 稍微調亮以在深色背景上更清晰 */
+    --primary: #5dade2;
+    --primary-light: #85c1e9;
+    --primary-dark: #3498db;
+
+    /* Secondary Colors */
+    --secondary: #58d68d;
+    --secondary-light: #7dcea0;
+    --secondary-dark: #2ecc71;
+
+    /* Neutral Colors */
+    --neutral-dark: #ecf0f1;
+    --neutral-medium: #bdc3c7;
+    --neutral-light: #2c3e50;
+
+    /* Functional Colors */
+    --info: #5dade2;
+    --success: #58d68d;
+    --warning: #f5b041;
+    --danger: #ec7063;
+
+    /* Shadows - 深色模式使用更柔和的陰影 */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+
+    /* Background Colors */
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+
+    /* Text Colors */
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --text-muted: #95a5a6;
+
+    /* Border Colors */
+    --border-color: #34495e;
+    --border-light: #2c3e50;
 }
 
 body {
     font-family: 'Noto Sans TC', 'Arial', sans-serif;
-    background-color: var(--neutral-light);
+    background-color: var(--bg-tertiary);
     margin: 0;
     padding: 0;
-    color: var(--neutral-dark);
+    color: var(--text-primary);
     line-height: 1.6;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 h1, h3 {
@@ -149,24 +207,74 @@ h1, h3 {
     margin-bottom: var(--space-lg) !important;
 }
 
+/* 深色模式切換按鈕容器 */
+.dark-mode-toggle-container {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}
+
+#dark-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    border: 2px solid var(--border-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+#dark-mode-toggle:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+#dark-mode-toggle i {
+    font-size: 1rem;
+    transition: transform var(--transition-normal);
+}
+
+#dark-mode-toggle:hover i {
+    transform: rotate(20deg);
+}
+
+/* 深色模式時按鈕樣式調整 */
+[data-theme="dark"] #dark-mode-toggle {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] #dark-mode-toggle i {
+    color: #f5b041;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--space-lg);
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--bg-primary);
     backdrop-filter: blur(10px);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
+    transition: background-color var(--transition-normal);
 }
 
 /* Filter Options */
 #filter-options {
-    background-color: #ffffff;
+    background-color: var(--bg-primary);
     padding: var(--space-lg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-bottom: var(--space-lg);
-    transition: box-shadow var(--transition-normal);
+    transition: all var(--transition-normal);
     border-left: 4px solid var(--primary);
 }
 
@@ -176,16 +284,18 @@ h1, h3 {
 
 #filter-options label {
     font-weight: 600;
-    color: var(--neutral-dark);
+    color: var(--text-primary);
     margin-bottom: var(--space-xs);
     display: block;
 }
 
 #filter-options .form-control {
     border-radius: var(--radius-md);
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     padding: 0.5rem 0.75rem;
     transition: all var(--transition-fast);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 #filter-options .form-control:focus {
@@ -196,12 +306,12 @@ h1, h3 {
 /* Articles List */
 .card {
     margin-bottom: var(--space-lg);
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    transition: all var(--transition-normal);
     overflow: hidden;
-    background-color: white;
+    background-color: var(--bg-primary);
 }
 
 .card:hover {
@@ -238,7 +348,7 @@ h1, h3 {
 }
 
 .card-text {
-    color: var(--neutral-medium);
+    color: var(--text-secondary);
     margin-bottom: var(--space-md);
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -681,54 +791,137 @@ button.btn-secondary:focus:not(:active)::after {
     border-radius: var(--radius-round);
 }
 
-/* 圖表切換按鈕 */
-#showKeywordTrend, #showExpectedTrend {
-    margin: var(--space-sm) var(--space-xs);
-    padding: 0.75rem 1.25rem;
+/* 圖表切換按鈕群組 */
+.chart-toggle-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 圖表切換按鈕統一樣式 */
+.chart-toggle-btn {
+    min-width: 200px;
+    padding: 0.875rem 1.5rem;
     border-radius: var(--radius-md);
     font-weight: 600;
+    font-size: 0.95rem;
     transition: all var(--transition-normal);
-    border: none;
+    border: 2px solid var(--primary);
+    background-color: transparent;
+    color: var(--primary);
     position: relative;
     overflow: hidden;
-    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-#showKeywordTrend.btn-primary, #showExpectedTrend.btn-primary {
+.chart-toggle-btn i {
+    font-size: 1.5rem;
+    transition: transform var(--transition-normal);
+}
+
+.chart-toggle-btn .btn-text {
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+/* 活躍狀態 */
+.chart-toggle-btn.active,
+.chart-toggle-btn.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Hover 效果 */
+.chart-toggle-btn:hover {
     background-color: var(--primary);
-    color: #ffffff;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-}
-
-#showKeywordTrend.btn-secondary, #showExpectedTrend.btn-secondary {
-    background-color: var(--neutral-medium);
-    color: #ffffff;
-}
-
-#showKeywordTrend:hover, #showExpectedTrend:hover {
+    color: white;
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
 }
 
-#showKeywordTrend::before, #showExpectedTrend::before {
+.chart-toggle-btn:hover i {
+    transform: scale(1.15);
+}
+
+.chart-toggle-btn.active:hover {
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+}
+
+/* 光澤動畫效果 */
+.chart-toggle-btn::before {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
+    left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transform: translateX(-100%);
-    z-index: -1;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left var(--transition-slow);
 }
 
-#showKeywordTrend:hover::before, #showExpectedTrend:hover::before {
-    animation: shine 1.5s infinite;
+.chart-toggle-btn:hover::before {
+    left: 100%;
 }
 
-@keyframes shine {
-    100% {
-        transform: translateX(100%);
+/* 深色模式調整 */
+[data-theme="dark"] .chart-toggle-btn-group {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .chart-toggle-btn {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+[data-theme="dark"] .chart-toggle-btn.active,
+[data-theme="dark"] .chart-toggle-btn.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .chart-toggle-btn-group {
+        gap: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .chart-toggle-btn {
+        min-width: 160px;
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .chart-toggle-btn i {
+        font-size: 1.25rem;
+    }
+
+    .chart-toggle-btn .btn-text {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .chart-toggle-btn-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chart-toggle-btn {
+        width: 100%;
+        min-width: auto;
     }
 }
 
@@ -1445,3 +1638,441 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 /* 淡入淡出動畫 - 已經在上面定義過，這裡移除重複定義 */
+
+/* ========================================
+   深色模式專屬樣式調整
+   ======================================== */
+
+[data-theme="dark"] {
+    /* 圖表容器深色模式 */
+    #keywordTrendContainer,
+    #expectedTrendContainer {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    /* 統計卡片深色模式 */
+    .stat-card {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .stat-card:hover {
+        border-color: var(--primary);
+    }
+
+    /* 列表檢視深色模式 */
+    .articles-list-view {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+    }
+
+    .list-view-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .list-view-table tbody tr:hover {
+        background-color: var(--bg-tertiary);
+    }
+
+    .list-view-title {
+        color: var(--text-primary);
+    }
+
+    .list-view-date {
+        color: var(--text-secondary);
+    }
+
+    .list-view-keyword {
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+
+    /* Modal 深色模式 */
+    .modal-content {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .modal-header {
+        background-color: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-body {
+        color: var(--text-primary);
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* 按鈕深色模式調整 */
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-secondary);
+        border-color: var(--border-color);
+        background-color: var(--bg-secondary);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--bg-tertiary);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    /* 表單元素深色模式 */
+    .form-control,
+    .custom-file-input,
+    .custom-select {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .form-control:focus {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: var(--primary);
+    }
+
+    .custom-file-label {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .custom-file-label::after {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    /* 進階篩選深色模式 */
+    #advanced-filters {
+        background-color: var(--bg-tertiary);
+        border-left-color: var(--secondary);
+    }
+
+    /* 分頁按鈕深色模式 */
+    .pagination button {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .pagination button.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .pagination button:hover:not(.active) {
+        background-color: var(--bg-tertiary);
+        color: var(--primary);
+    }
+
+    /* 徽章深色模式 */
+    .badge-pill {
+        background-color: rgba(93, 173, 226, 0.2);
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .badge-pill:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    /* 卡片頁腳深色模式 */
+    .card-footer {
+        background-color: var(--bg-tertiary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* 圖表容器深色模式 */
+    .chart-container {
+        background-color: var(--bg-tertiary);
+    }
+
+    /* 載入動畫深色模式 */
+    #loading-overlay {
+        background-color: rgba(26, 26, 46, 0.9);
+    }
+
+    .spinner {
+        border-left-color: var(--primary);
+    }
+
+    /* 文字顏色調整 */
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    /* Alert 深色模式 */
+    .alert {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .alert-info {
+        background-color: rgba(93, 173, 226, 0.2);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .alert-danger {
+        background-color: rgba(236, 112, 99, 0.2);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* 輸入群組深色模式 */
+    .input-group-text {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    /* 快速日期按鈕深色模式 */
+    .quick-date-btn {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .quick-date-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+    }
+
+    /* 區塊標題深色模式 */
+    .card-header {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    /* 檢視模式按鈕深色模式 */
+    .btn-group .btn {
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+    }
+
+    .btn-group .btn.active {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Smooth transitions for theme switching */
+    * {
+        transition: background-color var(--transition-normal),
+                    color var(--transition-normal),
+                    border-color var(--transition-normal);
+    }
+
+    /* 保持圖片和圖表的原始樣式 */
+    img, canvas {
+        transition: none;
+    }
+}
+
+/* ========================================
+   關鍵詞詞雲視覺化樣式
+   ======================================== */
+
+#keywordCloudContainer {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+#keywordCloudContainer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+}
+
+#keywordCloudContainer:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-5px);
+}
+
+#keywordCloudContainer h2 {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    display: inline-block;
+}
+
+#keywordCloudContainer h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background-color: var(--primary);
+    border-radius: var(--radius-round);
+}
+
+.wordcloud-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 500px;
+    margin: 0 auto;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#keywordCloudCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    cursor: default;
+}
+
+.cloud-controls {
+    margin-bottom: var(--space-lg);
+}
+
+.cloud-controls .form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+#cloud-size-value {
+    display: inline-block;
+    min-width: 30px;
+    font-weight: 700;
+    color: var(--primary);
+    padding: 0 0.5rem;
+}
+
+.cloud-slider {
+    width: 60%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Range slider 樣式 */
+.form-range {
+    width: 100%;
+    height: 8px;
+    padding: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.form-range::-webkit-slider-track {
+    height: 8px;
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    border-radius: var(--radius-round);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all var(--transition-fast);
+    margin-top: -6px;
+}
+
+.form-range::-webkit-slider-thumb:hover {
+    background-color: var(--primary);
+    transform: scale(1.1);
+}
+
+.form-range::-moz-range-track {
+    height: 8px;
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    border-radius: var(--radius-round);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.form-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all var(--transition-fast);
+}
+
+.form-range::-moz-range-thumb:hover {
+    background-color: var(--primary);
+    transform: scale(1.1);
+}
+
+/* 深色模式詞雲樣式 */
+[data-theme="dark"] #keywordCloudContainer {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .wordcloud-container {
+    background-color: var(--bg-tertiary);
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .wordcloud-container {
+        height: 400px;
+    }
+
+    #keywordCloudCanvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .cloud-slider {
+        width: 80%;
+    }
+}
+
+@media (max-width: 576px) {
+    .wordcloud-container {
+        height: 300px;
+    }
+}
