@@ -47,6 +47,7 @@ class EventHandlers {
         this.initializeContentToggleEvents();
         this.initializeSliderEvents();
         this.initializeFileUploadLabel();
+        this.initializeTrendModeToggle();
     }
 
     // 初始化檔案上傳標籤
@@ -732,7 +733,7 @@ class EventHandlers {
         }, 300);
     }
 
-    // 處理顯示關鍵詞詞雲
+    // 處理顯示關鍵詞文字雲
     handleShowKeywordCloud(event) {
         const keywordTrendContainer = document.getElementById('keywordTrendContainer');
         const expectedTrendContainer = document.getElementById('expectedTrendContainer');
@@ -740,7 +741,7 @@ class EventHandlers {
 
         if (!keywordCloudContainer) return;
 
-        this.uiComponents.showLoading('正在載入關鍵詞詞雲...');
+        this.uiComponents.showLoading('正在載入關鍵詞文字雲...');
 
         this.saveCurrentMonthSliderState();
 
@@ -753,7 +754,7 @@ class EventHandlers {
                 expectedTrendContainer.style.display = 'none';
             }
 
-            // 顯示詞雲容器
+            // 顯示文字雲容器
             this.showChartContainer(keywordCloudContainer);
             this.updateChartButtons(event.target, 'showKeywordTrend', 'showExpectedTrend');
 
@@ -761,12 +762,12 @@ class EventHandlers {
             const cloudSizeSlider = document.getElementById('cloud-size-slider');
             const topN = cloudSizeSlider ? parseInt(cloudSizeSlider.value) : 50;
 
-            // 渲染詞雲
+            // 渲染文字雲
             this.chartManager.renderKeywordCloud(topN);
         }, 300);
     }
 
-    // 處理詞雲大小變更
+    // 處理文字雲大小變更
     handleCloudSizeChange(event) {
         const value = event.target.value;
         const valueDisplay = document.getElementById('cloud-size-value');
@@ -1039,9 +1040,9 @@ class EventHandlers {
     adjustSliderWidth(monthCount) {
         const monthSlider = document.getElementById('month-slider');
         if (!monthSlider) return;
-        
+
         let width;
-        
+
         if (monthCount <= 3) {
             width = '30%';
         } else if (monthCount <= 6) {
@@ -1053,9 +1054,238 @@ class EventHandlers {
         } else {
             width = '85%';
         }
-        
+
         monthSlider.style.width = width;
         console.log(`根據 ${monthCount} 個月份調整滑桿寬度為 ${width}`);
+    }
+
+    // 初始化趨勢模式切換
+    initializeTrendModeToggle() {
+        const singleMonthBtn = document.getElementById('single-month-mode');
+        const multiMonthBtn = document.getElementById('multi-month-mode');
+        const timeRangeBtn = document.getElementById('time-range-mode');
+        const resetZoomBtn = document.getElementById('reset-chart-zoom');
+
+        if (singleMonthBtn) {
+            singleMonthBtn.addEventListener('click', () => this.switchTrendMode('single'));
+        }
+        if (multiMonthBtn) {
+            multiMonthBtn.addEventListener('click', () => this.switchTrendMode('multi'));
+        }
+        if (timeRangeBtn) {
+            timeRangeBtn.addEventListener('click', () => this.switchTrendMode('range'));
+        }
+        if (resetZoomBtn) {
+            resetZoomBtn.addEventListener('click', () => this.chartManager.resetChartZoom());
+        }
+
+        // 多月選擇相關事件
+        const applyMultiMonthBtn = document.getElementById('apply-multi-month');
+        const clearMonthSelectionBtn = document.getElementById('clear-month-selection');
+
+        if (applyMultiMonthBtn) {
+            applyMultiMonthBtn.addEventListener('click', () => this.applyMultiMonthComparison());
+        }
+        if (clearMonthSelectionBtn) {
+            clearMonthSelectionBtn.addEventListener('click', () => this.clearMonthSelection());
+        }
+
+        // 時間範圍相關事件
+        const applyTimeRangeBtn = document.getElementById('apply-time-range');
+        if (applyTimeRangeBtn) {
+            applyTimeRangeBtn.addEventListener('click', () => this.applyTimeRangeFilter());
+        }
+    }
+
+    // 切換趨勢模式
+    switchTrendMode(mode) {
+        const singleMonthControls = document.getElementById('single-month-controls');
+        const multiMonthControls = document.getElementById('multi-month-controls');
+        const timeRangeControls = document.getElementById('time-range-controls');
+
+        const singleMonthBtn = document.getElementById('single-month-mode');
+        const multiMonthBtn = document.getElementById('multi-month-mode');
+        const timeRangeBtn = document.getElementById('time-range-mode');
+
+        // 隱藏所有控制區
+        if (singleMonthControls) singleMonthControls.style.display = 'none';
+        if (multiMonthControls) multiMonthControls.style.display = 'none';
+        if (timeRangeControls) timeRangeControls.style.display = 'none';
+
+        // 移除所有按鈕的活動狀態
+        singleMonthBtn?.classList.remove('active');
+        multiMonthBtn?.classList.remove('active');
+        timeRangeBtn?.classList.remove('active');
+
+        // 根據模式顯示相應控制區
+        switch (mode) {
+            case 'single':
+                if (singleMonthControls) singleMonthControls.style.display = 'block';
+                singleMonthBtn?.classList.add('active');
+                // 恢復單月圖表
+                this.handleSliderChange();
+                break;
+
+            case 'multi':
+                if (multiMonthControls) multiMonthControls.style.display = 'block';
+                multiMonthBtn?.classList.add('active');
+                // 生成月份複選框
+                this.generateMonthCheckboxes();
+                break;
+
+            case 'range':
+                if (timeRangeControls) timeRangeControls.style.display = 'block';
+                timeRangeBtn?.classList.add('active');
+                // 填充時間範圍下拉選單
+                this.populateTimeRangeSelectors();
+                break;
+        }
+    }
+
+    // 生成月份複選框
+    generateMonthCheckboxes() {
+        const container = document.getElementById('month-checkboxes');
+        if (!container) return;
+
+        const filteredData = this.stateManager.getState('filteredArticlesData');
+        const articlesData = this.stateManager.getState('articlesData');
+        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+
+        if (!months || months.length === 0) {
+            container.innerHTML = '<p class="text-muted">目前沒有可用的月份資料</p>';
+            return;
+        }
+
+        // 清空容器
+        container.innerHTML = '';
+
+        // 為每個月份創建複選框
+        months.forEach(month => {
+            const item = document.createElement('div');
+            item.className = 'month-checkbox-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `month-${month}`;
+            checkbox.value = month;
+            checkbox.className = 'month-checkbox';
+
+            const label = document.createElement('label');
+            label.htmlFor = `month-${month}`;
+            label.className = 'month-checkbox-label';
+            label.textContent = this.utilities.formatMonthDisplay(month);
+
+            // 限制最多選擇 5 個月份
+            checkbox.addEventListener('change', (e) => {
+                const checkedCount = container.querySelectorAll('.month-checkbox:checked').length;
+                if (checkedCount > 5) {
+                    e.target.checked = false;
+                    alert('最多只能選擇 5 個月份進行比較');
+                }
+            });
+
+            item.appendChild(checkbox);
+            item.appendChild(label);
+            container.appendChild(item);
+        });
+    }
+
+    // 套用多月比較
+    applyMultiMonthComparison() {
+        const container = document.getElementById('month-checkboxes');
+        if (!container) return;
+
+        const checkedBoxes = container.querySelectorAll('.month-checkbox:checked');
+        const selectedMonths = Array.from(checkedBoxes).map(cb => cb.value);
+
+        if (selectedMonths.length === 0) {
+            alert('請至少選擇一個月份');
+            return;
+        }
+
+        if (selectedMonths.length === 1) {
+            // 如果只選擇一個月份，使用單月圖表
+            this.chartManager.renderTrendChart(selectedMonths[0]);
+
+            // 更新說明文字
+            const descriptionText = document.getElementById('trend-description-text');
+            if (descriptionText) {
+                descriptionText.textContent = `此圖表顯示選定月份中出現頻率最高的關鍵詞`;
+            }
+        } else {
+            // 多個月份使用比較圖表
+            this.chartManager.renderMultiMonthComparisonChart(selectedMonths);
+        }
+    }
+
+    // 清除月份選擇
+    clearMonthSelection() {
+        const container = document.getElementById('month-checkboxes');
+        if (!container) return;
+
+        const checkboxes = container.querySelectorAll('.month-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+        });
+    }
+
+    // 填充時間範圍選擇器
+    populateTimeRangeSelectors() {
+        const startSelect = document.getElementById('trend-start-month');
+        const endSelect = document.getElementById('trend-end-month');
+
+        if (!startSelect || !endSelect) return;
+
+        const filteredData = this.stateManager.getState('filteredArticlesData');
+        const articlesData = this.stateManager.getState('articlesData');
+        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
+
+        if (!months || months.length === 0) {
+            startSelect.innerHTML = '<option value="">沒有可用資料</option>';
+            endSelect.innerHTML = '<option value="">沒有可用資料</option>';
+            return;
+        }
+
+        // 清空現有選項
+        startSelect.innerHTML = '<option value="">請選擇...</option>';
+        endSelect.innerHTML = '<option value="">請選擇...</option>';
+
+        // 添加月份選項
+        months.forEach(month => {
+            const startOption = document.createElement('option');
+            startOption.value = month;
+            startOption.textContent = this.utilities.formatMonthDisplay(month);
+            startSelect.appendChild(startOption);
+
+            const endOption = document.createElement('option');
+            endOption.value = month;
+            endOption.textContent = this.utilities.formatMonthDisplay(month);
+            endSelect.appendChild(endOption);
+        });
+
+        // 預設選擇第一個和最後一個月份
+        if (months.length > 0) {
+            startSelect.value = months[0];
+            endSelect.value = months[months.length - 1];
+        }
+    }
+
+    // 套用時間範圍篩選
+    applyTimeRangeFilter() {
+        const startSelect = document.getElementById('trend-start-month');
+        const endSelect = document.getElementById('trend-end-month');
+
+        if (!startSelect || !endSelect) return;
+
+        const startMonth = startSelect.value;
+        const endMonth = endSelect.value;
+
+        if (!startMonth || !endMonth) {
+            alert('請選擇起始和結束月份');
+            return;
+        }
+
+        this.chartManager.renderTimeRangeTrendChart(startMonth, endMonth);
     }
 }
 

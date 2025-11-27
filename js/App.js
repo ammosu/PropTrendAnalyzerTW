@@ -478,8 +478,8 @@ class App {
     showDataDependentSections() {
         const sections = document.querySelectorAll('.data-dependent-section');
         sections.forEach(section => {
-            // 特殊處理：expectedTrendContainer 預設不顯示（由頁籤切換控制）
-            if (section.id === 'expectedTrendContainer') {
+            // 特殊處理：expectedTrendContainer 和 keywordCloudContainer 預設不顯示（由頁籤切換控制）
+            if (section.id === 'expectedTrendContainer' || section.id === 'keywordCloudContainer') {
                 return; // 保持隱藏狀態
             }
             // 使用 block 來顯示區塊元素
