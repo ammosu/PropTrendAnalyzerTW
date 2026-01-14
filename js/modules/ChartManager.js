@@ -65,26 +65,27 @@ class ChartManager {
 
         const formattedLabels = months.map(month => this.utilities.formatMonthDisplay(month));
 
+        // 使用 Constants 定義的專業配色方案
         const trendColors = {
             "上漲": {
-                backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                borderColor: 'rgba(46, 204, 113, 1)'
+                backgroundColor: Constants.COLORS.TREND.UP + 'B3', // 70% 不透明度
+                borderColor: Constants.COLORS.TREND.UP
             },
             "下跌": {
-                backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                borderColor: 'rgba(255, 99, 132, 1)'
+                backgroundColor: Constants.COLORS.TREND.DOWN + 'B3',
+                borderColor: Constants.COLORS.TREND.DOWN
             },
             "平穩": {
-                backgroundColor: 'rgba(255, 205, 86, 0.7)',
-                borderColor: 'rgba(255, 205, 86, 1)'
+                backgroundColor: Constants.COLORS.TREND.STABLE + 'B3',
+                borderColor: Constants.COLORS.TREND.STABLE
             },
             "無相關": {
-                backgroundColor: 'rgba(201, 203, 207, 0.7)',
-                borderColor: 'rgba(201, 203, 207, 1)'
+                backgroundColor: Constants.COLORS.TREND.UNRELATED + 'B3',
+                borderColor: Constants.COLORS.TREND.UNRELATED
             },
             "無法判斷": {
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)'
+                backgroundColor: Constants.COLORS.TREND.UNKNOWN + 'B3',
+                borderColor: Constants.COLORS.TREND.UNKNOWN
             }
         };
 
@@ -162,19 +163,39 @@ class ChartManager {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        enabled: true,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',  /* 使用主題深色 */
                         titleFont: {
-                            size: 14,
-                            weight: 'bold'
+                            size: 15,
+                            weight: '600',
+                            family: "'Noto Sans TC', sans-serif"
                         },
                         bodyFont: {
-                            size: 13
+                            size: 14,
+                            family: "'Noto Sans TC', sans-serif"
                         },
-                        padding: 10,
-                        cornerRadius: 6,
+                        padding: 14,
+                        cornerRadius: 8,
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
+                        displayColors: true,
+                        boxPadding: 6,
                         callbacks: {
+                            title: function(tooltipItems) {
+                                return `📅 ${tooltipItems[0].label}`;
+                            },
                             label: function(context) {
-                                return `${context.dataset.label}: ${context.raw} 篇`;
+                                const label = context.dataset.label || '';
+                                const value = context.raw;
+                                const emoji = label === '上漲' ? '📈' :
+                                             label === '下跌' ? '📉' :
+                                             label === '平穩' ? '➡️' :
+                                             label === '無相關' ? '❓' : '🔍';
+                                return `${emoji} ${label}: ${value} 篇`;
+                            },
+                            footer: function(tooltipItems) {
+                                const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
+                                return `\n總計: ${total} 篇新聞`;
                             }
                         }
                     }
@@ -247,18 +268,10 @@ class ChartManager {
             existingChart.destroy();
         }
 
-        const gradientColors = [
-            'rgba(99, 102, 241, 0.8)',   // 靛藍色
-            'rgba(244, 63, 94, 0.8)',    // 玫瑰紅
-            'rgba(251, 146, 60, 0.8)',   // 橘色
-            'rgba(34, 197, 94, 0.8)',    // 翠綠色
-            'rgba(168, 85, 247, 0.8)',   // 紫色
-            'rgba(14, 165, 233, 0.8)',   // 天藍色
-            'rgba(236, 72, 153, 0.8)',   // 粉紅色
-            'rgba(234, 179, 8, 0.8)',    // 金黃色
-            'rgba(20, 184, 166, 0.8)',   // 青綠色
-            'rgba(248, 113, 113, 0.8)'   // 珊瑚紅
-        ];
+        // 使用 Constants 定義的專業漸層配色方案
+        const gradientColors = Constants.COLORS.CHART_GRADIENT.map(color =>
+            this.hexToRgba(color, 0.8)
+        );
 
         const ctx = document.getElementById('trend').getContext('2d');
 
@@ -329,20 +342,37 @@ class ChartManager {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        enabled: true,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
                         titleFont: {
-                            size: 14,
-                            weight: 'bold'
+                            size: 15,
+                            weight: '600',
+                            family: "'Noto Sans TC', sans-serif"
                         },
                         bodyFont: {
-                            size: 13
+                            size: 14,
+                            family: "'Noto Sans TC', sans-serif"
                         },
-                        padding: 10,
-                        cornerRadius: 6,
+                        footerFont: {
+                            size: 13,
+                            weight: '500'
+                        },
+                        padding: 14,
+                        cornerRadius: 8,
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
                         displayColors: false,
                         callbacks: {
+                            title: function(context) {
+                                return `🔑 ${context[0].label}`;
+                            },
                             label: function(context) {
-                                return `出現次數: ${context.raw}`;
+                                return `出現次數: ${context.raw} 次`;
+                            },
+                            footer: function(context) {
+                                const totalCounts = context[0].chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context[0].raw / totalCounts) * 100).toFixed(1);
+                                return `\n佔比: ${percentage}%`;
                             }
                         }
                     },
@@ -435,22 +465,17 @@ class ChartManager {
             return;
         }
 
-        // 準備資料集
+        // 使用 Constants 定義的專業配色方案（多月比較）
+        const colorPalette = Constants.COLORS.CHART_GRADIENT.slice(0, 5);
         const datasets = selectedMonths.map((month, index) => {
-            const colors = [
-                'rgba(52, 152, 219, 0.7)',
-                'rgba(46, 204, 113, 0.7)',
-                'rgba(155, 89, 182, 0.7)',
-                'rgba(231, 76, 60, 0.7)',
-                'rgba(243, 156, 18, 0.7)'
-            ];
-            const borderColors = colors.map(c => c.replace('0.7', '1'));
+            const backgroundColor = this.hexToRgba(colorPalette[index % colorPalette.length], 0.7);
+            const borderColor = colorPalette[index % colorPalette.length];
 
             return {
                 label: this.utilities.formatMonthDisplay(month),
                 data: topKeywords.map(keyword => monthKeywordCounts[month][keyword] || 0),
-                backgroundColor: colors[index % colors.length],
-                borderColor: borderColors[index % borderColors.length],
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
                 borderWidth: 2
             };
         });
@@ -512,17 +537,27 @@ class ChartManager {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        enabled: true,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
                         titleFont: {
-                            size: 14,
-                            weight: 'bold'
+                            size: 15,
+                            weight: '600',
+                            family: "'Noto Sans TC', sans-serif"
                         },
                         bodyFont: {
-                            size: 13
+                            size: 14,
+                            family: "'Noto Sans TC', sans-serif"
                         },
-                        padding: 10,
-                        cornerRadius: 6,
+                        padding: 14,
+                        cornerRadius: 8,
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
+                        displayColors: true,
+                        boxPadding: 6,
                         callbacks: {
+                            title: function(context) {
+                                return `🔑 ${context[0].label}`;
+                            },
                             label: function(context) {
                                 return `${context.dataset.label}: ${context.raw} 次`;
                             }
@@ -636,11 +671,8 @@ class ChartManager {
             return;
         }
 
-        // 為每個關鍵詞準備資料集（折線圖）
-        const colors = [
-            '#3498db', '#2ecc71', '#9b59b6', '#e74c3c',
-            '#f39c12', '#1abc9c', '#34495e', '#e67e22'
-        ];
+        // 使用 Constants 定義的專業配色方案（折線圖）
+        const colors = Constants.COLORS.CHART_GRADIENT.slice(0, 8);
 
         const datasets = topKeywords.map((keyword, index) => {
             return {
@@ -722,20 +754,30 @@ class ChartManager {
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        enabled: true,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
                         titleFont: {
-                            size: 14,
-                            weight: 'bold'
+                            size: 15,
+                            weight: '600',
+                            family: "'Noto Sans TC', sans-serif"
                         },
                         bodyFont: {
-                            size: 13
+                            size: 14,
+                            family: "'Noto Sans TC', sans-serif"
                         },
-                        padding: 12,
+                        padding: 14,
                         cornerRadius: 8,
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderWidth: 1,
                         displayColors: true,
+                        boxPadding: 6,
                         callbacks: {
+                            title: function(context) {
+                                return `📅 ${context[0].label}`;
+                            },
                             label: function(context) {
-                                return `${context.dataset.label}: ${context.raw} 次`;
+                                const emoji = '🔑';
+                                return `${emoji} ${context.dataset.label}: ${context.raw} 次`;
                             }
                         }
                     },
@@ -771,11 +813,32 @@ class ChartManager {
         }
     }
 
-    // 重置圖表縮放
+    // 重置圖表縮放（增強視覺反饋）
     resetChartZoom() {
         const chart = this.stateManager.getState('trendChart');
         if (chart && chart.resetZoom) {
-            chart.resetZoom();
+            // 添加過渡動畫
+            chart.resetZoom('default');
+
+            // 視覺反饋：顯示重置成功訊息
+            const resetButton = document.getElementById('resetZoom');
+            if (resetButton) {
+                const originalText = resetButton.innerHTML;
+                resetButton.innerHTML = '<i class="fas fa-check me-1"></i> 已重置';
+                resetButton.classList.add('btn-success');
+                resetButton.classList.remove('btn-outline-secondary');
+
+                // 1秒後恢復原狀
+                setTimeout(() => {
+                    resetButton.innerHTML = originalText;
+                    resetButton.classList.remove('btn-success');
+                    resetButton.classList.add('btn-outline-secondary');
+                }, 1000);
+            }
+
+            console.log('圖表縮放已重置');
+        } else {
+            console.warn('圖表不存在或不支援縮放重置功能');
         }
     }
 
@@ -880,11 +943,8 @@ class ChartManager {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 生成顏色函數（使用漸層色）
-        const colors = [
-            '#3498db', '#2ecc71', '#9b59b6', '#e74c3c', '#f39c12',
-            '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'
-        ];
+        // 使用 Constants 定義的專業配色方案（文字雲）
+        const colors = Constants.COLORS.CHART_GRADIENT;
 
         // 渲染文字雲
         WordCloud(canvas, {
@@ -922,6 +982,24 @@ class ChartManager {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#7f8c8d';
         ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    }
+
+    /**
+     * 將 Hex 顏色轉換為 RGBA 格式
+     * @param {string} hex - Hex 顏色碼 (例如: '#6366F1')
+     * @param {number} alpha - 透明度 (0-1)
+     * @returns {string} RGBA 顏色字串
+     */
+    hexToRgba(hex, alpha) {
+        // 移除 # 符號
+        hex = hex.replace('#', '');
+
+        // 轉換為 RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 }
 

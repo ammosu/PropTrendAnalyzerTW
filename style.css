@@ -1587,19 +1587,20 @@ canvas#trend, canvas#expectedTrendChart {
     font-weight: 600;
 }
 
+/* 趨勢標籤配色 - 與 JavaScript Constants 保持一致 */
 .list-view-trend.trend-up {
-    background: rgba(46, 204, 113, 0.1);
-    color: #27ae60;
+    background: rgba(38, 166, 154, 0.1);  /* #26A69A */
+    color: #26A69A;
 }
 
 .list-view-trend.trend-down {
-    background: rgba(231, 76, 60, 0.1);
-    color: #c0392b;
+    background: rgba(239, 83, 80, 0.1);  /* #EF5350 */
+    color: #EF5350;
 }
 
 .list-view-trend.trend-stable {
-    background: rgba(52, 152, 219, 0.1);
-    color: #2980b9;
+    background: rgba(59, 130, 246, 0.1);  /* #3B82F6 */
+    color: #3B82F6;
 }
 
 .list-view-keywords {
