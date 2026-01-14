@@ -311,19 +311,36 @@ h1, h3 {
     transition: background-color var(--transition-normal);
 }
 
-/* Filter Options */
+/* Filter Options - 優化視覺反饋 */
 #filter-options {
     background-color: var(--bg-primary);
     padding: var(--space-lg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-bottom: var(--space-lg);
-    transition: box-shadow var(--transition-normal);
+    transition: box-shadow var(--transition-normal), transform 0.2s ease;
     border-left: 4px solid var(--primary);
+    position: relative;
+    overflow: hidden;
+}
+
+#filter-options::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
 }
 
 #filter-options:hover {
     box-shadow: var(--shadow-lg);
+}
+
+#filter-options:hover::before {
+    width: 6px;
 }
 
 #filter-options label {
@@ -335,16 +352,25 @@ h1, h3 {
 
 #filter-options .form-control {
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     padding: 0.5rem 0.75rem;
-    transition: all var(--transition-fast);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease,
+                transform 0.15s ease, background-color 0.2s ease;
     background-color: var(--bg-secondary);
     color: var(--text-primary);
 }
 
+#filter-options .form-control:hover {
+    border-color: var(--border-light);
+    background-color: var(--bg-primary);
+}
+
 #filter-options .form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+    outline: none;
+    background-color: var(--bg-primary);
 }
 
 /* Articles List */
@@ -497,18 +523,78 @@ h1, h3 {
     box-shadow: var(--shadow-md);
 }
 
-/* Advanced Filters */
+/* Advanced Filters - 優化展開/收合動畫 */
 #advanced-filters {
     background-color: rgba(241, 241, 241, 0.5);
     padding: var(--space-md);
     border-radius: var(--radius-md);
     margin-top: var(--space-sm);
     border-left: 3px solid var(--secondary);
-    transition: background-color var(--transition-normal);
+    transition: background-color var(--transition-normal),
+                max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease,
+                transform 0.3s ease;
+}
+
+#advanced-filters.collapsing {
+    overflow: hidden;
+    transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#advanced-filters.collapse:not(.show) {
+    display: none;
+}
+
+#advanced-filters.collapse.show {
+    animation: expandIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes expandIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #advanced-filters:hover {
     background-color: rgba(241, 241, 241, 0.8);
+}
+
+/* 進階篩選按鈕改進 */
+button[data-target="#advanced-filters"] {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button[data-target="#advanced-filters"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+button[data-target="#advanced-filters"]:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+button[data-target="#advanced-filters"] i {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button[data-target="#advanced-filters"][aria-expanded="true"] i {
+    transform: rotate(180deg);
 }
 
 .btn-group-toggle .btn {
@@ -1631,7 +1717,7 @@ canvas#trend, canvas#expectedTrendChart {
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
 
-/* 快速日期篩選按鈕樣式 */
+/* 快速日期篩選按鈕樣式 - 增強視覺反饋 */
 .quick-date-filters {
     display: flex;
     flex-wrap: wrap;
@@ -1643,18 +1729,42 @@ canvas#trend, canvas#expectedTrendChart {
     padding: 0.35rem 0.9rem;
     font-size: 0.85rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s ease,
+                color 0.3s ease,
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease;
     border: 1.5px solid #dee2e6;
     background: white;
     color: #495057;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-date-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.quick-date-btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .quick-date-btn:hover {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-color: #667eea;
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .quick-date-btn.active {
@@ -1662,40 +1772,83 @@ canvas#trend, canvas#expectedTrendChart {
     border-color: #667eea;
     color: white;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    50% {
+        box-shadow: 0 2px 16px rgba(102, 126, 234, 0.6);
+    }
 }
 
 .quick-date-btn:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.98);
 }
 
 .quick-date-btn i {
     font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
 }
 
-/* 篩選標籤樣式 */
+/* 篩選標籤樣式 - 增強互動反饋 */
 #active-filters-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+    min-height: 32px;
 }
 
 .filter-tag {
     display: inline-flex;
     align-items: center;
     padding: 0.4rem 0.8rem;
-    background-color: rgba(52, 152, 219, 0.1);
-    border: 1px solid var(--primary);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+    border: 1.5px solid var(--primary);
     border-radius: var(--radius-md);
     font-size: 0.85rem;
+    font-weight: 500;
     color: var(--primary-dark);
-    animation: fadeIn 0.3s ease-in;
-    transition: all var(--transition-fast);
+    animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.filter-tag::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.filter-tag:hover::before {
+    left: 100%;
 }
 
 .filter-tag:hover {
-    background-color: rgba(52, 152, 219, 0.2);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    border-color: var(--primary-dark);
 }
 
 .filter-tag .remove-filter {
@@ -1703,11 +1856,36 @@ canvas#trend, canvas#expectedTrendChart {
     cursor: pointer;
     color: var(--danger);
     font-weight: bold;
-    transition: transform var(--transition-fast);
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .filter-tag .remove-filter:hover {
-    transform: scale(1.2);
+    transform: scale(1.2) rotate(90deg);
+    background: rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+}
+
+.filter-tag .remove-filter:active {
+    transform: scale(0.9);
+}
+
+/* 標籤移除動畫 */
+.filter-tag.removing {
+    animation: slideOutToRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutToRight {
+    to {
+        opacity: 0;
+        transform: translateX(20px) scale(0.8);
+    }
 }
 
 /* 匯出按鈕樣式 */
@@ -1729,9 +1907,47 @@ canvas#trend, canvas#expectedTrendChart {
     box-shadow: var(--shadow-sm);
 }
 
-/* 篩選結果數量徽章樣式 */
+/* 篩選結果數量徽章樣式 - 增強動畫效果 */
 #filter-result-count {
-    animation: pulse 0.5s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+}
+
+#filter-result-count.updating {
+    animation: countUpdate 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes countUpdate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+        background-color: rgba(59, 130, 246, 0.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+#filtered-count {
+    display: inline-block;
+    transition: all 0.2s ease;
+    font-weight: 700;
+}
+
+#filtered-count.changed {
+    animation: numberPop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes numberPop {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+        color: var(--secondary);
+    }
 }
 
 @keyframes pulse {
