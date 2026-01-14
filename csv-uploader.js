@@ -1025,18 +1025,21 @@ function showDragDropToast(filename) {
         document.body.appendChild(toastContainer);
     }
 
-    // 建立 toast 元素
+    // 建立 toast 元素 - 使用緊湊樣式
     const toast = document.createElement('div');
-    toast.className = 'toast toast-info animate__animated animate__fadeInRight';
+    toast.className = 'toast toast-compact toast-info animate__animated animate__fadeInRight';
+
+    // 截斷過長的檔案名稱
+    const displayName = filename.length > 30 ? filename.substring(0, 27) + '...' : filename;
 
     toast.innerHTML = `
-        <i class="fas fa-file-upload" aria-hidden="true"></i>
-        <span>已接收檔案：${filename}</span>
+        <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <span>${displayName}</span>
     `;
 
     toastContainer.appendChild(toast);
 
-    // 2 秒後自動移除
+    // 1.5 秒後自動移除（更快消失）
     setTimeout(() => {
         toast.classList.remove('animate__fadeInRight');
         toast.classList.add('animate__fadeOutRight');
@@ -1049,7 +1052,7 @@ function showDragDropToast(filename) {
                 document.body.removeChild(toastContainer);
             }
         }, 300);
-    }, 2000);
+    }, 1500);
 }
 
 // 導出函數供其他模塊使用

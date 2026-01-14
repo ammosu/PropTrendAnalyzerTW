@@ -3290,6 +3290,25 @@ canvas#trend, canvas#expectedTrendChart {
     color: var(--text-primary);
 }
 
+/* Toast 緊湊版樣式 */
+.toast-compact {
+    min-width: 200px;
+    max-width: 280px;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    gap: 8px;
+}
+
+.toast-compact i {
+    font-size: 1rem;
+}
+
+.toast-compact span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Toast 類型變體 */
 .toast-success {
     border-left-color: #10B981;
