@@ -1208,36 +1208,256 @@ button.btn-secondary:focus:not(:active)::after {
     background-color: var(--primary-dark);
 }
 
-/* 載入動畫樣式 - 優化背景不透明度與模糊效果 */
+/* 載入動畫樣式 - 現代化設計與優化 */
 #loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.95);  /* 提升不透明度 */
-    backdrop-filter: blur(5px);  /* 略微增加模糊 */
-    display: flex;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    display: none; /* 預設隱藏，JavaScript 控制顯示 */
     justify-content: center;
     align-items: center;
     z-index: 9999;
     flex-direction: column;
-    transition: opacity 0.5s;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; /* 確保不攔截點擊事件 */
 }
 
+/* 現代化 Spinner - 雙環設計 */
 .spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 36px;
-    height: 36px;
+    position: relative;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+}
+
+.spinner::before,
+.spinner::after {
+    content: '';
+    position: absolute;
     border-radius: 50%;
-    border-left-color: var(--primary);
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
+    border: 3px solid transparent;
+    border-top-color: var(--primary);
+}
+
+.spinner::before {
+    width: 60px;
+    height: 60px;
+    border-right-color: var(--primary);
+    animation: spinOuter 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.spinner::after {
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-bottom-color: var(--secondary);
+    border-left-color: var(--secondary);
+    animation: spinInner 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
+}
+
+@keyframes spinOuter {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinInner {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* 載入文字動畫 */
+#loading-overlay .loading-text {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-top: 10px;
+    animation: loadingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   骨架屏載入動畫
+   ======================================== */
+
+/* 骨架屏容器 */
+.skeleton-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* 骨架屏基礎樣式 */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(229, 231, 235, 0.8) 0%,
+        rgba(243, 244, 246, 0.9) 50%,
+        rgba(229, 231, 235, 0.8) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s ease-in-out infinite;
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes skeletonLoading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* 骨架屏文字行 */
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text:last-child {
+    margin-bottom: 0;
+    width: 80%; /* 最後一行較短 */
+}
+
+/* 骨架屏標題 */
+.skeleton-title {
+    height: 24px;
+    width: 60%;
+    margin-bottom: 12px;
+    border-radius: var(--radius-md);
+}
+
+/* 骨架屏卡片 */
+.skeleton-card {
+    background-color: var(--bg-primary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.skeleton-card .skeleton {
+    margin-bottom: var(--space-sm);
+}
+
+/* 骨架屏統計卡片 */
+.skeleton-stat-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+}
+
+.skeleton-stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.skeleton-stat-content {
+    flex: 1;
+}
+
+.skeleton-stat-value {
+    height: 32px;
+    width: 80px;
+    margin-bottom: 8px;
+    border-radius: var(--radius-md);
+}
+
+.skeleton-stat-label {
+    height: 16px;
+    width: 100px;
+    border-radius: var(--radius-sm);
+}
+
+/* 骨架屏圖表 */
+.skeleton-chart {
+    height: 400px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(
+        90deg,
+        rgba(229, 231, 235, 0.5) 0%,
+        rgba(243, 244, 246, 0.7) 50%,
+        rgba(229, 231, 235, 0.5) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeletonLoading 2s ease-in-out infinite;
+}
+
+/* 骨架屏按鈕 */
+.skeleton-button {
+    height: 38px;
+    width: 120px;
+    border-radius: var(--radius-md);
+}
+
+/* 骨架屏徽章 */
+.skeleton-badge {
+    height: 24px;
+    width: 80px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+/* 深色模式骨架屏 */
+[data-theme="dark"] .skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(51, 65, 85, 0.8) 0%,
+        rgba(71, 85, 105, 0.9) 50%,
+        rgba(51, 65, 85, 0.8) 100%
+    );
+    background-size: 200% 100%;
+}
+
+[data-theme="dark"] .skeleton-stat-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(30, 41, 59, 0.85));
+}
+
+[data-theme="dark"] .skeleton-chart {
+    background: linear-gradient(
+        90deg,
+        rgba(51, 65, 85, 0.5) 0%,
+        rgba(71, 85, 105, 0.7) 50%,
+        rgba(51, 65, 85, 0.5) 100%
+    );
+    background-size: 200% 100%;
 }
 
 /* 卡片頁腳樣式 */
@@ -1411,23 +1631,97 @@ canvas#trend, canvas#expectedTrendChart {
     color: var(--text-primary);
 }
 
-/* 上傳進度條樣式 */
+/* 上傳進度條樣式 - 現代化設計 */
 #upload-progress-container {
-    animation: fadeIn 0.3s ease-in;
+    animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 1rem;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#upload-progress-container .progress {
+    height: 32px;
+    border-radius: var(--radius-md);
+    background-color: rgba(59, 130, 246, 0.1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+    overflow: visible;
+    position: relative;
 }
 
 #upload-progress-bar {
-    background: linear-gradient(90deg, #3498db, #2ecc71);
+    background: linear-gradient(90deg,
+        #3B82F6 0%,
+        #8B5CF6 50%,
+        #EC4899 100%);
+    background-size: 200% 100%;
     font-weight: 600;
     color: white;
-    transition: width 0.3s ease;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+    animation: gradientShift 2s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+#upload-progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
 }
 
 #upload-progress-text {
     display: inline-block;
     width: 100%;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+#upload-progress-message {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    animation: fadeIn 0.3s ease-in;
 }
 
 /* 資料統計卡片樣式 - 現代化設計 */
@@ -2231,11 +2525,32 @@ canvas#trend, canvas#expectedTrendChart {
 
     /* 載入動畫深色模式 - 提升不透明度 */
     #loading-overlay {
-        background-color: rgba(15, 23, 42, 0.95);  /* 使用主背景色並提升不透明度 */
+        background-color: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(8px) saturate(150%);
+        -webkit-backdrop-filter: blur(8px) saturate(150%);
     }
 
-    .spinner {
-        border-left-color: var(--primary);
+    .spinner::before {
+        border-top-color: var(--primary);
+        border-right-color: var(--primary);
+    }
+
+    .spinner::after {
+        border-bottom-color: var(--secondary);
+        border-left-color: var(--secondary);
+    }
+
+    /* 進度條深色模式 */
+    #upload-progress-container .progress {
+        background-color: rgba(59, 130, 246, 0.15);
+    }
+
+    #upload-progress-bar {
+        background: linear-gradient(90deg,
+            #3B82F6 0%,
+            #8B5CF6 50%,
+            #EC4899 100%);
+        box-shadow: 0 2px 12px rgba(59, 130, 246, 0.4);
     }
 
     /* 文字顏色調整 */
