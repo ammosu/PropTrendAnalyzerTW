@@ -848,16 +848,19 @@ class UIComponents {
     // 創建卡片頁腳
     createCardFooter(article) {
         const footer = this.securityUtils.createSafeElement('div', { class: 'card-footer bg-transparent border-0 p-0' });
-        
+
+        // 日期、作者資訊和書籤按鈕容器
+        const topRow = this.securityUtils.createSafeElement('div', { class: 'd-flex justify-content-between align-items-center mb-2' });
+
         // 日期和作者資訊
-        const infoContainer = this.securityUtils.createSafeElement('p', { class: 'text-muted mb-2' });
-        
+        const infoContainer = this.securityUtils.createSafeElement('p', { class: 'text-muted mb-0' });
+
         const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });
         infoContainer.appendChild(dateIcon);
-        
+
         const dateText = document.createTextNode(` ${this.formatDate(article.date)}`);
         infoContainer.appendChild(dateText);
-        
+
         if (article.author) {
             const authorIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-user' });
             const authorSpan = this.securityUtils.createSafeElement('span', { class: 'ml-2' });
@@ -865,20 +868,26 @@ class UIComponents {
             authorSpan.appendChild(document.createTextNode(` ${article.author}`));
             infoContainer.appendChild(authorSpan);
         }
-        
-        footer.appendChild(infoContainer);
-        
+
+        topRow.appendChild(infoContainer);
+
+        // 書籤按鈕
+        const bookmarkBtn = this.createBookmarkButton(article);
+        topRow.appendChild(bookmarkBtn);
+
+        footer.appendChild(topRow);
+
         // 閱讀更多按鈕
-        const readMoreBtn = this.securityUtils.createSafeElement('button', { 
+        const readMoreBtn = this.securityUtils.createSafeElement('button', {
             class: 'btn btn-primary btn-block',
             type: 'button',
             'data-article-id': article.id
         });
-        
+
         const btnIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-book-open' });
         readMoreBtn.appendChild(btnIcon);
         readMoreBtn.appendChild(document.createTextNode(' 閱讀更多'));
-        
+
         // 安全的事件處理
         readMoreBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -886,9 +895,90 @@ class UIComponents {
                 window.UIManager.showArticleDetails(article.id);
             }
         });
-        
+
         footer.appendChild(readMoreBtn);
         return footer;
+    }
+
+    // 創建書籤按鈕
+    createBookmarkButton(article) {
+        const bookmarkManager = window.bookmarkManager;
+        const isBookmarked = bookmarkManager ? bookmarkManager.isBookmarked(article.id) : false;
+
+        const btn = this.securityUtils.createSafeElement('button', {
+            class: `btn btn-sm bookmark-btn ${isBookmarked ? 'bookmarked' : ''}`,
+            type: 'button',
+            'data-article-id': article.id,
+            'aria-label': isBookmarked ? '取消收藏' : '加入收藏',
+            title: isBookmarked ? '取消收藏' : '加入收藏'
+        });
+
+        const icon = this.securityUtils.createSafeElement('i', {
+            class: isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'
+        });
+        btn.appendChild(icon);
+
+        // 事件處理
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!bookmarkManager) {
+                console.warn('BookmarkManager 未初始化');
+                return;
+            }
+
+            const newState = bookmarkManager.toggleBookmark(article.id);
+
+            // 更新按鈕狀態
+            if (newState) {
+                btn.classList.add('bookmarked');
+                btn.setAttribute('aria-label', '取消收藏');
+                btn.setAttribute('title', '取消收藏');
+                icon.className = 'fas fa-bookmark';
+            } else {
+                btn.classList.remove('bookmarked');
+                btn.setAttribute('aria-label', '加入收藏');
+                btn.setAttribute('title', '加入收藏');
+                icon.className = 'far fa-bookmark';
+            }
+
+            // 添加動畫效果
+            btn.classList.add('bookmark-animate');
+            setTimeout(() => btn.classList.remove('bookmark-animate'), 300);
+
+            // 顯示 Toast 通知
+            bookmarkManager.showToast(newState, article.title);
+
+            // 更新書籤計數
+            this.updateBookmarkCount();
+
+            // 如果正在篩選書籤，重新渲染
+            if (this.stateManager && this.stateManager.getState('bookmarkFilterActive')) {
+                if (window.app && window.app.filterArticles) {
+                    window.app.filterArticles();
+                }
+            }
+        });
+
+        return btn;
+    }
+
+    // 更新書籤計數顯示
+    updateBookmarkCount() {
+        const bookmarkManager = window.bookmarkManager;
+        const countBadge = document.getElementById('bookmark-count-badge');
+
+        if (!bookmarkManager || !countBadge) return;
+
+        const count = bookmarkManager.getBookmarkCount();
+
+        if (count > 0) {
+            countBadge.textContent = count;
+            countBadge.style.display = 'inline-block';
+        } else {
+            countBadge.style.display = 'none';
+        }
     }
 
     // 生成房地產主題的 SVG 圖片

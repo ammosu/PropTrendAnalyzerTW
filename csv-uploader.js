@@ -562,45 +562,34 @@ function showUploadStatus(message, type = 'info') {
 function showSuccessWithClearButton(count) {
     const uploadStatus = document.getElementById('upload-status');
     if (!uploadStatus) return;
-    
+
     // 清空現有內容
     while (uploadStatus.firstChild) {
         uploadStatus.removeChild(uploadStatus.firstChild);
     }
-    
+
     const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-success';
-    
+    alertDiv.className = 'alert alert-success d-flex align-items-center justify-content-between flex-wrap';
+
+    // 左側成功訊息
+    const messageSpan = document.createElement('span');
     const icon = document.createElement('i');
     icon.className = 'fas fa-check-circle';
-    alertDiv.appendChild(icon);
-    
-    const successText = document.createTextNode(` 成功處理 ${count} 篇文章。`);
-    alertDiv.appendChild(successText);
-    
+    messageSpan.appendChild(icon);
+    messageSpan.appendChild(document.createTextNode(` 成功處理 ${count} 篇文章。`));
+    alertDiv.appendChild(messageSpan);
+
     // 創建清除按鈕
     const clearButton = document.createElement('button');
     clearButton.id = 'clear-data';
-    clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
-    clearButton.textContent = '清除資料';
-    
-    // 安全的事件處理
-    clearButton.addEventListener('click', async function() {
-        if (!confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
-            return;
-        }
-        
-        try {
-            showUploadStatus('正在清除資料...', 'info');
-            await clearArticlesDB();
-            showUploadStatus('資料已清除，頁面即將重新載入...', 'success');
-            setTimeout(() => location.reload(), 1000);
-        } catch (error) {
-            console.error('清除資料錯誤:', error);
-            showUploadStatus(`清除資料失敗: ${error.message || error}`, 'danger');
-        }
+    clearButton.className = 'btn btn-sm btn-outline-danger';
+    clearButton.innerHTML = '<i class="fas fa-trash-alt"></i> 清除資料';
+
+    // 使用 Bootstrap modal 而非 confirm()
+    clearButton.addEventListener('click', function() {
+        showClearDataModal();
     });
-    
+
     alertDiv.appendChild(clearButton);
     uploadStatus.appendChild(alertDiv);
 }
@@ -609,44 +598,33 @@ function showSuccessWithClearButton(count) {
 function showDatabaseLoadedStatus(count) {
     const uploadStatus = document.getElementById('upload-status');
     if (!uploadStatus) return;
-    
+
     // 清空現有內容
     while (uploadStatus.firstChild) {
         uploadStatus.removeChild(uploadStatus.firstChild);
     }
-    
+
     const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-info';
-    
+    alertDiv.className = 'alert alert-info d-flex align-items-center justify-content-between flex-wrap';
+
+    // 左側資訊訊息
+    const messageSpan = document.createElement('span');
     const icon = document.createElement('i');
-    icon.className = 'fas fa-info-circle';
-    alertDiv.appendChild(icon);
-    
-    const infoText = document.createTextNode(` 已從資料庫載入 ${count} 篇文章。`);
-    alertDiv.appendChild(infoText);
-    
+    icon.className = 'fas fa-database';
+    messageSpan.appendChild(icon);
+    messageSpan.appendChild(document.createTextNode(` 已從資料庫載入 ${count} 篇文章。`));
+    alertDiv.appendChild(messageSpan);
+
     // 創建清除按鈕
     const clearButton = document.createElement('button');
-    clearButton.className = 'btn btn-sm btn-outline-danger ml-2';
-    clearButton.textContent = '清除資料';
-    
-    // 安全的事件處理
-    clearButton.addEventListener('click', async function() {
-        if (!confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
-            return;
-        }
-        
-        try {
-            showUploadStatus('正在清除資料...', 'info');
-            await clearArticlesDB();
-            showUploadStatus('資料已清除，頁面即將重新載入...', 'success');
-            setTimeout(() => location.reload(), 1000);
-        } catch (error) {
-            console.error('清除資料錯誤:', error);
-            showUploadStatus(`清除資料失敗: ${error.message || error}`, 'danger');
-        }
+    clearButton.className = 'btn btn-sm btn-outline-danger';
+    clearButton.innerHTML = '<i class="fas fa-trash-alt"></i> 清除資料';
+
+    // 使用 Bootstrap modal 而非 confirm()
+    clearButton.addEventListener('click', function() {
+        showClearDataModal();
     });
-    
+
     alertDiv.appendChild(clearButton);
     uploadStatus.appendChild(alertDiv);
 }
@@ -1014,6 +992,7 @@ function handleDrop(e) {
 
 /**
  * 顯示拖放成功的 Toast 提示
+ * 使用內聯樣式確保正確的尺寸
  */
 function showDragDropToast(filename) {
     // 檢查是否已存在 toast 容器
@@ -1021,25 +1000,57 @@ function showDragDropToast(filename) {
     if (!toastContainer) {
         toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
-        toastContainer.className = 'toast-container';
+        // 使用內聯樣式確保正確定位和尺寸
+        toastContainer.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            bottom: auto !important;
+            left: auto !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            gap: 8px !important;
+            pointer-events: none !important;
+            width: auto !important;
+            height: auto !important;
+        `;
         document.body.appendChild(toastContainer);
     }
 
-    // 建立 toast 元素 - 使用緊湊樣式
+    // 建立 toast 元素 - 使用內聯樣式確保緊湊尺寸
     const toast = document.createElement('div');
-    toast.className = 'toast toast-compact toast-info animate__animated animate__fadeInRight';
+    toast.className = 'animate__animated animate__fadeInRight';
+    toast.style.cssText = `
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 10px 14px !important;
+        min-width: 160px !important;
+        max-width: 280px !important;
+        height: auto !important;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, #fff 100%) !important;
+        border-left: 4px solid #3B82F6 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        pointer-events: all !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+    `;
 
     // 截斷過長的檔案名稱
-    const displayName = filename.length > 30 ? filename.substring(0, 27) + '...' : filename;
+    const displayName = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
 
     toast.innerHTML = `
-        <i class="fas fa-check-circle" aria-hidden="true"></i>
-        <span>${displayName}</span>
+        <i class="fas fa-check-circle" style="color: #10B981; font-size: 1rem; flex-shrink: 0;"></i>
+        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
     `;
 
     toastContainer.appendChild(toast);
 
-    // 1.5 秒後自動移除（更快消失）
+    // 1.5 秒後自動移除
     setTimeout(() => {
         toast.classList.remove('animate__fadeInRight');
         toast.classList.add('animate__fadeOutRight');
@@ -1048,11 +1059,168 @@ function showDragDropToast(filename) {
                 toastContainer.removeChild(toast);
             }
             // 如果沒有其他 toast，移除容器
-            if (toastContainer.children.length === 0) {
+            if (toastContainer.children.length === 0 && document.body.contains(toastContainer)) {
                 document.body.removeChild(toastContainer);
             }
         }, 300);
     }, 1500);
+}
+
+// ========================================
+// 清除資料確認對話框功能
+// ========================================
+
+/**
+ * 顯示清除資料確認對話框
+ */
+function showClearDataModal() {
+    const modal = document.getElementById('clearDataModal');
+    if (modal && typeof $ !== 'undefined') {
+        $(modal).modal('show');
+    } else {
+        // 如果 Bootstrap modal 不可用，回退到 confirm()
+        if (confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
+            executeClearData();
+        }
+    }
+}
+
+/**
+ * 隱藏清除資料確認對話框
+ */
+function hideClearDataModal() {
+    const modal = document.getElementById('clearDataModal');
+    if (modal && typeof $ !== 'undefined') {
+        $(modal).modal('hide');
+    }
+}
+
+/**
+ * 執行清除資料操作
+ */
+async function executeClearData() {
+    const confirmBtn = document.getElementById('confirm-clear-data-btn');
+
+    try {
+        // 禁用確認按鈕並顯示載入狀態
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 清除中...';
+        }
+
+        // 關閉對話框
+        hideClearDataModal();
+
+        // 顯示進度提示
+        showUploadStatus('正在清除資料...', 'info');
+
+        // 執行清除
+        await clearArticlesDB();
+
+        // 顯示成功訊息
+        showClearDataSuccessToast();
+
+        // 延遲重新載入頁面
+        showUploadStatus('資料已清除，頁面即將重新載入...', 'success');
+        setTimeout(() => location.reload(), 1500);
+
+    } catch (error) {
+        console.error('清除資料錯誤:', error);
+        showUploadStatus(`清除資料失敗: ${error.message || error}`, 'danger');
+
+        // 恢復確認按鈕
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 確認清除';
+        }
+    }
+}
+
+/**
+ * 顯示清除成功的 Toast 提示
+ */
+function showClearDataSuccessToast() {
+    // 檢查是否已存在 toast 容器
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            bottom: auto !important;
+            left: auto !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            gap: 8px !important;
+            pointer-events: none !important;
+            width: auto !important;
+            height: auto !important;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    // 建立 toast 元素
+    const toast = document.createElement('div');
+    toast.className = 'animate__animated animate__fadeInRight';
+    toast.style.cssText = `
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 10px 14px !important;
+        min-width: 160px !important;
+        max-width: 280px !important;
+        height: auto !important;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, #fff 100%) !important;
+        border-left: 4px solid #EF4444 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        pointer-events: all !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+    `;
+
+    toast.innerHTML = `
+        <i class="fas fa-check-circle" style="color: #EF4444; font-size: 1rem; flex-shrink: 0;"></i>
+        <span>資料已清除</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // 3 秒後自動移除
+    setTimeout(() => {
+        toast.classList.remove('animate__fadeInRight');
+        toast.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+            if (toastContainer.contains(toast)) {
+                toastContainer.removeChild(toast);
+            }
+            if (toastContainer.children.length === 0 && document.body.contains(toastContainer)) {
+                document.body.removeChild(toastContainer);
+            }
+        }, 300);
+    }, 3000);
+}
+
+/**
+ * 初始化清除資料對話框事件
+ */
+function initializeClearDataModal() {
+    const confirmBtn = document.getElementById('confirm-clear-data-btn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', executeClearData);
+    }
+}
+
+// 頁面載入時初始化清除資料對話框
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeClearDataModal);
+} else {
+    initializeClearDataModal();
 }
 
 // 導出函數供其他模塊使用
@@ -1061,7 +1229,9 @@ window.csvUploader = {
     clearArticlesDB,
     hasArticlesInDB,
     updateDataSummary,
-    initializeDragAndDrop
+    initializeDragAndDrop,
+    showClearDataModal,
+    executeClearData
 };
 
 // 頁面載入時初始化拖放功能

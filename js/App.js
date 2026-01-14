@@ -81,6 +81,10 @@ class App {
         // 初始化匯出管理器
         this.exportManager = new ExportManager(this.stateManager);
 
+        // 初始化書籤管理器
+        this.bookmarkManager = new BookmarkManager();
+        window.bookmarkManager = this.bookmarkManager;
+
         // 初始化 UI 元件和圖表管理器
         this.uiComponents = new UIComponents(this.stateManager);
         this.chartManager = new ChartManager(this.stateManager, this.uiComponents);
@@ -95,8 +99,11 @@ class App {
         this.uiComponents.setAccessibilityManager(this.accessibilityManager);
         this.eventHandlers.setAccessibilityManager(this.accessibilityManager);
 
-        // 初始化匯出功能事件監聽器
+        // 初始化匯出功能事件監聯器
         this.initializeExportFeatures();
+
+        // 初始化書籤篩選功能
+        this.initializeBookmarkFilter();
 
         // 同步深色模式按鈕狀態
         this.syncDarkModeButton();
@@ -316,6 +323,89 @@ class App {
         }
 
         console.log('匯出功能事件監聽器已初始化');
+    }
+
+    // 初始化書籤篩選功能
+    initializeBookmarkFilter() {
+        const bookmarkFilterBtn = document.getElementById('bookmark-filter-btn');
+
+        if (bookmarkFilterBtn) {
+            bookmarkFilterBtn.addEventListener('click', () => {
+                this.toggleBookmarkFilter();
+            });
+        }
+
+        // 初始更新書籤計數
+        this.updateBookmarkCountBadge();
+
+        console.log('書籤篩選功能已初始化');
+    }
+
+    // 切換書籤篩選狀態
+    toggleBookmarkFilter() {
+        const currentState = this.stateManager.getState('bookmarkFilterActive') || false;
+        const newState = !currentState;
+
+        // 更新狀態
+        this.stateManager.state.bookmarkFilterActive = newState;
+
+        // 更新按鈕樣式
+        const bookmarkFilterBtn = document.getElementById('bookmark-filter-btn');
+        if (bookmarkFilterBtn) {
+            if (newState) {
+                bookmarkFilterBtn.classList.remove('btn-outline-warning');
+                bookmarkFilterBtn.classList.add('btn-warning');
+                bookmarkFilterBtn.querySelector('i').className = 'fas fa-bookmark';
+                bookmarkFilterBtn.title = '顯示所有文章';
+            } else {
+                bookmarkFilterBtn.classList.remove('btn-warning');
+                bookmarkFilterBtn.classList.add('btn-outline-warning');
+                bookmarkFilterBtn.querySelector('i').className = 'far fa-bookmark';
+                bookmarkFilterBtn.title = '顯示收藏的文章';
+            }
+        }
+
+        // 重新篩選文章
+        this.filterArticles();
+    }
+
+    // 更新書籤計數徽章
+    updateBookmarkCountBadge() {
+        const countBadge = document.getElementById('bookmark-count-badge');
+
+        if (!countBadge || !this.bookmarkManager) return;
+
+        const count = this.bookmarkManager.getBookmarkCount();
+
+        if (count > 0) {
+            countBadge.textContent = count;
+            countBadge.style.display = 'inline-block';
+        } else {
+            countBadge.style.display = 'none';
+        }
+    }
+
+    // 文章篩選（包含書籤篩選）
+    filterArticles() {
+        if (this.eventHandlers) {
+            // 獲取基本篩選結果
+            this.eventHandlers.filterArticles();
+
+            // 如果書籤篩選開啟，進一步篩選
+            const bookmarkFilterActive = this.stateManager.getState('bookmarkFilterActive');
+            if (bookmarkFilterActive && this.bookmarkManager) {
+                const currentFiltered = this.stateManager.getState('filteredArticlesData');
+                const bookmarkedOnly = this.bookmarkManager.filterBookmarkedArticles(currentFiltered);
+                this.stateManager.setFilteredArticles(bookmarkedOnly);
+
+                // 重新渲染
+                this.uiComponents.renderArticles(1);
+                this.uiComponents.renderPagination();
+
+                // 更新計數
+                this.eventHandlers.updateFilterResultCount(bookmarkedOnly.length);
+            }
+        }
     }
 
     // 初始化匯出按鈕（相容舊方法）

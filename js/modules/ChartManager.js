@@ -195,16 +195,72 @@ class ChartManager {
                             },
                             footer: function(tooltipItems) {
                                 const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
-                                return `\n總計: ${total} 篇新聞`;
+                                return `\n總計: ${total} 篇新聞\n\n💡 點擊以篩選此趨勢類型`;
                             }
                         }
                     }
+                },
+                onClick: (event, elements) => {
+                    this.handleTrendChartClick(event, elements, months, formattedLabels);
                 }
             }
         });
-        
+
         this.stateManager.setExpectedTrendChart(chart);
         this.uiComponents.hideLoading();
+    }
+
+    // 處理趨勢圖表點擊事件
+    handleTrendChartClick(event, elements, months, formattedLabels) {
+        if (!elements || elements.length === 0) return;
+
+        const clickedElement = elements[0];
+        const chart = this.stateManager.getState('expectedTrendChart');
+
+        if (!chart) return;
+
+        const datasetIndex = clickedElement.datasetIndex;
+        const dataIndex = clickedElement.index;
+
+        const trendType = chart.data.datasets[datasetIndex].label;
+        const month = months[dataIndex];
+        const formattedMonth = formattedLabels[dataIndex];
+
+        // 創建並顯示趨勢篩選提示
+        this.showChartClickToast(`已篩選：${formattedMonth} 的「${trendType}」趨勢`);
+
+        // 設定日期範圍篩選（選定月份）
+        this.applyMonthFilter(month);
+
+        // 滾動到新聞列表
+        this.scrollToNewsSection();
+    }
+
+    // 套用月份篩選
+    applyMonthFilter(month) {
+        if (!month) return;
+
+        // 計算月份的起始和結束日期
+        const [year, monthNum] = month.split('-').map(Number);
+        const startDate = new Date(year, monthNum - 1, 1);
+        const endDate = new Date(year, monthNum, 0); // 該月最後一天
+
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+
+        // 更新日期篩選輸入框
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
+        if (startDateInput && endDateInput) {
+            startDateInput.value = startDateStr;
+            endDateInput.value = endDateStr;
+
+            // 觸發篩選
+            if (window.app && window.app.eventHandlers) {
+                window.app.eventHandlers.filterArticles();
+            }
+        }
     }
 
     // 渲染關鍵詞趨勢圖表（單月模式）
@@ -372,7 +428,7 @@ class ChartManager {
                             footer: function(context) {
                                 const totalCounts = context[0].chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context[0].raw / totalCounts) * 100).toFixed(1);
-                                return `\n佔比: ${percentage}%`;
+                                return `\n佔比: ${percentage}%\n\n💡 點擊以篩選此關鍵詞`;
                             }
                         }
                     },
@@ -394,12 +450,130 @@ class ChartManager {
                             y: {min: 0, max: 'original'}
                         }
                     }
+                },
+                onClick: (event, elements) => {
+                    this.handleKeywordChartClick(event, elements, labels);
                 }
             }
         });
 
         this.stateManager.setTrendChart(chart);
         this.uiComponents.hideLoading();
+    }
+
+    // 處理關鍵詞圖表點擊事件
+    handleKeywordChartClick(event, elements, labels) {
+        if (!elements || elements.length === 0) return;
+
+        const clickedElement = elements[0];
+        const keyword = labels[clickedElement.index];
+
+        if (!keyword) return;
+
+        // 更新關鍵字篩選輸入框
+        const keywordFilter = document.getElementById('keyword-filter');
+        if (keywordFilter) {
+            keywordFilter.value = keyword;
+            keywordFilter.focus();
+
+            // 觸發篩選
+            if (window.app && window.app.eventHandlers) {
+                window.app.eventHandlers.filterArticles();
+            }
+
+            // 顯示提示
+            this.showChartClickToast(`已篩選關鍵詞：${keyword}`);
+
+            // 滾動到新聞列表
+            this.scrollToNewsSection();
+        }
+    }
+
+    // 顯示圖表點擊提示 Toast
+    showChartClickToast(message) {
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.style.cssText = `
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                bottom: auto !important;
+                left: auto !important;
+                z-index: 10000 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-end !important;
+                gap: 8px !important;
+                pointer-events: none !important;
+                width: auto !important;
+                height: auto !important;
+            `;
+            document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'animate__animated animate__fadeInRight';
+        toast.style.cssText = `
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 10px 14px !important;
+            min-width: 160px !important;
+            max-width: 320px !important;
+            height: auto !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, #fff 100%) !important;
+            border-left: 4px solid #3B82F6 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            pointer-events: all !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            color: #1e293b !important;
+        `;
+
+        toast.innerHTML = `
+            <i class="fas fa-filter" style="color: #3B82F6; font-size: 1rem; flex-shrink: 0;"></i>
+            <span>${message}</span>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        // 2.5 秒後自動移除
+        setTimeout(() => {
+            toast.classList.remove('animate__fadeInRight');
+            toast.classList.add('animate__fadeOutRight');
+            setTimeout(() => {
+                if (toastContainer.contains(toast)) {
+                    toastContainer.removeChild(toast);
+                }
+                if (toastContainer.children.length === 0 && document.body.contains(toastContainer)) {
+                    document.body.removeChild(toastContainer);
+                }
+            }, 300);
+        }, 2500);
+    }
+
+    // 滾動到新聞列表區塊
+    scrollToNewsSection() {
+        const newsContent = document.getElementById('news-content');
+        const toggleButton = document.getElementById('toggle-news-button');
+
+        // 如果新聞內容是摺疊的，先展開
+        if (newsContent && !newsContent.classList.contains('show')) {
+            if (typeof $ !== 'undefined') {
+                $(newsContent).collapse('show');
+            }
+        }
+
+        // 滾動到新聞區塊
+        setTimeout(() => {
+            const filterOptions = document.getElementById('filter-options');
+            if (filterOptions) {
+                filterOptions.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 300);
     }
 
     // 渲染多月份比較圖表

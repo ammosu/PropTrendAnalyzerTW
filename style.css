@@ -3248,11 +3248,17 @@ canvas#trend, canvas#expectedTrendChart {
     position: fixed;
     top: 20px;
     right: 20px;
+    bottom: auto !important;  /* 關鍵：防止容器被拉伸到底部 */
+    left: auto !important;
     z-index: 10000;
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 12px;
     pointer-events: none;
+    width: auto;
+    height: auto;
+    max-width: 400px;
 }
 
 /* Toast 基礎樣式 */
@@ -3263,6 +3269,8 @@ canvas#trend, canvas#expectedTrendChart {
     padding: 14px 18px;
     min-width: 280px;
     max-width: 400px;
+    height: auto !important;  /* 防止高度被拉伸 */
+    flex-shrink: 0;  /* 防止被壓縮 */
     background: var(--card-bg);
     border-left: 4px solid;
     border-radius: 8px;
@@ -3290,20 +3298,21 @@ canvas#trend, canvas#expectedTrendChart {
     color: var(--text-primary);
 }
 
-/* Toast 緊湊版樣式 */
-.toast-compact {
-    min-width: 200px;
-    max-width: 280px;
-    padding: 10px 14px;
-    font-size: 0.875rem;
-    gap: 8px;
+/* Toast 緊湊版樣式 - 提高優先級確保生效 */
+.toast.toast-compact {
+    min-width: 180px !important;
+    max-width: 260px !important;
+    padding: 8px 12px !important;
+    font-size: 0.8125rem !important;
+    gap: 6px !important;
+    line-height: 1.2;
 }
 
-.toast-compact i {
-    font-size: 1rem;
+.toast.toast-compact i {
+    font-size: 0.875rem !important;
 }
 
-.toast-compact span {
+.toast.toast-compact span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3398,10 +3407,6 @@ body.dark-mode .toast:hover {
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
 }
 
-#csv-upload-section.drag-over .card-body {
-    position: relative;
-}
-
 #csv-upload-section.drag-over .card-body::before {
     content: '📂 放開以上傳檔案';
     position: absolute;
@@ -3448,6 +3453,28 @@ body.dark-mode #csv-upload-section.drag-over .card-body::before {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
 }
 
+/* 確保 card-body 有正確的定位上下文 */
+#csv-upload-section .card-body {
+    position: relative;
+}
+
+/* 確保表單元素在裝飾元素之上 */
+#csv-upload-section .card-body form,
+#csv-upload-section .card-body .form-group,
+#csv-upload-section .card-body .custom-file,
+#csv-upload-section .card-body .custom-file-label,
+#csv-upload-section .card-body button {
+    position: relative;
+    z-index: 2;
+}
+
+/* 確保檔案輸入框可以點擊 */
+#csv-upload-section .custom-file-input {
+    position: relative;
+    z-index: 3;
+    cursor: pointer;
+}
+
 #csv-upload-section .card-body::after {
     content: '\f0ee'; /* FontAwesome cloud-upload icon */
     font-family: 'Font Awesome 6 Free';
@@ -3459,9 +3486,310 @@ body.dark-mode #csv-upload-section.drag-over .card-body::before {
     color: var(--primary);
     opacity: 0.1;
     pointer-events: none;
+    z-index: 1;
     transition: opacity 0.3s ease;
 }
 
 #csv-upload-section:hover .card-body::after {
     opacity: 0.2;
+}
+
+/* ===========================
+   清除資料確認對話框樣式
+   =========================== */
+
+/* 對話框動畫 */
+#clearDataModal .modal-dialog {
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 對話框標題區域 */
+#clearDataModal .modal-header {
+    border-radius: calc(0.3rem - 1px) calc(0.3rem - 1px) 0 0;
+    border-bottom: none;
+}
+
+#clearDataModal .modal-header .close {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+#clearDataModal .modal-header .close:hover {
+    opacity: 1;
+}
+
+/* 對話框內容區域 */
+#clearDataModal .modal-body {
+    padding: 1.5rem 2rem;
+}
+
+#clearDataModal .modal-body .alert {
+    margin-bottom: 0;
+    border-radius: 8px;
+}
+
+/* 對話框底部按鈕 */
+#clearDataModal .modal-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1rem 1.5rem;
+}
+
+#clearDataModal .modal-footer .btn {
+    min-width: 100px;
+    transition: all 0.2s ease;
+}
+
+#clearDataModal .modal-footer .btn-danger {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    border: none;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+#clearDataModal .modal-footer .btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+#clearDataModal .modal-footer .btn-danger:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* 暗色模式對話框樣式 */
+body.dark-mode #clearDataModal .modal-content {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode #clearDataModal .modal-header {
+    background: linear-gradient(135deg, #991B1B 0%, #7F1D1D 100%);
+}
+
+body.dark-mode #clearDataModal .modal-body {
+    color: var(--text-primary);
+}
+
+body.dark-mode #clearDataModal .modal-body .text-muted {
+    color: var(--text-secondary) !important;
+}
+
+body.dark-mode #clearDataModal .modal-body .alert-warning {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #FCD34D;
+}
+
+body.dark-mode #clearDataModal .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode #clearDataModal .modal-footer .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+}
+
+body.dark-mode #clearDataModal .modal-footer .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ===========================
+   書籤/收藏功能樣式
+   =========================== */
+
+/* 書籤按鈕基礎樣式 */
+.bookmark-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 50%;
+    color: #9CA3AF;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bookmark-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+    color: #F59E0B;
+    transform: scale(1.1);
+}
+
+.bookmark-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+}
+
+/* 已收藏狀態 */
+.bookmark-btn.bookmarked {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+    border-color: #F59E0B;
+}
+
+.bookmark-btn.bookmarked:hover {
+    background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* 書籤按鈕動畫 */
+.bookmark-btn.bookmark-animate {
+    animation: bookmarkPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bookmarkPop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 書籤篩選按鈕樣式 */
+.bookmark-filter-btn {
+    position: relative;
+    padding: 0.375rem 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.bookmark-filter-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* 書籤計數徽章 */
+.bookmark-count-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    color: white;
+    border-radius: 9px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+/* 列表檢視中的書籤按鈕 */
+.list-view-bookmark-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+}
+
+/* 暗色模式書籤樣式 */
+body.dark-mode .bookmark-btn {
+    background: rgba(245, 158, 11, 0.15);
+    color: #9CA3AF;
+}
+
+body.dark-mode .bookmark-btn:hover {
+    background: rgba(245, 158, 11, 0.25);
+    color: #FCD34D;
+}
+
+body.dark-mode .bookmark-btn.bookmarked {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: white;
+}
+
+body.dark-mode .bookmark-filter-btn.btn-outline-warning {
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #FCD34D;
+}
+
+body.dark-mode .bookmark-filter-btn.btn-outline-warning:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #F59E0B;
+}
+
+body.dark-mode .bookmark-filter-btn.btn-warning {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    border-color: #F59E0B;
+    color: white;
+}
+
+/* 響應式調整 */
+@media (max-width: 640px) {
+    .bookmark-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .bookmark-count-badge {
+        min-width: 16px;
+        height: 16px;
+        font-size: 0.65rem;
+        line-height: 16px;
+        top: -4px;
+        right: -4px;
+    }
+}
+
+/* ===========================
+   圖表互動樣式
+   =========================== */
+
+/* 圖表容器可點擊提示 */
+#expectedTrendChart,
+#trend {
+    cursor: pointer;
+}
+
+/* 圖表標題下方的互動提示 */
+.chart-interaction-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.chart-interaction-hint i {
+    color: var(--primary);
+    font-size: 0.875rem;
+}
+
+.chart-interaction-hint:hover {
+    background: rgba(59, 130, 246, 0.12);
+}
+
+/* 暗色模式圖表互動提示 */
+body.dark-mode .chart-interaction-hint {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--text-secondary);
+}
+
+body.dark-mode .chart-interaction-hint:hover {
+    background: rgba(59, 130, 246, 0.2);
 }
