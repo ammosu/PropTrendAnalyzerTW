@@ -918,10 +918,153 @@ function updateDataSummary(articles) {
     }
 }
 
+// ========================================
+// 拖放上傳功能
+// ========================================
+
+/**
+ * 初始化拖放上傳功能
+ */
+function initializeDragAndDrop() {
+    const uploadSection = document.getElementById('csv-upload-section');
+    const fileInput = document.getElementById('csv-file');
+
+    if (!uploadSection || !fileInput) {
+        console.warn('找不到上傳區域或檔案輸入框');
+        return;
+    }
+
+    // 防止瀏覽器預設的拖放行為（開啟檔案）
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // 拖曳進入區域時的視覺反饋
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, () => {
+            uploadSection.classList.add('drag-over');
+        }, false);
+    });
+
+    // 拖曳離開區域時移除視覺反饋
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadSection.addEventListener(eventName, () => {
+            uploadSection.classList.remove('drag-over');
+        }, false);
+    });
+
+    // 處理檔案放下
+    uploadSection.addEventListener('drop', handleDrop, false);
+
+    console.log('✅ 拖放上傳功能已初始化');
+}
+
+/**
+ * 防止瀏覽器預設行為
+ */
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+/**
+ * 處理拖放的檔案
+ */
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length === 0) {
+        return;
+    }
+
+    const file = files[0];
+    const fileInput = document.getElementById('csv-file');
+
+    // 驗證檔案類型
+    if (!file.name.endsWith('.csv')) {
+        showUploadStatus('❌ 請上傳 CSV 格式檔案', 'danger');
+        return;
+    }
+
+    // 更新檔案輸入框（觸發 change 事件以更新 label）
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+
+    // 更新 label 顯示檔案名稱
+    const label = fileInput.nextElementSibling;
+    if (label && label.classList.contains('custom-file-label')) {
+        label.textContent = file.name;
+    }
+
+    // 顯示 Toast 提示
+    showDragDropToast(file.name);
+
+    // 自動觸發表單提交
+    const uploadForm = document.getElementById('csv-upload-form');
+    if (uploadForm) {
+        // 使用 setTimeout 確保 UI 更新完成
+        setTimeout(() => {
+            uploadForm.dispatchEvent(new Event('submit'));
+        }, 100);
+    }
+}
+
+/**
+ * 顯示拖放成功的 Toast 提示
+ */
+function showDragDropToast(filename) {
+    // 檢查是否已存在 toast 容器
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    // 建立 toast 元素
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-info animate__animated animate__fadeInRight';
+
+    toast.innerHTML = `
+        <i class="fas fa-file-upload" aria-hidden="true"></i>
+        <span>已接收檔案：${filename}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // 2 秒後自動移除
+    setTimeout(() => {
+        toast.classList.remove('animate__fadeInRight');
+        toast.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+            if (toastContainer.contains(toast)) {
+                toastContainer.removeChild(toast);
+            }
+            // 如果沒有其他 toast，移除容器
+            if (toastContainer.children.length === 0) {
+                document.body.removeChild(toastContainer);
+            }
+        }, 300);
+    }, 2000);
+}
+
 // 導出函數供其他模塊使用
 window.csvUploader = {
     getArticlesFromDB,
     clearArticlesDB,
     hasArticlesInDB,
-    updateDataSummary
+    updateDataSummary,
+    initializeDragAndDrop
 };
+
+// 頁面載入時初始化拖放功能
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDragAndDrop);
+} else {
+    // DOMContentLoaded 已經觸發過了
+    initializeDragAndDrop();
+}

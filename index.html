@@ -143,14 +143,37 @@
                     <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 1rem;">
                         <i class="fas fa-list"></i> 共 <span id="filtered-count">0</span> 篇文章
                     </div>
-                    <div class="d-flex align-items-center">
-                        <!-- 匯出按鈕 -->
-                        <button id="export-csv-btn" class="btn btn-sm btn-outline-primary mr-2" title="匯出為 CSV">
-                            <i class="fas fa-file-csv"></i> 匯出 CSV
-                        </button>
-                        <button id="export-json-btn" class="btn btn-sm btn-outline-primary" title="匯出為 JSON">
-                            <i class="fas fa-file-code"></i> 匯出 JSON
-                        </button>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- 匯出下拉選單 -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
+                                <i class="fas fa-download"></i> 匯出
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <h6 class="dropdown-header"><i class="fas fa-file-alt"></i> 資料格式</h6>
+                                <button id="export-csv-btn" class="dropdown-item" type="button">
+                                    <i class="fas fa-file-csv text-success"></i> CSV 格式
+                                </button>
+                                <button id="export-json-btn" class="dropdown-item" type="button">
+                                    <i class="fas fa-file-code text-info"></i> JSON 格式
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header"><i class="fas fa-chart-bar"></i> 圖表</h6>
+                                <button id="export-chart-keyword-btn" class="dropdown-item" type="button">
+                                    <i class="fas fa-chart-line text-primary"></i> 關鍵詞趨勢圖
+                                </button>
+                                <button id="export-chart-trend-btn" class="dropdown-item" type="button">
+                                    <i class="fas fa-chart-pie text-warning"></i> 市場趨勢圖
+                                </button>
+                                <button id="export-chart-cloud-btn" class="dropdown-item" type="button">
+                                    <i class="fas fa-cloud text-secondary"></i> 文字雲圖
+                                </button>
+                                <div class="dropdown-divider"></div>
+                                <button id="export-full-report-btn" class="dropdown-item font-weight-bold" type="button">
+                                    <i class="fas fa-file-download text-danger"></i> 完整報表
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <!-- 已選篩選條件標籤 -->
@@ -454,6 +477,7 @@
     <script src="js/modules/CacheManager.js"></script>
     <script src="js/modules/StateManager.js"></script>
     <script src="js/modules/AccessibilityManager.js"></script>
+    <script src="js/modules/ExportManager.js"></script>
     <script src="js/modules/UIComponents.js"></script>
     <script src="js/modules/ChartManager.js"></script>
     <script src="js/modules/EventHandlers.js"></script>
