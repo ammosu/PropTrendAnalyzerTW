@@ -182,20 +182,16 @@ class ChartManager {
                         boxPadding: 6,
                         callbacks: {
                             title: function(tooltipItems) {
-                                return `📅 ${tooltipItems[0].label}`;
+                                return tooltipItems[0].label;
                             },
                             label: function(context) {
                                 const label = context.dataset.label || '';
                                 const value = context.raw;
-                                const emoji = label === '上漲' ? '📈' :
-                                             label === '下跌' ? '📉' :
-                                             label === '平穩' ? '➡️' :
-                                             label === '無相關' ? '❓' : '🔍';
-                                return `${emoji} ${label}: ${value} 篇`;
+                                return `${label}: ${value} 篇`;
                             },
                             footer: function(tooltipItems) {
                                 const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
-                                return `\n總計: ${total} 篇新聞\n\n💡 點擊以篩選此趨勢類型`;
+                                return `\n總計: ${total} 篇新聞\n\n點擊以篩選此趨勢類型`;
                             }
                         }
                     }
@@ -420,7 +416,7 @@ class ChartManager {
                         displayColors: false,
                         callbacks: {
                             title: function(context) {
-                                return `🔑 ${context[0].label}`;
+                                return context[0].label;
                             },
                             label: function(context) {
                                 return `出現次數: ${context.raw} 次`;
@@ -428,7 +424,7 @@ class ChartManager {
                             footer: function(context) {
                                 const totalCounts = context[0].chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percentage = ((context[0].raw / totalCounts) * 100).toFixed(1);
-                                return `\n佔比: ${percentage}%\n\n💡 點擊以篩選此關鍵詞`;
+                                return `\n佔比: ${percentage}%\n\n點擊以篩選此關鍵詞`;
                             }
                         }
                     },
@@ -730,7 +726,7 @@ class ChartManager {
                         boxPadding: 6,
                         callbacks: {
                             title: function(context) {
-                                return `🔑 ${context[0].label}`;
+                                return context[0].label;
                             },
                             label: function(context) {
                                 return `${context.dataset.label}: ${context.raw} 次`;
@@ -947,11 +943,10 @@ class ChartManager {
                         boxPadding: 6,
                         callbacks: {
                             title: function(context) {
-                                return `📅 ${context[0].label}`;
+                                return context[0].label;
                             },
                             label: function(context) {
-                                const emoji = '🔑';
-                                return `${emoji} ${context.dataset.label}: ${context.raw} 次`;
+                                return `${context.dataset.label}: ${context.raw} 次`;
                             }
                         }
                     },

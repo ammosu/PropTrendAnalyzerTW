@@ -935,7 +935,7 @@ function initializeDragAndDrop() {
     // 處理檔案放下
     uploadSection.addEventListener('drop', handleDrop, false);
 
-    console.log('✅ 拖放上傳功能已初始化');
+    console.log('拖放上傳功能已初始化');
 }
 
 /**
@@ -962,7 +962,7 @@ function handleDrop(e) {
 
     // 驗證檔案類型
     if (!file.name.endsWith('.csv')) {
-        showUploadStatus('❌ 請上傳 CSV 格式檔案', 'danger');
+        showUploadStatus('請上傳 CSV 格式檔案', 'danger');
         return;
     }
 
