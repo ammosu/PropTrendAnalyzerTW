@@ -24,7 +24,10 @@ class App {
             
             // 初始化模組
             this.initializeModules();
-            
+
+            // 初始化 UI 互動
+            this.initializeUIInteractions();
+
             // 設定全域引用供向後相容
             this.setupGlobalReferences();
             
@@ -109,6 +112,63 @@ class App {
         this.syncDarkModeButton();
 
         console.log('所有模組初始化完成（包含無障礙性管理器）');
+    }
+
+    // 初始化 UI 互動
+    initializeUIInteractions() {
+        // 浮動上傳按鈕
+        const uploadFab = document.getElementById('upload-fab');
+        const uploadSidebar = document.getElementById('upload-sidebar');
+        const sidebarOverlay = uploadSidebar?.querySelector('.upload-sidebar-overlay');
+        const sidebarClose = uploadSidebar?.querySelector('.upload-sidebar-close');
+        const emptyStateUploadBtn = document.getElementById('empty-state-upload-btn');
+
+        // 打開上傳側邊欄
+        const openUploadSidebar = () => {
+            if (uploadSidebar) {
+                uploadSidebar.classList.add('active');
+                uploadSidebar.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden'; // 防止背景滾動
+            }
+        };
+
+        // 關閉上傳側邊欄
+        const closeUploadSidebar = () => {
+            if (uploadSidebar) {
+                uploadSidebar.classList.remove('active');
+                uploadSidebar.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = ''; // 恢復滾動
+            }
+        };
+
+        // 浮動按鈕點擊事件
+        if (uploadFab) {
+            uploadFab.addEventListener('click', openUploadSidebar);
+        }
+
+        // 空狀態上傳按鈕點擊事件
+        if (emptyStateUploadBtn) {
+            emptyStateUploadBtn.addEventListener('click', openUploadSidebar);
+        }
+
+        // 關閉按鈕點擊事件
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', closeUploadSidebar);
+        }
+
+        // 點擊遮罩關閉
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', closeUploadSidebar);
+        }
+
+        // ESC 鍵關閉
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && uploadSidebar?.classList.contains('active')) {
+                closeUploadSidebar();
+            }
+        });
+
+        console.log('UI 互動已初始化（浮動按鈕、側邊欄）');
     }
 
     // 同步深色模式按鈕狀態
@@ -485,17 +545,24 @@ class App {
         // 隱藏所有資料相關的區塊
         this.hideDataDependentSections();
 
+        // 顯示新的空狀態頁面
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) {
+            emptyState.style.display = 'flex';
+        }
+
+        // 隱藏原本的文章容器內容
         const articlesContainer = document.getElementById('articles');
         if (articlesContainer) {
-            articlesContainer.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle fa-2x mb-3"></i>
-                        <h4>尚未載入任何資料</h4>
-                        <p>請上傳 CSV 檔案或檢查資料載入狀況。</p>
-                    </div>
-                </div>
-            `;
+            articlesContainer.innerHTML = '';
+        }
+    }
+
+    // 隱藏空狀態
+    hideEmptyState() {
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) {
+            emptyState.style.display = 'none';
         }
     }
 
@@ -510,6 +577,9 @@ class App {
 
     // 顯示所有資料相關的區塊
     showDataDependentSections() {
+        // 隱藏空狀態
+        this.hideEmptyState();
+
         const sections = document.querySelectorAll('.data-dependent-section');
         sections.forEach(section => {
             // 特殊處理：expectedTrendContainer 和 keywordCloudContainer 預設不顯示（由頁籤切換控制）

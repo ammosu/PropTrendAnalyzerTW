@@ -94,6 +94,12 @@ class EventHandlers {
         document.querySelectorAll('.media-filter').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.filterArticles());
         });
+
+        // 清除所有篩選按鈕
+        const clearAllBtn = document.getElementById('clear-all-filters-btn');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', () => this.clearAllFilters());
+        }
     }
 
     // 初始化快速日期篩選
@@ -516,6 +522,7 @@ class EventHandlers {
     // 更新篩選標籤
     updateFilterTags(filters) {
         const tagsContainer = document.getElementById('active-filters-tags');
+        const clearAllBtn = document.getElementById('clear-all-filters-btn');
         if (!tagsContainer) return;
 
         // 清空現有標籤
@@ -523,12 +530,15 @@ class EventHandlers {
             tagsContainer.removeChild(tagsContainer.firstChild);
         }
 
+        let hasActiveFilters = false;
+
         // 日期篩選標籤
         if (filters.startDate) {
             this.addFilterTag(tagsContainer, '起始日期', filters.startDate, () => {
                 document.getElementById('start-date').value = '';
                 this.filterArticles();
             });
+            hasActiveFilters = true;
         }
 
         if (filters.endDate) {
@@ -536,6 +546,7 @@ class EventHandlers {
                 document.getElementById('end-date').value = '';
                 this.filterArticles();
             });
+            hasActiveFilters = true;
         }
 
         // 關鍵字篩選標籤
@@ -544,6 +555,7 @@ class EventHandlers {
                 document.getElementById('keyword-filter').value = '';
                 this.filterArticles();
             });
+            hasActiveFilters = true;
         }
 
         // 媒體篩選標籤：如果有篩選（不是全選），顯示摘要標籤
@@ -556,34 +568,67 @@ class EventHandlers {
                 this.addFilterTag(
                     tagsContainer,
                     '媒體篩選',
-                    `已選 ${filters.selectedMedia.length}/${allMediaCount}（在進階篩選中調整）`,
+                    `已選 ${filters.selectedMedia.length}/${allMediaCount}`,
                     () => {
                         // 點擊移除時，全選所有媒體
                         document.querySelectorAll('.media-filter').forEach(cb => cb.checked = true);
                         this.filterArticles();
                     }
                 );
+                hasActiveFilters = true;
             }
+        }
+
+        // 顯示或隱藏「清除全部」按鈕
+        if (clearAllBtn) {
+            clearAllBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
         }
     }
 
     // 添加篩選標籤
     addFilterTag(container, label, value, onRemove) {
-        const tag = document.createElement('div');
+        const tag = document.createElement('span');
         tag.className = 'filter-tag';
 
         const labelSpan = document.createElement('span');
         labelSpan.textContent = `${label}: ${value}`;
         tag.appendChild(labelSpan);
 
-        const removeIcon = document.createElement('span');
-        removeIcon.className = 'remove-filter';
-        removeIcon.textContent = '×';
-        removeIcon.title = '移除此篩選條件';
-        removeIcon.addEventListener('click', onRemove);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'filter-tag-remove';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.title = '移除此篩選條件';
+        removeBtn.setAttribute('aria-label', `移除${label}篩選條件`);
+        removeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRemove();
+        });
 
-        tag.appendChild(removeIcon);
+        tag.appendChild(removeBtn);
         container.appendChild(tag);
+    }
+
+    // 清除所有篩選條件
+    clearAllFilters() {
+        // 清除日期篩選
+        const startDateEl = document.getElementById('start-date');
+        const endDateEl = document.getElementById('end-date');
+        if (startDateEl) startDateEl.value = '';
+        if (endDateEl) endDateEl.value = '';
+
+        // 清除關鍵字篩選
+        const keywordFilterEl = document.getElementById('keyword-filter');
+        if (keywordFilterEl) keywordFilterEl.value = '';
+
+        // 全選所有媒體
+        document.querySelectorAll('.media-filter').forEach(cb => cb.checked = true);
+
+        // 清除快速日期選擇
+        this.clearQuickDateSelection();
+
+        // 重新套用篩選
+        this.filterArticles();
     }
 
     // 處理頁面跳轉
