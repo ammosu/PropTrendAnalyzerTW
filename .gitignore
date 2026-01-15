@@ -21,3 +21,5 @@ npm-debug.log*
 # Environment
 .env
 .env.local
+.playwright-mcp/
+test_data.csv

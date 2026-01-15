@@ -171,6 +171,88 @@ class App {
         console.log('UI 互動已初始化（浮動按鈕、側邊欄）');
     }
 
+    // 初始化圖表預覽卡片點擊事件
+    initializeChartPreviewCards() {
+        const chartPreviewCards = document.querySelectorAll('.chart-preview-card');
+
+        chartPreviewCards.forEach((card, index) => {
+            // 點擊事件
+            card.addEventListener('click', () => {
+                this.navigateToChart(index);
+            });
+
+            // 鍵盤事件（Enter 和 Space）
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.navigateToChart(index);
+                }
+            });
+        });
+
+        console.log('圖表預覽卡片互動已初始化');
+    }
+
+    // 導航到對應的完整圖表
+    navigateToChart(index) {
+        // 顯示對應的圖表容器
+        const chartContainers = [
+            'keywordTrendContainer',
+            'expectedTrendContainer',
+            'keywordCloudContainer'
+        ];
+
+        const targetContainer = document.getElementById(chartContainers[index]);
+        if (!targetContainer) return;
+
+        // 隱藏其他圖表容器
+        chartContainers.forEach((containerId, i) => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.style.display = (i === index) ? 'block' : 'none';
+            }
+        });
+
+        // 更新圖表切換按鈕狀態
+        const chartToggleButtons = [
+            'showKeywordTrend',
+            'showExpectedTrend',
+            'showKeywordCloud'
+        ];
+
+        chartToggleButtons.forEach((buttonId, i) => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                if (i === index) {
+                    button.classList.add('active');
+                    button.setAttribute('aria-pressed', 'true');
+                } else {
+                    button.classList.remove('active');
+                    button.setAttribute('aria-pressed', 'false');
+                }
+            }
+        });
+
+        // 平滑滾動到圖表區域
+        targetContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 顯示骨架屏
+    showSkeletons() {
+        const statsSkeleton = document.getElementById('stats-skeleton');
+        if (statsSkeleton) {
+            statsSkeleton.style.display = 'block';
+        }
+    }
+
+    // 隱藏骨架屏
+    hideSkeletons() {
+        const statsSkeleton = document.getElementById('stats-skeleton');
+        if (statsSkeleton) {
+            statsSkeleton.style.display = 'none';
+        }
+    }
+
     // 同步深色模式按鈕狀態
     syncDarkModeButton() {
         const isDarkMode = this.stateManager.getState('darkMode');
@@ -494,20 +576,23 @@ class App {
         }
 
         console.log('開始初始化頁面...');
-        
+
+        // 顯示骨架屏
+        this.showSkeletons();
         this.uiComponents.showLoading('正在初始化頁面...');
-        
+
         let articlesData = this.stateManager.getState('articlesData');
-        
+
         // 如果 StateManager 中沒有資料，檢查全域變數
         if ((!articlesData || articlesData.length === 0) && typeof window.articlesData !== 'undefined' && window.articlesData.length > 0) {
             console.log('從全域變數同步資料到 StateManager');
             this.stateManager.setArticlesData(window.articlesData);
             articlesData = window.articlesData;
         }
-        
+
         if (!articlesData || articlesData.length === 0) {
             console.log('沒有文章資料，顯示空狀態');
+            this.hideSkeletons();
             this.showEmptyState();
             this.uiComponents.hideLoading();
             return;
@@ -533,7 +618,14 @@ class App {
             // 初始化預期趨勢圖表
             this.chartManager.renderExpectedTrendChart();
 
-            // 隱藏載入動畫
+            // 渲染迷你圖表預覽
+            this.chartManager.renderMiniCharts();
+
+            // 初始化圖表預覽卡片點擊事件
+            this.initializeChartPreviewCards();
+
+            // 隱藏骨架屏和載入動畫
+            this.hideSkeletons();
             this.uiComponents.hideLoading();
 
             console.log('頁面初始化完成');

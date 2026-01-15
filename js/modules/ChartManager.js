@@ -1170,6 +1170,192 @@ class ChartManager {
 
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
+
+    /**
+     * 渲染迷你關鍵詞趨勢圖
+     */
+    renderMiniKeywordChart() {
+        const canvas = document.getElementById('mini-keyword-chart');
+        if (!canvas) return;
+
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
+
+        // 計算關鍵詞頻率
+        const keywordCounts = {};
+        filteredArticlesData.forEach(article => {
+            if (article.keywords && Array.isArray(article.keywords)) {
+                article.keywords.forEach(keyword => {
+                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                });
+            }
+        });
+
+        // 取前 5 個關鍵詞
+        const sortedKeywords = Object.entries(keywordCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+        const labels = sortedKeywords.map(([keyword]) => keyword);
+        const data = sortedKeywords.map(([, count]) => count);
+
+        // 銷毀舊圖表
+        if (this.miniKeywordChart) {
+            this.miniKeywordChart.destroy();
+        }
+
+        // 創建新圖表
+        const ctx = canvas.getContext('2d');
+        this.miniKeywordChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        ticks: { font: { size: 10 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        display: false,
+                        grid: { display: false }
+                    }
+                },
+                animation: { duration: 500 }
+            }
+        });
+    }
+
+    /**
+     * 渲染迷你市場趨勢圖
+     */
+    renderMiniTrendChart() {
+        const canvas = document.getElementById('mini-trend-chart');
+        if (!canvas) return;
+
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
+
+        // 計算趨勢分佈
+        const trendCounts = {
+            "上漲": 0,
+            "下跌": 0,
+            "平穩": 0,
+            "無相關": 0,
+            "無法判斷": 0
+        };
+
+        filteredArticlesData.forEach(article => {
+            const trend = article.trend || "無法判斷";
+            if (trendCounts.hasOwnProperty(trend)) {
+                trendCounts[trend]++;
+            }
+        });
+
+        const labels = Object.keys(trendCounts);
+        const data = Object.values(trendCounts);
+
+        // 銷毀舊圖表
+        if (this.miniTrendChart) {
+            this.miniTrendChart.destroy();
+        }
+
+        // 創建新圖表
+        const ctx = canvas.getContext('2d');
+        this.miniTrendChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(148, 163, 184, 0.8)',
+                        'rgba(203, 213, 225, 0.8)'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                animation: { duration: 500 },
+                cutout: '60%'
+            }
+        });
+    }
+
+    /**
+     * 渲染迷你關鍵詞雲
+     */
+    renderMiniKeywordCloud() {
+        const container = document.getElementById('mini-cloud-preview');
+        if (!container) return;
+
+        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
+
+        // 計算關鍵詞頻率
+        const keywordCounts = {};
+        filteredArticlesData.forEach(article => {
+            if (article.keywords && Array.isArray(article.keywords)) {
+                article.keywords.forEach(keyword => {
+                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                });
+            }
+        });
+
+        // 取前 10 個關鍵詞
+        const sortedKeywords = Object.entries(keywordCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        // 清空容器
+        container.innerHTML = '';
+
+        // 渲染文字
+        sortedKeywords.forEach(([keyword, count], index) => {
+            const span = document.createElement('span');
+            span.className = 'mini-cloud-word';
+            span.textContent = keyword;
+
+            // 根據排名設定字體大小
+            const fontSize = 18 - (index * 1.5);
+            span.style.fontSize = `${fontSize}px`;
+
+            container.appendChild(span);
+        });
+    }
+
+    /**
+     * 渲染所有迷你圖表
+     */
+    renderMiniCharts() {
+        this.renderMiniKeywordChart();
+        this.renderMiniTrendChart();
+        this.renderMiniKeywordCloud();
+    }
 }
 
 // 導出供其他模組使用

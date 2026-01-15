@@ -57,6 +57,48 @@
             <i class="fas fa-cloud-upload-alt"></i>
         </button>
 
+        <!-- 骨架屏 - 統計卡片 -->
+        <section id="stats-skeleton" class="mb-4" style="display: none;">
+            <div class="row">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card-skeleton">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-value"></div>
+                            <div class="skeleton skeleton-label"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card-skeleton">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-value"></div>
+                            <div class="skeleton skeleton-label"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card-skeleton">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-value"></div>
+                            <div class="skeleton skeleton-label"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="stat-card-skeleton">
+                        <div class="skeleton skeleton-icon"></div>
+                        <div class="skeleton-content">
+                            <div class="skeleton skeleton-value"></div>
+                            <div class="skeleton skeleton-label"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- 資料統計摘要區塊 -->
         <section id="data-summary-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
             <div class="row">
@@ -101,6 +143,75 @@
                         <div class="stat-content">
                             <div class="stat-value" id="publishers-count" data-target="0">0</div>
                             <div class="stat-label">家媒體</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 圖表預覽卡片區塊 -->
+        <section id="chart-preview-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
+            <h5 class="mb-3"><i class="fas fa-chart-area"></i> 數據總覽</h5>
+            <div class="row">
+                <!-- 關鍵詞趨勢預覽 -->
+                <div class="col-md-4 mb-3">
+                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞趨勢分析詳情">
+                        <div class="chart-preview-header">
+                            <div class="chart-preview-icon chart-preview-icon-blue">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="chart-preview-title">
+                                <h6>關鍵詞趨勢</h6>
+                                <p class="chart-preview-subtitle">熱門關鍵詞出現頻率</p>
+                            </div>
+                        </div>
+                        <div class="chart-preview-body">
+                            <canvas id="mini-keyword-chart" width="300" height="150"></canvas>
+                        </div>
+                        <div class="chart-preview-footer">
+                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 市場趨勢預覽 -->
+                <div class="col-md-4 mb-3">
+                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看市場趨勢分佈詳情">
+                        <div class="chart-preview-header">
+                            <div class="chart-preview-icon chart-preview-icon-orange">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="chart-preview-title">
+                                <h6>市場趨勢</h6>
+                                <p class="chart-preview-subtitle">預期走向分佈</p>
+                            </div>
+                        </div>
+                        <div class="chart-preview-body">
+                            <canvas id="mini-trend-chart" width="300" height="150"></canvas>
+                        </div>
+                        <div class="chart-preview-footer">
+                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 關鍵詞雲預覽 -->
+                <div class="col-md-4 mb-3">
+                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞文字雲詳情">
+                        <div class="chart-preview-header">
+                            <div class="chart-preview-icon chart-preview-icon-purple">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="chart-preview-title">
+                                <h6>關鍵詞雲</h6>
+                                <p class="chart-preview-subtitle">詞頻視覺化</p>
+                            </div>
+                        </div>
+                        <div class="chart-preview-body">
+                            <div id="mini-cloud-preview" class="mini-cloud-container"></div>
+                        </div>
+                        <div class="chart-preview-footer">
+                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
                         </div>
                     </div>
                 </div>
