@@ -998,7 +998,9 @@ button.btn-secondary:focus:not(:active)::after {
 }
 
 /* 圖表容器樣式 - 玻璃擬態效果 */
-#keywordTrendContainer, #expectedTrendContainer {
+#keywordTrendContainer,
+#expectedTrendContainer,
+#keywordCloudContainer {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -1015,7 +1017,9 @@ button.btn-secondary:focus:not(:active)::after {
     overflow: hidden;
 }
 
-#keywordTrendContainer::before, #expectedTrendContainer::before {
+#keywordTrendContainer::before,
+#expectedTrendContainer::before,
+#keywordCloudContainer::before {
     content: '';
     position: absolute;
     top: 0;
@@ -1026,7 +1030,9 @@ button.btn-secondary:focus:not(:active)::after {
     opacity: 0.8;
 }
 
-#keywordTrendContainer:hover, #expectedTrendContainer:hover {
+#keywordTrendContainer:hover,
+#expectedTrendContainer:hover,
+#keywordCloudContainer:hover {
     box-shadow:
         0 12px 40px rgba(31, 38, 135, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -1034,7 +1040,9 @@ button.btn-secondary:focus:not(:active)::after {
     border-color: rgba(59, 130, 246, 0.3);
 }
 
-#keywordTrendContainer h1, #expectedTrendContainer h3 {
+#keywordTrendContainer h2,
+#expectedTrendContainer h2,
+#keywordCloudContainer h2 {
     font-size: 1.5rem;
     color: var(--primary);
     margin-bottom: var(--space-lg);
@@ -1042,11 +1050,14 @@ button.btn-secondary:focus:not(:active)::after {
     display: inline-block;
 }
 
-#keywordTrendContainer h1::after, #expectedTrendContainer h3::after {
+#keywordTrendContainer h2::after,
+#expectedTrendContainer h2::after,
+#keywordCloudContainer h2::after {
     content: '';
     position: absolute;
     bottom: -8px;
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 50px;
     height: 3px;
     background-color: var(--primary);
@@ -1504,8 +1515,10 @@ button.btn-secondary:focus:not(:active)::after {
     margin-top: var(--space-sm);
 }
 
-/* 圖表容器樣式 */
-#keywordTrendContainer, #expectedTrendContainer {
+/* 圖表容器布局 */
+#keywordTrendContainer,
+#expectedTrendContainer,
+#keywordCloudContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2316,8 +2329,9 @@ canvas#trend, canvas#expectedTrendChart {
 [data-theme="dark"] {
     /* 圖表容器深色模式 - 玻璃擬態效果（提升不透明度確保文字可讀性） */
     #keywordTrendContainer,
-    #expectedTrendContainer {
-        background: rgba(30, 41, 59, 0.85);  /* 從 0.7 提升到 0.85 */
+    #expectedTrendContainer,
+    #keywordCloudContainer {
+        background: rgba(30, 41, 59, 0.85);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2327,7 +2341,8 @@ canvas#trend, canvas#expectedTrendChart {
     }
 
     #keywordTrendContainer:hover,
-    #expectedTrendContainer:hover {
+    #expectedTrendContainer:hover,
+    #keywordCloudContainer:hover {
         border-color: rgba(96, 165, 250, 0.3);
         box-shadow:
             0 12px 40px rgba(0, 0, 0, 0.4),
@@ -2657,61 +2672,6 @@ canvas#trend, canvas#expectedTrendChart {
    關鍵詞文字雲視覺化樣式
    ======================================== */
 
-#keywordCloudContainer {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-lg);
-    box-shadow:
-        0 8px 32px rgba(31, 38, 135, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    padding: var(--space-lg);
-    margin: var(--space-lg) 0;
-    transition: box-shadow var(--transition-normal), transform var(--transition-normal),
-                border-color var(--transition-normal);
-    position: relative;
-    overflow: hidden;
-}
-
-#keywordCloudContainer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, var(--primary));
-    opacity: 0.8;
-}
-
-#keywordCloudContainer:hover {
-    box-shadow:
-        0 12px 40px rgba(31, 38, 135, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    transform: translateY(-4px);
-    border-color: rgba(102, 126, 234, 0.3);
-}
-
-#keywordCloudContainer h2 {
-    font-size: 1.5rem;
-    color: var(--primary);
-    margin-bottom: var(--space-lg);
-    position: relative;
-    display: inline-block;
-}
-
-#keywordCloudContainer h2::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background-color: var(--primary);
-    border-radius: var(--radius-round);
-}
-
 .wordcloud-container {
     position: relative;
     width: 100%;
@@ -2817,24 +2777,7 @@ canvas#trend, canvas#expectedTrendChart {
     transform: scale(1.1);
 }
 
-/* 深色模式文字雲樣式 - 玻璃擬態效果（提升不透明度） */
-[data-theme="dark"] #keywordCloudContainer {
-    background: rgba(30, 41, 59, 0.85);  /* 從 0.7 提升到 0.85 */
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="dark"] #keywordCloudContainer:hover {
-    border-color: rgba(102, 126, 234, 0.3);
-    box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
+/* 深色模式文字雲容器 */
 [data-theme="dark"] .wordcloud-container {
     background-color: var(--bg-tertiary);
 }
