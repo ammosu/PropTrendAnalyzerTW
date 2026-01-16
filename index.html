@@ -218,242 +218,6 @@
             </div>
         </section>
 
-        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
-            <h5 id="filter-heading" class="mb-3"><i class="fas fa-filter" aria-hidden="true"></i> 篩選選項</h5>
-
-            <!-- 篩選結果數量和已選標籤 -->
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 1rem;">
-                            <i class="fas fa-list"></i> 共 <span id="filtered-count">0</span> 篇文章
-                        </div>
-                        <!-- 書籤篩選切換 -->
-                        <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
-                            <i class="far fa-bookmark"></i>
-                            <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
-                        </button>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- 匯出下拉選單 -->
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
-                                <i class="fas fa-download"></i> 匯出
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <h6 class="dropdown-header"><i class="fas fa-file-alt"></i> 資料格式</h6>
-                                <button id="export-csv-btn" class="dropdown-item" type="button">
-                                    <i class="fas fa-file-csv text-success"></i> CSV 格式
-                                </button>
-                                <button id="export-json-btn" class="dropdown-item" type="button">
-                                    <i class="fas fa-file-code text-info"></i> JSON 格式
-                                </button>
-                                <div class="dropdown-divider"></div>
-                                <h6 class="dropdown-header"><i class="fas fa-chart-bar"></i> 圖表</h6>
-                                <button id="export-chart-keyword-btn" class="dropdown-item" type="button">
-                                    <i class="fas fa-chart-line text-primary"></i> 關鍵詞趨勢圖
-                                </button>
-                                <button id="export-chart-trend-btn" class="dropdown-item" type="button">
-                                    <i class="fas fa-chart-pie text-warning"></i> 市場趨勢圖
-                                </button>
-                                <button id="export-chart-cloud-btn" class="dropdown-item" type="button">
-                                    <i class="fas fa-cloud text-secondary"></i> 文字雲圖
-                                </button>
-                                <div class="dropdown-divider"></div>
-                                <button id="export-full-report-btn" class="dropdown-item font-weight-bold" type="button">
-                                    <i class="fas fa-file-download text-danger"></i> 完整報表
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- 已選篩選條件標籤 -->
-                <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <div id="active-filters-tags" class="d-flex align-items-center gap-2 flex-wrap"></div>
-                    <button id="clear-all-filters-btn" class="clear-all-filters-btn" style="display: none;" title="清除所有篩選條件">
-                        <i class="fas fa-times-circle"></i> 清除全部
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="col-md-3">
-                    <label for="start-date"><i class="far fa-calendar-alt" aria-hidden="true"></i> 起始日期：</label>
-                    <input type="date" id="start-date" class="form-control" aria-label="選擇篩選起始日期">
-                </div>
-                <div class="col-md-3">
-                    <label for="end-date"><i class="far fa-calendar-alt" aria-hidden="true"></i> 結束日期：</label>
-                    <input type="date" id="end-date" class="form-control" aria-label="選擇篩選結束日期">
-                </div>
-                <div class="col-md-6">
-                    <label class="d-block"><i class="fas fa-bolt" aria-hidden="true"></i> 快速選擇：</label>
-                    <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Month" title="最近1個月">
-                            最近1個月
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last3Months" title="最近3個月">
-                            最近3個月
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last6Months" title="最近6個月">
-                            最近6個月
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Year" title="最近1年">
-                            最近1年
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="all" title="全部時間">
-                            <i class="fas fa-infinity"></i> 全部
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row mt-3">
-                <div class="col-md-6">
-                    <label for="keyword-filter"><i class="fas fa-search" aria-hidden="true"></i> 搜尋：</label>
-                    <div class="search-container">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" id="keyword-filter-icon"><i class="fas fa-search" aria-hidden="true"></i></span>
-                            </div>
-                            <input type="text"
-                                   id="keyword-filter"
-                                   class="form-control search-input"
-                                   placeholder="搜尋標題、內文、摘要或關鍵詞..."
-                                   aria-label="搜尋文章"
-                                   aria-describedby="keyword-filter-icon"
-                                   autocomplete="off">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary search-clear-btn"
-                                        type="button"
-                                        id="search-clear-btn"
-                                        title="清除搜尋"
-                                        style="display: none;">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button id="search-options-dropdown-btn"
-                                        class="btn btn-outline-secondary dropdown-toggle search-options-btn"
-                                        type="button"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
-                                        title="搜尋選項">
-                                    <i class="fas fa-sliders-h"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
-                                    <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋範圍</h6>
-                                    <div class="px-3 py-2">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
-                                            <label class="custom-control-label" for="search-scope-title">標題</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-summary" value="summary" checked>
-                                            <label class="custom-control-label" for="search-scope-summary">摘要</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-content" value="fullText" checked>
-                                            <label class="custom-control-label" for="search-scope-content">內文</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-keywords" value="keywords" checked>
-                                            <label class="custom-control-label" for="search-scope-keywords">關鍵詞</label>
-                                        </div>
-                                    </div>
-                                    <div class="dropdown-divider"></div>
-                                    <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋選項</h6>
-                                    <div class="px-3 py-2">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
-                                            <label class="custom-control-label" for="search-case-sensitive">區分大小寫</label>
-                                        </div>
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="search-exact-match">
-                                            <label class="custom-control-label" for="search-exact-match">完全符合</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- 搜尋建議下拉選單 -->
-                        <div class="search-suggestions" id="search-suggestions" style="display: none;">
-                            <div class="search-suggestions-section" id="search-history-section" style="display: none;">
-                                <div class="search-suggestions-header">
-                                    <span><i class="fas fa-history"></i> 最近搜尋</span>
-                                    <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                                <div class="search-suggestions-list" id="search-history-list"></div>
-                            </div>
-                            <div class="search-suggestions-section" id="search-popular-section">
-                                <div class="search-suggestions-header">
-                                    <span><i class="fas fa-fire"></i> 熱門關鍵詞</span>
-                                </div>
-                                <div class="search-suggestions-list" id="search-popular-list"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <label for="sort-field"><i class="fas fa-sort" aria-hidden="true"></i> 排序：</label>
-                    <div class="sort-controls">
-                        <select id="sort-field" class="form-control sort-field-select" aria-label="選擇排序欄位">
-                            <option value="date">時間</option>
-                            <option value="title">標題</option>
-                            <option value="publisher">來源</option>
-                            <option value="keywords-count">關鍵詞數量</option>
-                            <option value="trend">預期走向</option>
-                            <option value="relevance">相關性</option>
-                        </select>
-                        <button id="sort-direction-btn"
-                                class="btn btn-outline-secondary sort-direction-btn"
-                                data-direction="desc"
-                                title="點擊切換排序方向"
-                                aria-label="切換排序方向">
-                            <i class="fas fa-sort-amount-down"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 折疊區域 -->
-            <div class="mb-3 mt-3">
-                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#advanced-filters" aria-expanded="false" aria-controls="advanced-filters" aria-label="顯示或隱藏進階篩選選項">
-                    <i class="fas fa-angle-down me-1" aria-hidden="true"></i> 進階篩選
-                </button>
-            </div>
-
-            <div class="collapse" id="advanced-filters">
-                <div class="form-row">
-                    <div class="col-md-12">
-                        <label id="media-filter-label"><i class="fas fa-newspaper" aria-hidden="true"></i> 新聞媒體：</label>
-                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
-                            <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="中國時報" checked name="media-filter-chinatimes" id="media-filter-chinatimes" aria-label="篩選中國時報新聞">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i> 中國時報
-                            </label>
-                            <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked name="media-filter-united-daily" id="media-filter-united-daily" aria-label="篩選聯合新聞網新聞">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i> 聯合新聞網
-                            </label>
-                            <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="工商時報" checked name="media-filter-commercial-times" id="media-filter-commercial-times" aria-label="篩選工商時報新聞">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i> 工商時報
-                            </label>
-                            <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="自由時報" checked name="media-filter-liberty-times" id="media-filter-liberty-times" aria-label="篩選自由時報新聞">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i> 自由時報
-                            </label>
-                            <label class="btn btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="風傳媒" checked name="media-filter-storm" id="media-filter-storm" aria-label="篩選風傳媒新聞">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i> 風傳媒
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <div class="section-divider data-dependent-section" style="display: none;"></div>
 
         <!-- 圖表切換按鈕 -->
@@ -594,6 +358,209 @@
         </section>
 
         <div class="section-divider data-dependent-section" style="display: none;"></div>
+
+        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
+            <!-- 預設顯示區：快速選擇 + 排序 + 文章數 -->
+            <div class="filter-compact-bar">
+                <div class="filter-compact-left">
+                    <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 0.9rem;">
+                        <i class="fas fa-list"></i> 共 <span id="filtered-count">0</span> 篇
+                    </div>
+                    <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
+                        <i class="far fa-bookmark"></i>
+                        <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
+                    </button>
+                    <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Month" title="最近1個月">1個月</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last3Months" title="最近3個月">3個月</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last6Months" title="最近6個月">6個月</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Year" title="最近1年">1年</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn active" data-range="all" title="全部時間">全部</button>
+                    </div>
+                </div>
+                <div class="filter-compact-right">
+                    <div class="sort-controls-compact">
+                        <select id="sort-field" class="form-control form-control-sm sort-field-select" aria-label="選擇排序欄位">
+                            <option value="date" selected>時間</option>
+                            <option value="title">標題</option>
+                            <option value="publisher">來源</option>
+                            <option value="keywords-count">關鍵詞數</option>
+                            <option value="trend">預期走向</option>
+                            <option value="relevance">相關性</option>
+                        </select>
+                        <button id="sort-direction-btn" class="btn btn-sm btn-outline-secondary sort-direction-btn" data-direction="desc" title="目前：新到舊" aria-label="切換排序方向">
+                            <i class="fas fa-sort-amount-down"></i>
+                        </button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#more-filters" aria-expanded="false" aria-controls="more-filters" title="更多篩選選項">
+                        <i class="fas fa-sliders-h"></i> 更多
+                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <h6 class="dropdown-header"><i class="fas fa-file-alt"></i> 資料格式</h6>
+                            <button id="export-csv-btn" class="dropdown-item" type="button">
+                                <i class="fas fa-file-csv text-success"></i> CSV 格式
+                            </button>
+                            <button id="export-json-btn" class="dropdown-item" type="button">
+                                <i class="fas fa-file-code text-info"></i> JSON 格式
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header"><i class="fas fa-chart-bar"></i> 圖表</h6>
+                            <button id="export-chart-keyword-btn" class="dropdown-item" type="button">
+                                <i class="fas fa-chart-line text-primary"></i> 關鍵詞趨勢圖
+                            </button>
+                            <button id="export-chart-trend-btn" class="dropdown-item" type="button">
+                                <i class="fas fa-chart-pie text-warning"></i> 市場趨勢圖
+                            </button>
+                            <button id="export-chart-cloud-btn" class="dropdown-item" type="button">
+                                <i class="fas fa-cloud text-secondary"></i> 文字雲圖
+                            </button>
+                            <div class="dropdown-divider"></div>
+                            <button id="export-full-report-btn" class="dropdown-item font-weight-bold" type="button">
+                                <i class="fas fa-file-download text-danger"></i> 完整報表
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 已選篩選條件標籤 -->
+            <div class="active-filters-container mt-2" id="active-filters-container" style="display: none;">
+                <div id="active-filters-tags" class="d-flex align-items-center gap-2 flex-wrap"></div>
+                <button id="clear-all-filters-btn" class="clear-all-filters-btn" style="display: none;" title="清除所有篩選條件">
+                    <i class="fas fa-times-circle"></i> 清除全部
+                </button>
+            </div>
+
+            <!-- 展開區：更多篩選選項 -->
+            <div class="collapse mt-3" id="more-filters">
+                <div class="more-filters-panel">
+                    <!-- 日期範圍 -->
+                    <div class="filter-group">
+                        <label class="filter-group-label"><i class="far fa-calendar-alt"></i> 日期範圍</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="date" id="start-date" class="form-control form-control-sm" aria-label="起始日期">
+                            <span class="text-muted">~</span>
+                            <input type="date" id="end-date" class="form-control form-control-sm" aria-label="結束日期">
+                        </div>
+                    </div>
+
+                    <!-- 搜尋 -->
+                    <div class="filter-group">
+                        <label class="filter-group-label"><i class="fas fa-search"></i> 關鍵字搜尋</label>
+                        <div class="search-container">
+                            <div class="input-group input-group-sm">
+                                <input type="text"
+                                       id="keyword-filter"
+                                       class="form-control search-input"
+                                       placeholder="搜尋標題、內文、摘要或關鍵詞..."
+                                       aria-label="搜尋文章"
+                                       autocomplete="off">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary search-clear-btn"
+                                            type="button"
+                                            id="search-clear-btn"
+                                            title="清除搜尋"
+                                            style="display: none;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button id="search-options-dropdown-btn"
+                                            class="btn btn-outline-secondary dropdown-toggle search-options-btn"
+                                            type="button"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false"
+                                            title="搜尋選項">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
+                                        <h6 class="dropdown-header"><i class="fas fa-crosshairs"></i> 搜尋範圍</h6>
+                                        <div class="px-3 py-2">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
+                                                <label class="custom-control-label" for="search-scope-title">標題</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-summary" value="summary" checked>
+                                                <label class="custom-control-label" for="search-scope-summary">摘要</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-content" value="fullText" checked>
+                                                <label class="custom-control-label" for="search-scope-content">內文</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-keywords" value="keywords" checked>
+                                                <label class="custom-control-label" for="search-scope-keywords">關鍵詞</label>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋選項</h6>
+                                        <div class="px-3 py-2">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
+                                                <label class="custom-control-label" for="search-case-sensitive">區分大小寫</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="search-exact-match">
+                                                <label class="custom-control-label" for="search-exact-match">完全符合</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 搜尋建議下拉選單 -->
+                            <div class="search-suggestions" id="search-suggestions" style="display: none;">
+                                <div class="search-suggestions-section" id="search-history-section" style="display: none;">
+                                    <div class="search-suggestions-header">
+                                        <span><i class="fas fa-history"></i> 最近搜尋</span>
+                                        <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="search-suggestions-list" id="search-history-list"></div>
+                                </div>
+                                <div class="search-suggestions-section" id="search-popular-section">
+                                    <div class="search-suggestions-header">
+                                        <span><i class="fas fa-fire"></i> 熱門關鍵詞</span>
+                                    </div>
+                                    <div class="search-suggestions-list" id="search-popular-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 新聞媒體篩選 -->
+                    <div class="filter-group">
+                        <label id="media-filter-label" class="filter-group-label"><i class="fas fa-newspaper"></i> 新聞媒體</label>
+                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="中國時報" checked id="media-filter-chinatimes">
+                                中國時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked id="media-filter-united-daily">
+                                聯合新聞網
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="工商時報" checked id="media-filter-commercial-times">
+                                工商時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="自由時報" checked id="media-filter-liberty-times">
+                                自由時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="風傳媒" checked id="media-filter-storm">
+                                風傳媒
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s data-dependent-section" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容" style="display: none;">
             <i class="fas fa-newspaper" aria-hidden="true"></i> 顯示/隱藏新聞內容
