@@ -12,8 +12,9 @@ class UIComponents {
      * @constructor
      * @param {StateManager} stateManager - 狀態管理器實例
      */
-    constructor(stateManager) {
+    constructor(stateManager, searchManager = null) {
         this.stateManager = stateManager;
+        this.searchManager = searchManager;
         this.securityUtils = window.SecurityUtils;
         this.utilities = window.Utilities;
         this.constants = window.Constants;
@@ -26,6 +27,23 @@ class UIComponents {
      */
     setAccessibilityManager(accessibilityManager) {
         this.accessibilityManager = accessibilityManager;
+    }
+
+    /**
+     * 高亮搜尋結果
+     * @param {string} text - 要處理的文字
+     * @returns {string} - 包含高亮標記的HTML
+     */
+    highlightSearchTerm(text) {
+        if (!text || !this.searchManager) return this.utilities.escapeHtml(text);
+
+        const searchTerm = this.searchManager.getCurrentSearchTerm();
+        if (!searchTerm) return this.utilities.escapeHtml(text);
+
+        return this.searchManager.highlightSearchResults(
+            this.utilities.escapeHtml(text),
+            searchTerm
+        );
     }
 
     // 顯示載入動畫
@@ -244,12 +262,13 @@ class UIComponents {
     createListViewRow(article) {
         const row = this.securityUtils.createSafeElement('tr');
 
-        // 標題
+        // 標題（支援高亮）
         const titleCell = this.securityUtils.createSafeElement('td');
         const titleDiv = this.securityUtils.createSafeElement('div', {
             class: 'list-view-title',
             title: article.title
-        }, article.title || '');
+        });
+        titleDiv.innerHTML = this.highlightSearchTerm(article.title || '');
         titleCell.appendChild(titleDiv);
         row.appendChild(titleCell);
 

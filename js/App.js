@@ -88,14 +88,18 @@ class App {
         this.bookmarkManager = new BookmarkManager();
         window.bookmarkManager = this.bookmarkManager;
 
+        // 初始化搜尋管理器（需要在 UI 元件之前）
+        this.searchManager = new SearchManager(this.stateManager, this.utilities);
+
         // 初始化 UI 元件和圖表管理器
-        this.uiComponents = new UIComponents(this.stateManager);
+        this.uiComponents = new UIComponents(this.stateManager, this.searchManager);
         this.chartManager = new ChartManager(this.stateManager, this.uiComponents);
         this.eventHandlers = new EventHandlers(
             this.stateManager,
             this.uiComponents,
             this.chartManager,
-            this.utilities
+            this.utilities,
+            this.searchManager
         );
 
         // 將無障礙性管理器設定到需要的模組

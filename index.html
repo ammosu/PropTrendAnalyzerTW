@@ -308,13 +308,89 @@
             </div>
 
             <div class="form-row mt-3">
-                <div class="col-md-3">
-                    <label for="keyword-filter"><i class="fas fa-search" aria-hidden="true"></i> 關鍵字：</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="keyword-filter-icon"><i class="fas fa-search" aria-hidden="true"></i></span>
+                <div class="col-md-6">
+                    <label for="keyword-filter"><i class="fas fa-search" aria-hidden="true"></i> 搜尋：</label>
+                    <div class="search-container">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="keyword-filter-icon"><i class="fas fa-search" aria-hidden="true"></i></span>
+                            </div>
+                            <input type="text"
+                                   id="keyword-filter"
+                                   class="form-control search-input"
+                                   placeholder="搜尋標題、內文、摘要或關鍵詞..."
+                                   aria-label="搜尋文章"
+                                   aria-describedby="keyword-filter-icon"
+                                   autocomplete="off">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary search-clear-btn"
+                                        type="button"
+                                        id="search-clear-btn"
+                                        title="清除搜尋"
+                                        style="display: none;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary dropdown-toggle search-options-btn"
+                                        type="button"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        title="搜尋選項">
+                                    <i class="fas fa-sliders-h"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
+                                    <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋範圍</h6>
+                                    <div class="px-3 py-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
+                                            <label class="custom-control-label" for="search-scope-title">標題</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-summary" value="summary" checked>
+                                            <label class="custom-control-label" for="search-scope-summary">摘要</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-content" value="fullText" checked>
+                                            <label class="custom-control-label" for="search-scope-content">內文</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-keywords" value="keywords" checked>
+                                            <label class="custom-control-label" for="search-scope-keywords">關鍵詞</label>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋選項</h6>
+                                    <div class="px-3 py-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
+                                            <label class="custom-control-label" for="search-case-sensitive">區分大小寫</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="search-exact-match">
+                                            <label class="custom-control-label" for="search-exact-match">完全符合</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <input type="text" id="keyword-filter" class="form-control" placeholder="輸入關鍵字" aria-label="輸入關鍵字進行篩選" aria-describedby="keyword-filter-icon">
+                        <!-- 搜尋建議下拉選單 -->
+                        <div class="search-suggestions" id="search-suggestions" style="display: none;">
+                            <div class="search-suggestions-section" id="search-history-section" style="display: none;">
+                                <div class="search-suggestions-header">
+                                    <span><i class="fas fa-history"></i> 最近搜尋</span>
+                                    <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                <div class="search-suggestions-list" id="search-history-list"></div>
+                            </div>
+                            <div class="search-suggestions-section" id="search-popular-section">
+                                <div class="search-suggestions-header">
+                                    <span><i class="fas fa-fire"></i> 熱門關鍵詞</span>
+                                </div>
+                                <div class="search-suggestions-list" id="search-popular-list"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -324,6 +400,7 @@
                         <option value="date-asc">時間（最舊到最新）</option>
                         <option value="title-asc">名稱（A到Z）</option>
                         <option value="title-desc">名稱（Z到A）</option>
+                        <option value="relevance">相關性</option>
                     </select>
                 </div>
             </div>
@@ -690,6 +767,7 @@
     <script src="js/modules/BookmarkManager.js"></script>
     <script src="js/modules/UIComponents.js"></script>
     <script src="js/modules/ChartManager.js"></script>
+    <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/EventHandlers.js"></script>
     <script src="js/App.js"></script>
     

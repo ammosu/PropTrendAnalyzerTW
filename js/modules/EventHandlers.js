@@ -14,12 +14,14 @@ class EventHandlers {
      * @param {UIComponents} uiComponents - UI 元件實例
      * @param {ChartManager} chartManager - 圖表管理器實例
      * @param {Utilities} utilities - 工具函數實例
+     * @param {SearchManager} searchManager - 搜尋管理器實例
      */
-    constructor(stateManager, uiComponents, chartManager, utilities) {
+    constructor(stateManager, uiComponents, chartManager, utilities, searchManager) {
         this.stateManager = stateManager;
         this.uiComponents = uiComponents;
         this.chartManager = chartManager;
         this.utilities = utilities;
+        this.searchManager = searchManager;
         this.cache = window.CacheManager;
         this.constants = window.Constants;
         this.validator = window.Validator;
@@ -457,8 +459,9 @@ class EventHandlers {
                 matchesDate = matchesDate && articleDate <= endDateObj;
             }
 
+            // 使用 SearchManager 進行關鍵字搜尋
             const matchesKeyword = keyword ?
-                (article.keywords && Array.isArray(article.keywords) && article.keywords.some(kw => kw.toLowerCase().includes(keyword))) : true;
+                this.searchManager.matchesSearch(article, keyword) : true;
             const matchesMedia = selectedMedia.length === 0 || selectedMedia.includes(article.publisher);
 
             return matchesDate && matchesKeyword && matchesMedia;
@@ -474,6 +477,11 @@ class EventHandlers {
                 return a.title.localeCompare(b.title);
             } else if (sortOption === 'title-desc') {
                 return b.title.localeCompare(a.title);
+            } else if (sortOption === 'relevance' && keyword) {
+                // 相關性排序：計算匹配分數
+                const scoreA = this.calculateRelevanceScore(a, keyword);
+                const scoreB = this.calculateRelevanceScore(b, keyword);
+                return scoreB - scoreA;
             }
             return 0;
         });
@@ -629,6 +637,54 @@ class EventHandlers {
 
         // 重新套用篩選
         this.filterArticles();
+    }
+
+    /**
+     * 計算文章與搜尋詞的相關性分數
+     * @param {Object} article - 文章物件
+     * @param {string} searchTerm - 搜尋詞
+     * @returns {number} - 相關性分數（越高越相關）
+     */
+    calculateRelevanceScore(article, searchTerm) {
+        let score = 0;
+        const term = searchTerm.toLowerCase();
+
+        // 標題匹配（權重最高：50分）
+        if (article.title && article.title.toLowerCase().includes(term)) {
+            score += 50;
+            // 完全匹配額外加分
+            if (article.title.toLowerCase() === term) {
+                score += 25;
+            }
+        }
+
+        // 摘要匹配（權重：30分）
+        if (article.summary && article.summary.toLowerCase().includes(term)) {
+            score += 30;
+        }
+
+        // 關鍵詞匹配（權重：20分）
+        if (article.keywords && Array.isArray(article.keywords)) {
+            const matchedKeywords = article.keywords.filter(kw =>
+                kw.toLowerCase().includes(term)
+            );
+            score += matchedKeywords.length * 20;
+
+            // 完全匹配的關鍵詞額外加分
+            if (article.keywords.some(kw => kw.toLowerCase() === term)) {
+                score += 30;
+            }
+        }
+
+        // 內文匹配（權重：10分）
+        if (article.fullText && article.fullText.toLowerCase().includes(term)) {
+            score += 10;
+            // 計算出現次數（每次額外加1分，最多加10分）
+            const occurrences = (article.fullText.toLowerCase().match(new RegExp(term, 'g')) || []).length;
+            score += Math.min(occurrences, 10);
+        }
+
+        return score;
     }
 
     // 處理頁面跳轉
