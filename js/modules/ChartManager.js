@@ -20,13 +20,13 @@ class ChartManager {
     }
 
     // 渲染預期趨勢圖表
-    renderExpectedTrendChart() {
+    renderExpectedTrendChart(chartType = null) {
         this.uiComponents.showLoading('正在生成市場趨勢分佈圖表...');
-        
+
         let filteredArticlesData = this.stateManager.getState('filteredArticlesData');
-        const currentChartType = this.stateManager.getState('currentChartType');
+        const currentChartType = chartType || this.stateManager.getState('currentChartType') || 'bar';
         const chartAnimationDuration = this.stateManager.getState('chartAnimationDuration');
-        
+
         // 如果過濾資料為空，嘗試使用原始資料
         if (!filteredArticlesData || filteredArticlesData.length === 0) {
             const articlesData = this.stateManager.getState('articlesData');
@@ -40,9 +40,10 @@ class ChartManager {
                 return;
             }
         }
-        
+
         const months = this.utilities.getMonthRange(filteredArticlesData);
         const trendCountsPerMonth = {};
+        const trendTypes = ["上漲", "下跌", "平穩", "無相關", "無法判斷"];
 
         months.forEach(month => {
             trendCountsPerMonth[month] = {
@@ -57,7 +58,7 @@ class ChartManager {
         filteredArticlesData.forEach(article => {
             const articleDate = new Date(article.date);
             const articleYearMonth = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
-            
+
             if (trendCountsPerMonth[articleYearMonth] && trendCountsPerMonth[articleYearMonth][article.expectedMarketTrend] !== undefined) {
                 trendCountsPerMonth[articleYearMonth][article.expectedMarketTrend]++;
             }
@@ -68,7 +69,7 @@ class ChartManager {
         // 使用 Constants 定義的專業配色方案
         const trendColors = {
             "上漲": {
-                backgroundColor: Constants.COLORS.TREND.UP + 'B3', // 70% 不透明度
+                backgroundColor: Constants.COLORS.TREND.UP + 'B3',
                 borderColor: Constants.COLORS.TREND.UP
             },
             "下跌": {
@@ -89,22 +90,96 @@ class ChartManager {
             }
         };
 
-        const trendDatasets = ["上漲", "下跌", "平穩", "無相關", "無法判斷"].map(trend => {
-            return {
-                label: trend,
-                data: months.map(month => trendCountsPerMonth[month][trend]),
-                backgroundColor: trendColors[trend].backgroundColor,
-                borderColor: trendColors[trend].borderColor,
-                borderWidth: 1,
-                fill: currentChartType === 'bar',
-                tension: 0.2,
-                pointRadius: currentChartType === 'line' ? 4 : 0,
-                pointHoverRadius: currentChartType === 'line' ? 6 : 0,
-                pointBackgroundColor: trendColors[trend].borderColor,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            };
-        });
+        const existingChart = this.stateManager.getState('expectedTrendChart');
+        if (existingChart) {
+            existingChart.destroy();
+        }
+
+        const ctx = document.getElementById('expectedTrendChart').getContext('2d');
+        let chart;
+
+        // 根據圖表類型選擇不同的渲染方式
+        if (currentChartType === 'doughnut') {
+            // 儲存資料供滑桿使用
+            this.doughnutData = { trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration };
+            this.initDoughnutMonthSlider(months, formattedLabels);
+            this.showDoughnutControls(true);
+
+            // 預設顯示全部月份
+            const selectedMonth = this.stateManager.getState('doughnutSelectedMonth');
+            chart = this.renderDoughnutChart(ctx, trendTypes, trendColors, trendCountsPerMonth, months, chartAnimationDuration, selectedMonth);
+        } else {
+            this.showDoughnutControls(false);
+            if (currentChartType === 'percentage') {
+                chart = this.renderPercentageChart(ctx, trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration);
+            } else {
+                chart = this.renderTimeSeriesChart(ctx, currentChartType, trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration);
+            }
+        }
+
+        this.stateManager.setExpectedTrendChart(chart);
+        this.stateManager.updateState('currentChartType', currentChartType);
+        this.updateChartDescription(currentChartType);
+        this.uiComponents.hideLoading();
+    }
+
+    // 顯示/隱藏甜甜圈圖控制項
+    showDoughnutControls(show) {
+        const controls = document.getElementById('doughnut-month-controls');
+        if (controls) {
+            controls.style.display = show ? 'block' : 'none';
+        }
+    }
+
+    // 初始化甜甜圈圖月份滑桿
+    initDoughnutMonthSlider(months, formattedLabels) {
+        const slider = document.getElementById('doughnut-month-slider');
+        const monthLabel = document.getElementById('doughnut-selected-month');
+        const showAllBtn = document.getElementById('doughnut-show-all');
+
+        if (!slider || !monthLabel) return;
+
+        // 設定滑桿範圍（0 = 全部，1-n = 各月份）
+        slider.min = 0;
+        slider.max = months.length;
+        slider.value = 0;
+
+        // 更新標籤
+        this.updateDoughnutMonthLabel(0, formattedLabels);
+
+        // 設定「顯示全部」按鈕狀態
+        if (showAllBtn) {
+            showAllBtn.classList.add('active');
+        }
+    }
+
+    // 更新甜甜圈圖月份標籤
+    updateDoughnutMonthLabel(value, formattedLabels) {
+        const monthLabel = document.getElementById('doughnut-selected-month');
+        const showAllBtn = document.getElementById('doughnut-show-all');
+
+        if (!monthLabel) return;
+
+        if (value === 0 || value === '0') {
+            monthLabel.textContent = '全部月份';
+            if (showAllBtn) showAllBtn.classList.add('active');
+        } else {
+            const index = parseInt(value) - 1;
+            monthLabel.textContent = formattedLabels[index] || '';
+            if (showAllBtn) showAllBtn.classList.remove('active');
+        }
+    }
+
+    // 更新甜甜圈圖（供滑桿呼叫）
+    updateDoughnutByMonth(monthIndex) {
+        if (!this.doughnutData) return;
+
+        const { trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration } = this.doughnutData;
+        const selectedMonth = monthIndex === 0 ? null : months[monthIndex - 1];
+        const monthLabel = monthIndex === 0 ? null : formattedLabels[monthIndex - 1];
+
+        this.updateDoughnutMonthLabel(monthIndex, formattedLabels);
+        this.stateManager.updateState('doughnutSelectedMonth', selectedMonth);
 
         const existingChart = this.stateManager.getState('expectedTrendChart');
         if (existingChart) {
@@ -112,8 +187,36 @@ class ChartManager {
         }
 
         const ctx = document.getElementById('expectedTrendChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: currentChartType,
+        const chart = this.renderDoughnutChart(ctx, trendTypes, trendColors, trendCountsPerMonth, months, chartAnimationDuration, selectedMonth);
+
+        this.stateManager.setExpectedTrendChart(chart);
+        this.updateChartDescription('doughnut', monthLabel);
+    }
+
+    // 渲染時間序列圖表（長條圖、折線圖、面積圖）
+    renderTimeSeriesChart(ctx, chartType, trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration) {
+        const isStacked = chartType === 'bar' || chartType === 'area';
+        const actualChartType = chartType === 'area' ? 'line' : chartType;
+
+        const trendDatasets = trendTypes.map(trend => {
+            return {
+                label: trend,
+                data: months.map(month => trendCountsPerMonth[month][trend]),
+                backgroundColor: trendColors[trend].backgroundColor,
+                borderColor: trendColors[trend].borderColor,
+                borderWidth: chartType === 'area' ? 2 : 1,
+                fill: chartType === 'area' ? 'origin' : (chartType === 'bar'),
+                tension: 0.3,
+                pointRadius: chartType === 'line' ? 4 : (chartType === 'area' ? 2 : 0),
+                pointHoverRadius: chartType === 'line' ? 6 : (chartType === 'area' ? 4 : 0),
+                pointBackgroundColor: trendColors[trend].borderColor,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            };
+        });
+
+        return new Chart(ctx, {
+            type: actualChartType,
             data: {
                 labels: formattedLabels,
                 datasets: trendDatasets
@@ -126,84 +229,245 @@ class ChartManager {
                     easing: 'easeOutQuart'
                 },
                 scales: {
-                    x: { 
-                        stacked: currentChartType === 'bar',
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
+                    x: {
+                        stacked: isStacked,
+                        grid: { display: false },
+                        ticks: { font: { size: 12 } }
                     },
-                    y: { 
-                        stacked: currentChartType === 'bar', 
+                    y: {
+                        stacked: isStacked,
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { font: { size: 12 } }
                     }
                 },
                 plugins: {
-                    legend: { 
+                    legend: {
                         display: true,
                         position: 'top',
-                        labels: {
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            },
-                            padding: 15
-                        }
+                        labels: { font: { size: 14, weight: 'bold' }, padding: 15 }
                     },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',  /* 使用主題深色 */
-                        titleFont: {
-                            size: 15,
-                            weight: '600',
-                            family: "'Noto Sans TC', sans-serif"
-                        },
-                        bodyFont: {
-                            size: 14,
-                            family: "'Noto Sans TC', sans-serif"
-                        },
-                        padding: 14,
-                        cornerRadius: 8,
-                        borderColor: 'rgba(59, 130, 246, 0.5)',
-                        borderWidth: 1,
-                        displayColors: true,
-                        boxPadding: 6,
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                return tooltipItems[0].label;
-                            },
-                            label: function(context) {
-                                const label = context.dataset.label || '';
-                                const value = context.raw;
-                                return `${label}: ${value} 篇`;
-                            },
-                            footer: function(tooltipItems) {
-                                const total = tooltipItems.reduce((sum, item) => sum + item.raw, 0);
-                                return `\n總計: ${total} 篇新聞\n\n點擊以篩選此趨勢類型`;
-                            }
-                        }
-                    }
+                    tooltip: this.getTooltipConfig()
                 },
                 onClick: (event, elements) => {
                     this.handleTrendChartClick(event, elements, months, formattedLabels);
                 }
             }
         });
+    }
 
-        this.stateManager.setExpectedTrendChart(chart);
-        this.uiComponents.hideLoading();
+    // 渲染百分比堆疊圖表
+    renderPercentageChart(ctx, trendTypes, trendColors, trendCountsPerMonth, months, formattedLabels, chartAnimationDuration) {
+        // 計算每月總數和百分比
+        const percentageData = {};
+        months.forEach(month => {
+            const total = trendTypes.reduce((sum, trend) => sum + trendCountsPerMonth[month][trend], 0);
+            percentageData[month] = {};
+            trendTypes.forEach(trend => {
+                percentageData[month][trend] = total > 0 ? (trendCountsPerMonth[month][trend] / total * 100) : 0;
+            });
+        });
+
+        const trendDatasets = trendTypes.map(trend => {
+            return {
+                label: trend,
+                data: months.map(month => percentageData[month][trend]),
+                backgroundColor: trendColors[trend].backgroundColor,
+                borderColor: trendColors[trend].borderColor,
+                borderWidth: 1
+            };
+        });
+
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: formattedLabels,
+                datasets: trendDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: chartAnimationDuration,
+                    easing: 'easeOutQuart'
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { font: { size: 12 } }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            font: { size: 12 },
+                            callback: value => value + '%'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: { font: { size: 14, weight: 'bold' }, padding: 15 }
+                    },
+                    tooltip: {
+                        ...this.getTooltipConfig(),
+                        callbacks: {
+                            title: tooltipItems => tooltipItems[0].label,
+                            label: context => {
+                                const label = context.dataset.label || '';
+                                const value = context.raw.toFixed(1);
+                                return `${label}: ${value}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 渲染甜甜圈圖表
+    renderDoughnutChart(ctx, trendTypes, trendColors, trendCountsPerMonth, months, chartAnimationDuration, selectedMonth = null) {
+        // 根據是否選擇特定月份來計算資料
+        const totalCounts = {};
+        if (selectedMonth && trendCountsPerMonth[selectedMonth]) {
+            // 顯示特定月份
+            trendTypes.forEach(trend => {
+                totalCounts[trend] = trendCountsPerMonth[selectedMonth][trend];
+            });
+        } else {
+            // 合併所有月份的資料
+            trendTypes.forEach(trend => {
+                totalCounts[trend] = months.reduce((sum, month) => sum + trendCountsPerMonth[month][trend], 0);
+            });
+        }
+
+        const data = trendTypes.map(trend => totalCounts[trend]);
+        const backgroundColors = trendTypes.map(trend => trendColors[trend].backgroundColor);
+        const borderColors = trendTypes.map(trend => trendColors[trend].borderColor);
+
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: trendTypes,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 2,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: chartAnimationDuration,
+                    easing: 'easeOutQuart'
+                },
+                cutout: '55%',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            font: { size: 14, weight: 'bold' },
+                            padding: 15,
+                            generateLabels: chart => {
+                                const data = chart.data;
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return {
+                                        text: `${label} (${percentage}%)`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        strokeStyle: data.datasets[0].borderColor[i],
+                                        lineWidth: 2,
+                                        hidden: false,
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        ...this.getTooltipConfig(),
+                        callbacks: {
+                            label: context => {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${label}: ${value} 篇 (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'centerText',
+                beforeDraw: chart => {
+                    const { ctx, width, height } = chart;
+                    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    ctx.save();
+                    ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1e293b';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(total, width / 2, height / 2 - 10);
+                    ctx.font = '14px "Noto Sans TC", sans-serif';
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#64748b';
+                    ctx.fillText('篇新聞', width / 2, height / 2 + 15);
+                    ctx.restore();
+                }
+            }]
+        });
+    }
+
+    // 取得通用 tooltip 設定
+    getTooltipConfig() {
+        return {
+            enabled: true,
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            titleFont: { size: 15, weight: '600', family: "'Noto Sans TC', sans-serif" },
+            bodyFont: { size: 14, family: "'Noto Sans TC', sans-serif" },
+            padding: 14,
+            cornerRadius: 8,
+            borderColor: 'rgba(59, 130, 246, 0.5)',
+            borderWidth: 1,
+            displayColors: true,
+            boxPadding: 6
+        };
+    }
+
+    // 更新圖表說明文字
+    updateChartDescription(chartType, monthLabel = null) {
+        const descEl = document.getElementById('expected-trend-description');
+        if (!descEl) return;
+
+        let description;
+        if (chartType === 'doughnut') {
+            if (monthLabel) {
+                description = `甜甜圈圖顯示 ${monthLabel} 各趨勢類型的分佈`;
+            } else {
+                description = '甜甜圈圖顯示所選期間內各趨勢類型的整體分佈，拖動滑桿可查看各月份變化';
+            }
+        } else {
+            const descriptions = {
+                'bar': '堆疊長條圖顯示每月各趨勢類型的新聞數量',
+                'line': '折線圖顯示各趨勢類型隨時間的變化趨勢',
+                'area': '堆疊面積圖呈現各趨勢類型的累積變化',
+                'percentage': '百分比圖顯示每月各趨勢類型的佔比分佈'
+            };
+            description = descriptions[chartType] || descriptions['bar'];
+        }
+
+        descEl.innerHTML = `<i class="fas fa-info-circle" aria-hidden="true"></i> ${description}`;
     }
 
     // 處理趨勢圖表點擊事件

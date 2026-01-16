@@ -333,7 +333,6 @@ class EventHandlers {
         const showKeywordTrendBtn = document.getElementById('showKeywordTrend');
         const showExpectedTrendBtn = document.getElementById('showExpectedTrend');
         const showKeywordCloudBtn = document.getElementById('showKeywordCloud');
-        const toggleChartTypeBtn = document.getElementById('toggleChartType');
         const cloudSizeSlider = document.getElementById('cloud-size-slider');
 
         if (showKeywordTrendBtn) {
@@ -345,12 +344,75 @@ class EventHandlers {
         if (showKeywordCloudBtn) {
             showKeywordCloudBtn.addEventListener('click', (e) => this.handleShowKeywordCloud(e));
         }
-        if (toggleChartTypeBtn) {
-            toggleChartTypeBtn.addEventListener('click', () => this.chartManager.toggleChartType());
-        }
         if (cloudSizeSlider) {
             cloudSizeSlider.addEventListener('input', (e) => this.handleCloudSizeChange(e));
         }
+
+        // 市場趨勢圖表類型切換按鈕
+        const chartTypeBtns = document.querySelectorAll('.chart-type-btn');
+        chartTypeBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleChartTypeChange(e));
+        });
+
+        // 甜甜圈圖月份滑桿
+        this.initDoughnutSliderEvents();
+    }
+
+    // 初始化甜甜圈圖滑桿事件
+    initDoughnutSliderEvents() {
+        const slider = document.getElementById('doughnut-month-slider');
+        const prevBtn = document.getElementById('doughnut-prev-month');
+        const nextBtn = document.getElementById('doughnut-next-month');
+        const showAllBtn = document.getElementById('doughnut-show-all');
+
+        if (slider) {
+            slider.addEventListener('input', (e) => {
+                this.chartManager.updateDoughnutByMonth(parseInt(e.target.value));
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                const slider = document.getElementById('doughnut-month-slider');
+                if (slider && parseInt(slider.value) > parseInt(slider.min)) {
+                    slider.value = parseInt(slider.value) - 1;
+                    this.chartManager.updateDoughnutByMonth(parseInt(slider.value));
+                }
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const slider = document.getElementById('doughnut-month-slider');
+                if (slider && parseInt(slider.value) < parseInt(slider.max)) {
+                    slider.value = parseInt(slider.value) + 1;
+                    this.chartManager.updateDoughnutByMonth(parseInt(slider.value));
+                }
+            });
+        }
+
+        if (showAllBtn) {
+            showAllBtn.addEventListener('click', () => {
+                const slider = document.getElementById('doughnut-month-slider');
+                if (slider) {
+                    slider.value = 0;
+                    this.chartManager.updateDoughnutByMonth(0);
+                }
+            });
+        }
+    }
+
+    // 處理圖表類型切換
+    handleChartTypeChange(event) {
+        const btn = event.currentTarget;
+        const chartType = btn.dataset.chartType;
+
+        // 更新按鈕狀態
+        document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // 渲染新的圖表類型
+        this.chartManager.renderExpectedTrendChart(chartType);
     }
 
     // 初始化內容切換事件
