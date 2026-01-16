@@ -394,14 +394,24 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label for="sort-options"><i class="fas fa-sort" aria-hidden="true"></i> 排序依據：</label>
-                    <select id="sort-options" class="form-control" aria-label="選擇文章排序方式">
-                        <option value="date-desc">時間（最新到最舊）</option>
-                        <option value="date-asc">時間（最舊到最新）</option>
-                        <option value="title-asc">名稱（A到Z）</option>
-                        <option value="title-desc">名稱（Z到A）</option>
-                        <option value="relevance">相關性</option>
-                    </select>
+                    <label for="sort-field"><i class="fas fa-sort" aria-hidden="true"></i> 排序：</label>
+                    <div class="sort-controls">
+                        <select id="sort-field" class="form-control sort-field-select" aria-label="選擇排序欄位">
+                            <option value="date">時間</option>
+                            <option value="title">標題</option>
+                            <option value="publisher">來源</option>
+                            <option value="keywords-count">關鍵詞數量</option>
+                            <option value="trend">預期走向</option>
+                            <option value="relevance">相關性</option>
+                        </select>
+                        <button id="sort-direction-btn"
+                                class="btn btn-outline-secondary sort-direction-btn"
+                                data-direction="desc"
+                                title="點擊切換排序方向"
+                                aria-label="切換排序方向">
+                            <i class="fas fa-sort-amount-down"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             

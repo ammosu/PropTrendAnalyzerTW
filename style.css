@@ -4887,3 +4887,95 @@ body.dark-mode .chart-interaction-hint:hover {
 [data-theme="dark"] .search-suggestion-item:hover {
     background-color: var(--bg-tertiary);
 }
+
+/* ===========================
+   排序控制樣式
+   =========================== */
+
+/* 排序控制容器 */
+.sort-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.sort-field-select {
+    flex: 1;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.sort-direction-btn {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 0.375rem 0.75rem;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    border-left: none;
+}
+
+.sort-direction-btn:hover {
+    background-color: var(--bg-tertiary);
+    transform: scale(1.05);
+}
+
+.sort-direction-btn:active {
+    transform: scale(0.95);
+}
+
+.sort-direction-btn i {
+    font-size: 1.1rem;
+    transition: transform var(--transition-normal);
+}
+
+/* 排序方向動畫 */
+.sort-direction-btn[data-direction="asc"] i {
+    transform: rotate(180deg);
+}
+
+.sort-direction-btn[data-direction="desc"] i {
+    transform: rotate(0deg);
+}
+
+/* 排序狀態指示 */
+.sort-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+.sort-status-icon {
+    color: var(--primary);
+}
+
+.sort-status-text {
+    font-weight: 500;
+}
+
+/* 深色模式 */
+[data-theme="dark"] .sort-direction-btn:hover {
+    background-color: var(--bg-primary);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .sort-controls {
+        flex-direction: column;
+    }
+    
+    .sort-field-select {
+        border-radius: var(--radius-md);
+    }
+    
+    .sort-direction-btn {
+        border-radius: var(--radius-md);
+        border-left: 1px solid var(--border-color);
+        width: 100%;
+    }
+}

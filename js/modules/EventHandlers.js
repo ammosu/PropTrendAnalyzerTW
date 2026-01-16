@@ -71,7 +71,8 @@ class EventHandlers {
         const startDateEl = document.getElementById('start-date');
         const endDateEl = document.getElementById('end-date');
         const keywordFilterEl = document.getElementById('keyword-filter');
-        const sortOptionsEl = document.getElementById('sort-options');
+        const sortFieldEl = document.getElementById('sort-field');
+        const sortDirectionBtn = document.getElementById('sort-direction-btn');
 
         if (startDateEl) {
             startDateEl.addEventListener('change', this.utilities.debounce(() => {
@@ -88,8 +89,14 @@ class EventHandlers {
         if (keywordFilterEl) {
             keywordFilterEl.addEventListener('input', this.utilities.debounce(() => this.filterArticles(), this.constants.UI.DEBOUNCE_DELAY));
         }
-        if (sortOptionsEl) {
-            sortOptionsEl.addEventListener('change', () => this.filterArticles());
+        if (sortFieldEl) {
+            sortFieldEl.addEventListener('change', () => this.filterArticles());
+        }
+        if (sortDirectionBtn) {
+            sortDirectionBtn.addEventListener('click', () => {
+                this.toggleSortDirection();
+                this.filterArticles();
+            });
         }
 
         // 媒體篩選按鈕
@@ -381,13 +388,15 @@ class EventHandlers {
         const startDateEl = document.getElementById('start-date');
         const endDateEl = document.getElementById('end-date');
         const keywordFilterEl = document.getElementById('keyword-filter');
-        const sortOptionsEl = document.getElementById('sort-options');
+        const sortFieldEl = document.getElementById('sort-field');
+        const sortDirectionBtn = document.getElementById('sort-direction-btn');
 
         const startDate = startDateEl ? startDateEl.value : '';
         const endDate = endDateEl ? endDateEl.value : '';
         const keyword = keywordFilterEl ? keywordFilterEl.value.trim().toLowerCase() : '';
         const selectedMedia = Array.from(document.querySelectorAll('.media-filter:checked')).map(el => el.value);
-        const sortOption = sortOptionsEl ? sortOptionsEl.value : 'date-desc';
+        const sortField = sortFieldEl ? sortFieldEl.value : 'date';
+        const sortDirection = sortDirectionBtn ? sortDirectionBtn.dataset.direction : 'desc';
 
         // 驗證日期輸入
         if (startDate && !this.validator.isValidDate(startDate)) {
@@ -414,7 +423,8 @@ class EventHandlers {
             endDate,
             keyword,
             selectedMedia: selectedMedia.sort(),
-            sortOption,
+            sortField,
+            sortDirection,
             dataHash: articlesData.length // 簡單的資料版本檢查
         };
 
@@ -468,23 +478,7 @@ class EventHandlers {
         });
 
         // 應用排序
-        filteredArticles.sort((a, b) => {
-            if (sortOption === 'date-desc') {
-                return new Date(b.date) - new Date(a.date);
-            } else if (sortOption === 'date-asc') {
-                return new Date(a.date) - new Date(b.date);
-            } else if (sortOption === 'title-asc') {
-                return a.title.localeCompare(b.title);
-            } else if (sortOption === 'title-desc') {
-                return b.title.localeCompare(a.title);
-            } else if (sortOption === 'relevance' && keyword) {
-                // 相關性排序：計算匹配分數
-                const scoreA = this.calculateRelevanceScore(a, keyword);
-                const scoreB = this.calculateRelevanceScore(b, keyword);
-                return scoreB - scoreA;
-            }
-            return 0;
-        });
+        this.sortArticles(filteredArticles, sortField, sortDirection, keyword);
 
         // 存入快取（TTL 設為 5 分鐘）
         this.cache.set(cacheKey, filteredArticles, this.constants.CACHE.FILTER_TTL);
@@ -685,6 +679,102 @@ class EventHandlers {
         }
 
         return score;
+    }
+
+    /**
+     * 切換排序方向
+     */
+    toggleSortDirection() {
+        const sortDirectionBtn = document.getElementById('sort-direction-btn');
+        if (!sortDirectionBtn) return;
+
+        const currentDirection = sortDirectionBtn.dataset.direction;
+        const newDirection = currentDirection === 'desc' ? 'asc' : 'desc';
+
+        sortDirectionBtn.dataset.direction = newDirection;
+
+        // 更新圖示
+        const icon = sortDirectionBtn.querySelector('i');
+        if (icon) {
+            if (newDirection === 'asc') {
+                icon.className = 'fas fa-sort-amount-up';
+                sortDirectionBtn.title = '升序排列';
+            } else {
+                icon.className = 'fas fa-sort-amount-down';
+                sortDirectionBtn.title = '降序排列';
+            }
+        }
+    }
+
+    /**
+     * 排序文章陣列
+     * @param {Array} articles - 要排序的文章陣列
+     * @param {string} sortField - 排序欄位
+     * @param {string} sortDirection - 排序方向 ('asc' 或 'desc')
+     * @param {string} keyword - 搜尋關鍵字（用於相關性排序）
+     */
+    sortArticles(articles, sortField, sortDirection, keyword = '') {
+        const multiplier = sortDirection === 'desc' ? -1 : 1;
+
+        articles.sort((a, b) => {
+            let comparison = 0;
+
+            switch (sortField) {
+                case 'date':
+                    comparison = new Date(b.date) - new Date(a.date);
+                    break;
+
+                case 'title':
+                    comparison = a.title.localeCompare(b.title, 'zh-TW');
+                    break;
+
+                case 'publisher':
+                    const publisherA = a.publisher || '';
+                    const publisherB = b.publisher || '';
+                    comparison = publisherA.localeCompare(publisherB, 'zh-TW');
+                    break;
+
+                case 'keywords-count':
+                    const countA = Array.isArray(a.keywords) ? a.keywords.length : 0;
+                    const countB = Array.isArray(b.keywords) ? b.keywords.length : 0;
+                    comparison = countB - countA;
+                    break;
+
+                case 'trend':
+                    // 預期走向排序：上漲 > 平穩 > 下跌 > 無相關 > 無法判斷
+                    const trendOrder = {
+                        '上漲': 5,
+                        '平穩': 4,
+                        '下跌': 3,
+                        '無相關': 2,
+                        '無法判斷': 1
+                    };
+                    const trendA = trendOrder[a['預期走向']] || 0;
+                    const trendB = trendOrder[b['預期走向']] || 0;
+                    comparison = trendB - trendA;
+                    break;
+
+                case 'relevance':
+                    if (keyword) {
+                        const scoreA = this.calculateRelevanceScore(a, keyword);
+                        const scoreB = this.calculateRelevanceScore(b, keyword);
+                        comparison = scoreB - scoreA;
+                    } else {
+                        // 如果沒有搜尋關鍵字，改用日期排序
+                        comparison = new Date(b.date) - new Date(a.date);
+                    }
+                    break;
+
+                default:
+                    comparison = 0;
+            }
+
+            // 應用排序方向（相關性排序不受方向影響，始終降序）
+            if (sortField === 'relevance') {
+                return comparison;
+            }
+            return comparison * multiplier;
+        });
     }
 
     // 處理頁面跳轉
