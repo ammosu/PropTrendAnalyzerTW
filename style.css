@@ -318,29 +318,15 @@ h1, h3 {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     margin-bottom: var(--space-lg);
-    transition: box-shadow var(--transition-normal), transform 0.2s ease;
-    border-left: 4px solid var(--primary);
-    position: relative;
-    overflow: hidden;
-}
-
-#filter-options::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, var(--primary), var(--secondary));
-    transition: width 0.3s ease;
+    transition: box-shadow var(--transition-normal), transform 0.2s ease, border-left-width 0.3s ease;
+    border-left: 4px solid;
+    border-image: linear-gradient(180deg, var(--primary), var(--secondary)) 1;
+    overflow: visible;
 }
 
 #filter-options:hover {
     box-shadow: var(--shadow-lg);
-}
-
-#filter-options:hover::before {
-    width: 6px;
+    border-left-width: 6px;
 }
 
 #filter-options label {
@@ -4978,4 +4964,13 @@ body.dark-mode .chart-interaction-hint:hover {
         border-left: 1px solid var(--border-color);
         width: 100%;
     }
+}
+
+/* 搜尋選項dropdown - 當移到 body 時確保顯示在最上層 */
+body > .search-options-dropdown {
+    z-index: 10002 !important;
+}
+
+.search-options-dropdown.show {
+    z-index: 10002 !important;
 }

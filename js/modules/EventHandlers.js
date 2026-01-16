@@ -109,6 +109,7 @@ class EventHandlers {
         if (clearAllBtn) {
             clearAllBtn.addEventListener('click', () => this.clearAllFilters());
         }
+
     }
 
     // 初始化快速日期篩選
