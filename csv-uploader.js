@@ -384,6 +384,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         }
         
+        // 綁定載入範例資料按鈕事件
+        const loadSampleBtn = document.getElementById('load-sample-data-btn');
+        if (loadSampleBtn) {
+            loadSampleBtn.addEventListener('click', loadSampleData);
+        }
+
         // 檢查是否有已存儲的資料
         const hasData = await hasArticlesInDB();
         if (hasData) {
@@ -1223,6 +1229,192 @@ if (document.readyState === 'loading') {
     initializeClearDataModal();
 }
 
+// ========================================
+// 載入範例資料功能
+// ========================================
+
+/**
+ * 載入範例 CSV 資料
+ */
+async function loadSampleData() {
+    const loadBtn = document.getElementById('load-sample-data-btn');
+
+    try {
+        // 禁用按鈕並顯示載入狀態
+        if (loadBtn) {
+            loadBtn.disabled = true;
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 載入中...';
+        }
+
+        // 顯示進度條
+        showProgressBar();
+        updateProgress(10, '正在下載範例資料...');
+
+        // 從伺服器取得範例 CSV 檔案
+        const response = await fetch('test_data.csv');
+        if (!response.ok) {
+            throw new Error('無法取得範例檔案');
+        }
+
+        updateProgress(30, '下載完成，解析資料中...');
+
+        const csvText = await response.text();
+
+        // 使用 PapaParse 解析 CSV
+        Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async function(results) {
+                if (results.errors.length > 0) {
+                    const errorMsg = results.errors[0].message || '未知解析錯誤';
+                    hideProgressBar();
+                    showUploadStatus(`CSV解析錯誤：${errorMsg}`, 'danger');
+                    resetLoadSampleButton();
+                    return;
+                }
+
+                try {
+                    updateProgress(50, 'CSV 解析完成，處理資料中...');
+
+                    // 轉換 CSV 資料為應用程式所需的格式
+                    const articlesData = processCSVData(results.data);
+
+                    updateProgress(70, '資料處理完成，儲存到資料庫...');
+
+                    // 儲存到 IndexedDB
+                    const count = await saveArticlesToDB(articlesData);
+
+                    updateProgress(85, '儲存完成，更新介面...');
+
+                    // 設定文章資料
+                    setArticlesData(articlesData);
+
+                    // 確保月份滑桿寬度調整（如果函數存在）
+                    if (typeof adjustSliderWidth === 'function') {
+                        const months = getMonthRange(articlesData);
+                        if (months && months.length > 0) {
+                            adjustSliderWidth(months.length);
+                        }
+                    }
+
+                    updateProgress(95, '計算統計資料...');
+
+                    // 更新資料統計
+                    updateDataSummary(articlesData);
+
+                    updateProgress(100, '範例資料載入完成！');
+
+                    // 等待一下再隱藏進度條
+                    setTimeout(() => {
+                        hideProgressBar();
+                        showSuccessWithClearButton(count);
+                        showSampleDataLoadedToast(count);
+                        resetLoadSampleButton();
+                    }, 500);
+
+                } catch (error) {
+                    console.error('處理範例資料時發生錯誤:', error);
+                    const errorMsg = error.message || error.toString();
+                    hideProgressBar();
+                    showUploadStatus(`處理資料時發生錯誤：${errorMsg}`, 'danger');
+                    resetLoadSampleButton();
+                }
+            },
+            error: function(error) {
+                console.error('CSV解析錯誤:', error);
+                const errorMsg = error.message || error.toString();
+                hideProgressBar();
+                showUploadStatus(`CSV解析錯誤：${errorMsg}`, 'danger');
+                resetLoadSampleButton();
+            }
+        });
+
+    } catch (error) {
+        console.error('載入範例資料錯誤:', error);
+        hideProgressBar();
+        showUploadStatus(`載入範例資料失敗：${error.message || error}`, 'danger');
+        resetLoadSampleButton();
+    }
+}
+
+/**
+ * 重置載入範例按鈕狀態
+ */
+function resetLoadSampleButton() {
+    const loadBtn = document.getElementById('load-sample-data-btn');
+    if (loadBtn) {
+        loadBtn.disabled = false;
+        loadBtn.innerHTML = '<i class="fas fa-play me-1"></i> 載入範例資料';
+    }
+}
+
+/**
+ * 顯示範例資料載入成功的 Toast
+ */
+function showSampleDataLoadedToast(count) {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            bottom: auto !important;
+            left: auto !important;
+            z-index: 10000 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            gap: 8px !important;
+            pointer-events: none !important;
+            width: auto !important;
+            height: auto !important;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'animate__animated animate__fadeInRight';
+    toast.style.cssText = `
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 10px 14px !important;
+        min-width: 160px !important;
+        max-width: 280px !important;
+        height: auto !important;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, #fff 100%) !important;
+        border-left: 4px solid #10B981 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        pointer-events: all !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+    `;
+
+    toast.innerHTML = `
+        <i class="fas fa-check-circle" style="color: #10B981; font-size: 1rem; flex-shrink: 0;"></i>
+        <span>已載入 ${count} 筆範例資料</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove('animate__fadeInRight');
+        toast.classList.add('animate__fadeOutRight');
+        setTimeout(() => {
+            if (toastContainer.contains(toast)) {
+                toastContainer.removeChild(toast);
+            }
+            if (toastContainer.children.length === 0 && document.body.contains(toastContainer)) {
+                document.body.removeChild(toastContainer);
+            }
+        }, 300);
+    }, 2000);
+}
+
 // 導出函數供其他模塊使用
 window.csvUploader = {
     getArticlesFromDB,
@@ -1231,7 +1423,8 @@ window.csvUploader = {
     updateDataSummary,
     initializeDragAndDrop,
     showClearDataModal,
-    executeClearData
+    executeClearData,
+    loadSampleData
 };
 
 // 頁面載入時初始化拖放功能

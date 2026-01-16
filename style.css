@@ -3881,6 +3881,54 @@ body.dark-mode .chart-interaction-hint:hover {
     flex: 1;
 }
 
+/* 範例 CSV 區塊樣式 */
+.sample-csv-section {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.sample-csv-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.sample-csv-header i {
+    color: var(--primary);
+}
+
+.sample-csv-description {
+    font-size: 0.813rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.sample-csv-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.sample-csv-buttons .btn {
+    flex: 1;
+    min-width: 120px;
+    font-size: 0.813rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* 深色模式下的範例 CSV 區塊 */
+[data-theme="dark"] .sample-csv-section {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    border-color: var(--border-light);
+}
+
 /* 響應式側邊欄 */
 @media (max-width: 576px) {
     .upload-sidebar {
