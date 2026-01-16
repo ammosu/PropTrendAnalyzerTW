@@ -1251,7 +1251,7 @@ async function loadSampleData() {
         updateProgress(10, '正在下載範例資料...');
 
         // 從伺服器取得範例 CSV 檔案
-        const response = await fetch('test_data.csv');
+        const response = await fetch('sample_data.csv');
         if (!response.ok) {
             throw new Error('無法取得範例檔案');
         }
