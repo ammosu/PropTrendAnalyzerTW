@@ -4,75 +4,80 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PropTrendAnalyzerTW is a Taiwan real estate news analysis frontend application that displays property news summaries with trend analysis charts. The app supports filtering, pagination, and keyword trend visualization.
+PropTrendAnalyzerTW is a Taiwan real estate news analysis frontend application that displays property news summaries with trend analysis charts. The app supports filtering, pagination, keyword trend visualization, bookmarks, and data export.
 
 ## Development Commands
 
-### Running the Application
 ```bash
-node server.js           # Start Express server on port 3000
-```
-
-### Data Management
-```bash
-node convert-csv.js      # Convert CSV data to JSON format for the application
+npm install            # Install dependencies (first time setup)
+node server.js         # Start Express server on port 3000
+node convert-csv.js    # Convert CSV data to JSON format for the application
 ```
 
 ## Architecture Overview
 
-### Frontend Architecture
-- **Pure Frontend Stack**: HTML + CSS + JavaScript (no build process)
-- **UI Framework**: Bootstrap 4.5.2 for responsive design
-- **Charts**: Chart.js for trend visualization
-- **Data Loading**: Fetch API for dynamic JSON loading
+### Tech Stack
+- **Frontend**: Pure HTML + CSS + JavaScript (ES6+), no build process
+- **UI Framework**: Bootstrap 4.5.2
+- **Charts**: Chart.js 3.9.1
 - **Storage**: IndexedDB for client-side data persistence
+- **Server**: Express.js serving static files
 
-### Backend Architecture
-- **Server**: Simple Express.js server serving static files
-- **API**: Single endpoint `/api/data-files` to list available data files
-- **Data Storage**: JSON files in `/data` directory
+### Module System
 
-### Key Components
+The application uses a modular architecture in `js/modules/`. All modules are loaded via script tags in `index.html` and initialized by `js/App.js`.
 
-#### Data Flow
-1. `data.js` - Central data management, loads from IndexedDB or JSON files
-2. `scripts.js` - Main application logic, UI rendering, and interactions
-3. `convert-csv.js` - Data transformation from CSV to JSON format
-4. `csv-uploader.js` - Client-side CSV upload and IndexedDB management
+**Core Modules:**
+- `StateManager.js` - Centralized state management with pub/sub pattern
+- `UIComponents.js` - UI rendering (article cards, pagination, stats)
+- `ChartManager.js` - Chart.js chart creation and updates
+- `EventHandlers.js` - User interaction event handling
+- `SearchManager.js` - Search functionality with multiple search modes
 
-#### Data Structure
-- Articles stored with metadata: title, author, content, keywords, trends
-- Trend predictions: 上漲/下跌/平穩/無相關/無法判斷 (up/down/stable/unrelated/unknown)
-- Monthly data segmentation for performance optimization
+**Support Modules:**
+- `BookmarkManager.js` - Article bookmarking (localStorage)
+- `ExportManager.js` - Data export (JSON, CSV, PDF)
+- `AccessibilityManager.js` - Keyboard navigation and ARIA support
+- `CacheManager.js` - Data caching layer
+- `Validator.js` - Input and file validation
+- `SecurityUtils.js` - XSS prevention, HTML sanitization
+- `ErrorHandler.js` - Centralized error handling
+- `Utilities.js` - Date formatting, debounce, sorting helpers
+- `Constants.js` - Configuration constants
 
-### File Organization
-```
-/
-├── index.html          # Main application page
-├── style.css           # Application styles
-├── scripts.js          # Core frontend logic
-├── data.js             # Data loading and management
-├── csv-uploader.js     # CSV upload functionality
-├── convert-csv.js      # Server-side data conversion
-├── server.js           # Express server
-└── data/               # JSON data files (created by convert-csv.js)
-```
+### Data Flow
 
-### Data Management Workflow
-1. Raw data in `sample_data.csv` with columns: title, author, fullText, url, tag, publisher, keywords, summary, date, 預期走向, 理由
-2. Run `node convert-csv.js` to process CSV into JSON files in `/data` directory
-3. Frontend loads from IndexedDB first, falls back to JSON files
-4. Client-side CSV upload stores directly to IndexedDB
+1. **Data Loading**: `csv-uploader.js` handles CSV upload → IndexedDB storage
+2. **State**: `StateManager` holds all app state (articles, filters, pagination)
+3. **Rendering**: State changes trigger `UIComponents` re-renders
+4. **Charts**: `ChartManager` subscribes to state for chart updates
 
-### Key Technical Patterns
-- **Progressive Loading**: Check IndexedDB → load JSON files → initialize UI
-- **Error Handling**: Comprehensive try-catch in data loading with fallbacks
-- **Performance**: Monthly data chunking, lazy loading, pagination
-- **Localization**: Traditional Chinese interface and data structures
+### Data Sources (Priority Order)
+
+1. **IndexedDB** - Client-uploaded CSV data (takes precedence)
+2. **JSON files** - Server-side data in `/data` directory (fallback)
+
+### CSV Data Structure
+
+Required columns: `title`, `author`, `fullText`, `url`, `tag`, `publisher`, `keywords`, `summary`, `date`, `預期走向`, `理由`
+
+Trend values (預期走向): `上漲`, `下跌`, `平穩`, `無相關`, `無法判斷`
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `index.html` | Main SPA page, loads all modules |
+| `style.css` | All styles including dark mode (`[data-theme="dark"]`) |
+| `js/App.js` | Application bootstrap and module initialization |
+| `csv-uploader.js` | CSV parsing, IndexedDB operations |
+| `data.js` | Legacy data loading (backward compatibility) |
+| `server.js` | Express server with CSP headers |
 
 ## Development Notes
 
-- No build process required - direct file editing and refresh
-- Data updates require running `convert-csv.js` after CSV changes
-- IndexedDB takes precedence over JSON files for data loading
-- Server mainly serves static files; core logic is client-side
+- No build process - edit files and refresh browser
+- CSS uses custom properties (`--primary`, `--bg-primary`, etc.) defined in `:root`
+- Dark mode: Toggle `data-theme="dark"` on `<html>`, override styles with `[data-theme="dark"]` selector
+- Scripts are loaded in dependency order at end of `index.html`
+- Test data available: `test_data.csv` (can be loaded via UI)
