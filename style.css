@@ -4180,11 +4180,29 @@ body.dark-mode .chart-interaction-hint:hover {
     color: var(--text-muted);
 }
 
-/* 深色模式下的邊框增強 */
+/* 深色模式下的卡片樣式 */
 [data-theme="dark"] .card,
-[data-theme="dark"] .stat-card,
 [data-theme="dark"] #filter-options {
     border-color: var(--border-light);
+}
+
+/* 深色模式下的統計卡片 */
+[data-theme="dark"] .stat-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.85));
+    border-color: var(--border-light);
+}
+
+/* 深色模式下的次要按鈕 */
+[data-theme="dark"] .btn-secondary {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background-color: var(--border-light);
+    border-color: var(--border-light);
+    color: var(--text-primary);
 }
 
 /* ===========================
