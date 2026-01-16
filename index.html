@@ -260,12 +260,17 @@
 
             <!-- 單月選擇模式 -->
             <div id="single-month-controls" class="text-center mb-3">
-                <label for="month-slider" class="form-label">選擇月份以查看趨勢變化：</label>
-                <div class="d-flex align-items-center justify-content-center" role="group" aria-label="月份選擇控制項">
-                    <button id="prev-month" class="btn btn-secondary" aria-label="上一個月"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
-                    <input type="range" id="month-slider" class="mx-3" aria-label="選擇月份" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" aria-live="polite">
-                    <button id="next-month" class="btn btn-secondary" aria-label="下一個月"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
-                    <span id="selected-month" class="badge" role="status" aria-live="polite" aria-atomic="true"></span>
+                <div class="month-slider-container">
+                    <button id="prev-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="上一個月">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="month-slider-wrapper">
+                        <input type="range" id="month-slider" class="month-slider-input" aria-label="選擇月份" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0" aria-live="polite">
+                    </div>
+                    <button id="next-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="下一個月">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <span id="selected-month" class="month-slider-label" role="status" aria-live="polite" aria-atomic="true"></span>
                 </div>
             </div>
 
@@ -352,21 +357,20 @@
 
             <!-- 甜甜圈圖月份滑桿 -->
             <div id="doughnut-month-controls" class="text-center mb-3" style="display: none;">
-                <div class="doughnut-slider-container">
-                    <button id="doughnut-prev-month" class="btn btn-sm btn-secondary" aria-label="上一個月">
+                <div class="month-slider-container">
+                    <button id="doughnut-prev-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="上一個月">
                         <i class="fas fa-chevron-left"></i>
                     </button>
-                    <div class="doughnut-slider-wrapper">
-                        <input type="range" id="doughnut-month-slider" class="doughnut-slider" min="0" max="12" value="0" aria-label="選擇月份">
-                        <div class="doughnut-slider-labels" id="doughnut-slider-labels"></div>
+                    <div class="month-slider-wrapper">
+                        <input type="range" id="doughnut-month-slider" class="month-slider-input" min="0" max="12" value="0" aria-label="選擇月份">
                     </div>
-                    <button id="doughnut-next-month" class="btn btn-sm btn-secondary" aria-label="下一個月">
+                    <button id="doughnut-next-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="下一個月">
                         <i class="fas fa-chevron-right"></i>
                     </button>
-                    <span id="doughnut-selected-month" class="badge badge-primary ml-2"></span>
+                    <span id="doughnut-selected-month" class="month-slider-label"></span>
                 </div>
                 <div class="mt-2">
-                    <button id="doughnut-show-all" class="btn btn-sm btn-outline-primary">
+                    <button id="doughnut-show-all" class="btn btn-sm btn-outline-primary show-all-btn">
                         <i class="fas fa-layer-group"></i> 顯示全部月份
                     </button>
                 </div>
