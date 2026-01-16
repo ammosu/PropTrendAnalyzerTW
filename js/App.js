@@ -237,6 +237,11 @@ class App {
             }
         });
 
+        // 同步更新 AccessibilityManager 狀態
+        if (this.accessibilityManager) {
+            this.accessibilityManager.updateChartButtonsAria(chartToggleButtons[index]);
+        }
+
         // 平滑滾動到圖表區域
         targetContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

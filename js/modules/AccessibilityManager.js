@@ -280,32 +280,20 @@ class AccessibilityManager {
      * @param {string} activeButtonId - 啟用的按鈕 ID
      */
     updateChartButtonsAria(activeButtonId) {
-        const keywordButton = document.getElementById('showKeywordTrend');
-        const expectedButton = document.getElementById('showExpectedTrend');
+        const buttonIds = ['showKeywordTrend', 'showExpectedTrend', 'showKeywordCloud'];
 
-        if (keywordButton) {
-            const isActive = activeButtonId === 'showKeywordTrend';
-            keywordButton.setAttribute('aria-pressed', isActive.toString());
-            if (isActive) {
-                keywordButton.classList.remove('btn-secondary');
-                keywordButton.classList.add('btn-primary');
-            } else {
-                keywordButton.classList.remove('btn-primary');
-                keywordButton.classList.add('btn-secondary');
+        buttonIds.forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                const isActive = activeButtonId === buttonId;
+                button.setAttribute('aria-pressed', isActive.toString());
+                if (isActive) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
             }
-        }
-
-        if (expectedButton) {
-            const isActive = activeButtonId === 'showExpectedTrend';
-            expectedButton.setAttribute('aria-pressed', isActive.toString());
-            if (isActive) {
-                expectedButton.classList.remove('btn-secondary');
-                expectedButton.classList.add('btn-primary');
-            } else {
-                expectedButton.classList.remove('btn-primary');
-                expectedButton.classList.add('btn-secondary');
-            }
-        }
+        });
     }
 
     /**
