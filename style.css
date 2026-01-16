@@ -4,7 +4,7 @@
     position: absolute;
     top: -40px;
     left: 0;
-    background-color: #3498db;
+    background-color: var(--primary);
     color: white;
     padding: 0.75rem 1.5rem;
     text-decoration: none;
@@ -17,7 +17,7 @@
 
 .skip-to-main-content:focus {
     top: 0;
-    outline: 3px solid #f39c12;
+    outline: 3px solid var(--warning);
     outline-offset: 2px;
 }
 
@@ -458,7 +458,7 @@ h1, h3 {
 #trendChartContainer {
     margin: var(--space-xl) 0;
     padding: var(--space-lg);
-    background-color: #ffffff;
+    background-color: var(--bg-primary);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     transition: box-shadow var(--transition-normal);
@@ -713,9 +713,9 @@ button[data-target="#advanced-filters"][aria-expanded="true"] i {
 }
 
 #toggle-news-button:hover {
-    background-color: #2980b9;
+    background-color: var(--primary-dark);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
 }
 
 #toggle-news-button:hover::before {
@@ -1831,24 +1831,24 @@ canvas#trend, canvas#expectedTrendChart {
 
 /* 檢視模式切換按鈕樣式 */
 .btn-group .btn.active {
-    background-color: #3498db;
-    border-color: #3498db;
+    background-color: var(--primary);
+    border-color: var(--primary);
     color: white;
 }
 
 .btn-group .btn:hover {
-    background-color: #e9ecef;
+    background-color: var(--bg-tertiary);
 }
 
 .btn-group .btn.active:hover {
-    background-color: #2980b9;
-    border-color: #2980b9;
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
 /* 列表檢視樣式 - 加入響應式滾動支援 */
 .articles-list-view {
-    background: white;
-    border-radius: 8px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
     overflow-x: auto; /* 支援水平滾動 */
     -webkit-overflow-scrolling: touch; /* iOS 平滑滾動 */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
