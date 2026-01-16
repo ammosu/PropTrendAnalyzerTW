@@ -162,6 +162,18 @@ class SearchManager {
         this.searchInput.addEventListener('keydown', (e) => {
             this.handleKeyboardNavigation(e);
         });
+
+        // 防止搜尋選項dropdown內部點擊時關閉
+        const searchOptionsDropdown = document.querySelector('.search-options-dropdown');
+        if (searchOptionsDropdown) {
+            searchOptionsDropdown.addEventListener('click', (e) => {
+                // 只有點擊checkbox或label時不關閉dropdown
+                const isCheckboxOrLabel = e.target.closest('.custom-control-input, .custom-control-label');
+                if (isCheckboxOrLabel) {
+                    e.stopPropagation();
+                }
+            });
+        }
     }
 
     /**
