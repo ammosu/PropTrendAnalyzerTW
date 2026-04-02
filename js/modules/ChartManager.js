@@ -630,7 +630,9 @@ class ChartManager {
                         ticks: {
                             font: {
                                 size: 12
-                            }
+                            },
+                            precision: 0,
+                            stepSize: 1
                         }
                     },
                     x: {
