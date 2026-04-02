@@ -139,8 +139,8 @@ class ChartManager {
             return;
         }
 
-        const startInput = document.getElementById('range-start');
-        const endInput = document.getElementById('range-end');
+        let startInput = document.getElementById('range-start');
+        let endInput = document.getElementById('range-end');
         const fill = document.getElementById('dual-range-fill');
         const startLabel = document.getElementById('range-start-label');
         const endLabel = document.getElementById('range-end-label');
@@ -180,6 +180,15 @@ class ChartManager {
             updateFill();
             this.renderTrendChart(months[e]);
         };
+
+        // 移除舊的事件監聽器（用 cloneNode 取代節點）
+        const newStartInput = startInput.cloneNode(true);
+        startInput.parentNode.replaceChild(newStartInput, startInput);
+        startInput = newStartInput;
+
+        const newEndInput = endInput.cloneNode(true);
+        endInput.parentNode.replaceChild(newEndInput, endInput);
+        endInput = newEndInput;
 
         startInput.addEventListener('input', onRangeChange);
         endInput.addEventListener('input', onRangeChange);
