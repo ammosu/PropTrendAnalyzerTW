@@ -131,6 +131,70 @@ class ChartManager {
         }
     }
 
+    // 初始化雙端時間滑桿
+    initializeDualRangeSlider(months, formattedLabels) {
+        const startInput = document.getElementById('range-start');
+        const endInput = document.getElementById('range-end');
+        const fill = document.getElementById('dual-range-fill');
+        const startLabel = document.getElementById('range-start-label');
+        const endLabel = document.getElementById('range-end-label');
+        const wrapper = document.getElementById('dual-range-wrapper');
+
+        if (!startInput || !endInput || !wrapper) return;
+
+        const maxIdx = months.length - 1;
+        startInput.max = maxIdx;
+        endInput.max = maxIdx;
+        startInput.value = 0;
+        endInput.value = maxIdx;
+
+        const updateFill = () => {
+            const s = parseInt(startInput.value);
+            const e = parseInt(endInput.value);
+            const leftPct = maxIdx > 0 ? (s / maxIdx) * 100 : 0;
+            const rightPct = maxIdx > 0 ? 100 - (e / maxIdx) * 100 : 0;
+            fill.style.left = `${leftPct}%`;
+            fill.style.right = `${rightPct}%`;
+            if (startLabel) startLabel.textContent = formattedLabels[s] || '-';
+            if (endLabel) endLabel.textContent = formattedLabels[e] || '-';
+        };
+
+        updateFill();
+
+        const onRangeChange = () => {
+            let s = parseInt(startInput.value);
+            let e = parseInt(endInput.value);
+            if (s > e) { s = e; startInput.value = s; }
+            updateFill();
+            this.renderTrendChart(months[e]);
+        };
+
+        startInput.addEventListener('input', onRangeChange);
+        endInput.addEventListener('input', onRangeChange);
+
+        // 快速按鈕
+        document.querySelectorAll('.quick-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.quick-range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const range = btn.dataset.range;
+                const endIdx = maxIdx;
+                let startIdx = 0;
+
+                if (range !== 'all') {
+                    const n = parseInt(range);
+                    startIdx = Math.max(0, endIdx - n + 1);
+                }
+
+                startInput.value = startIdx;
+                endInput.value = endIdx;
+                updateFill();
+                this.renderTrendChart(months[endIdx]);
+            });
+        });
+    }
+
     // 初始化甜甜圈圖月份滑桿
     initDoughnutMonthSlider(months, formattedLabels) {
         const slider = document.getElementById('doughnut-month-slider');

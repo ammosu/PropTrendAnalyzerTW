@@ -1269,25 +1269,19 @@ class EventHandlers {
         const filteredData = this.stateManager.getState('filteredArticlesData');
         const articlesData = this.stateManager.getState('articlesData');
         const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
-        
+
         if (months.length === 0) {
             console.warn('沒有可用的月份資料');
             return;
         }
-        
-        const monthSlider = document.getElementById('month-slider');
-        const selectedMonthLabel = document.getElementById('selected-month');
-        
-        if (!monthSlider || !selectedMonthLabel) return;
-        
-        this.adjustSliderWidth(months.length);
 
-        monthSlider.min = 0;
-        monthSlider.max = months.length - 1;
-        monthSlider.value = 0;
-        selectedMonthLabel.textContent = months[monthSlider.value];
+        const formattedLabels = months.map(m => this.utilities.formatMonthDisplay(m));
 
-        this.chartManager.renderTrendChart(months[monthSlider.value]);
+        // 使用雙端滑桿
+        this.chartManager.initializeDualRangeSlider(months, formattedLabels);
+
+        // 初始渲染最新月份
+        this.chartManager.renderTrendChart(months[months.length - 1]);
     }
 
     // 根據月份數量動態調整滑桿寬度
