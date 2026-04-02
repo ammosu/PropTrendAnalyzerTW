@@ -197,6 +197,7 @@ class StateManager {
         this.state = {
             articlesData: [],
             filteredArticlesData: [],
+            insightData: null,
             currentPage: 1,
             articlesPerPage: 6,
             trendChart: null,
