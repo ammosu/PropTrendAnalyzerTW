@@ -4,6 +4,9 @@ node_modules/
 # Testing
 test-validator.js
 
+# Claude Code
+.claude/
+
 # IDE
 .vscode/
 .idea/
@@ -23,3 +26,4 @@ npm-debug.log*
 .env.local
 .playwright-mcp/
 test_data.csv
+.worktrees/
