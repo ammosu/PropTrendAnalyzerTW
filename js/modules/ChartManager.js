@@ -1525,7 +1525,7 @@ class ChartManager {
         };
 
         filteredArticlesData.forEach(article => {
-            const trend = article.trend || "無法判斷";
+            const trend = article.expectedMarketTrend || "無法判斷";
             if (trendCounts.hasOwnProperty(trend)) {
                 trendCounts[trend]++;
             }
