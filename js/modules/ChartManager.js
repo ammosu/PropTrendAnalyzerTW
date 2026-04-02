@@ -133,6 +133,12 @@ class ChartManager {
 
     // 初始化雙端時間滑桿
     initializeDualRangeSlider(months, formattedLabels) {
+        // Guard: 檢查月份資料
+        if (!months || months.length === 0) {
+            console.warn('initializeDualRangeSlider: 沒有月份資料');
+            return;
+        }
+
         const startInput = document.getElementById('range-start');
         const endInput = document.getElementById('range-end');
         const fill = document.getElementById('dual-range-fill');
@@ -164,7 +170,13 @@ class ChartManager {
         const onRangeChange = () => {
             let s = parseInt(startInput.value);
             let e = parseInt(endInput.value);
-            if (s > e) { s = e; startInput.value = s; }
+            if (s > e) {
+                const temp = s;
+                s = e;
+                e = temp;
+                startInput.value = s;
+                endInput.value = e;
+            }
             updateFill();
             this.renderTrendChart(months[e]);
         };
@@ -172,7 +184,12 @@ class ChartManager {
         startInput.addEventListener('input', onRangeChange);
         endInput.addEventListener('input', onRangeChange);
 
-        // 快速按鈕
+        // 快速按鈕：先移除舊的事件監聽器，再重新綁定
+        document.querySelectorAll('.quick-range-btn').forEach(btn => {
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+        });
+
         document.querySelectorAll('.quick-range-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.quick-range-btn').forEach(b => b.classList.remove('active'));
