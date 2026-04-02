@@ -561,7 +561,7 @@ class ChartManager {
     }
 
     // 處理趨勢圖表點擊事件
-    handleTrendChartClick(event, elements, months, formattedLabels) {
+    handleTrendChartClick(_event, elements, months, formattedLabels) {
         if (!elements || elements.length === 0) return;
 
         const clickedElement = elements[0];
@@ -814,7 +814,7 @@ class ChartManager {
     }
 
     // 處理關鍵詞圖表點擊事件
-    handleKeywordChartClick(event, elements, labels) {
+    handleKeywordChartClick(_event, elements, labels) {
         if (!elements || elements.length === 0) return;
 
         const clickedElement = elements[0];
@@ -910,7 +910,6 @@ class ChartManager {
     // 滾動到新聞列表區塊
     scrollToNewsSection() {
         const newsContent = document.getElementById('news-content');
-        const toggleButton = document.getElementById('toggle-news-button');
 
         // 如果新聞內容是摺疊的，先展開
         if (newsContent && !newsContent.classList.contains('show')) {
@@ -1788,7 +1787,7 @@ class ChartManager {
         container.innerHTML = '';
 
         // 渲染文字
-        sortedKeywords.forEach(([keyword, count], index) => {
+        sortedKeywords.forEach(([keyword], index) => {
             const span = document.createElement('span');
             span.className = 'mini-cloud-word';
             span.textContent = keyword;
