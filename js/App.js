@@ -568,6 +568,9 @@ class App {
     handleFilteredArticlesChanged() {
         const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
         console.log(`過濾後的文章數量: ${filteredArticlesData.length}`);
+        if (this.eventHandlers) {
+            this.eventHandlers.updateFilterResultCount(filteredArticlesData.length);
+        }
     }
 
     // 處理頁面變化
