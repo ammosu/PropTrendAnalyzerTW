@@ -40,7 +40,8 @@ class StateManager {
             chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
             savedMonthSliderState: null,
             viewMode: 'card', // 'card' 或 'list'
-            darkMode: false // 深色模式狀態
+            darkMode: false, // 深色模式狀態
+            selectedCloudKeyword: null
         };
 
         /**
@@ -205,7 +206,8 @@ class StateManager {
             currentChartType: 'bar',
             chartAnimationDuration: 800,
             savedMonthSliderState: null,
-            viewMode: 'card'
+            viewMode: 'card',
+            selectedCloudKeyword: null
         };
         this.notify('reset', this.state, null);
     }

@@ -1311,6 +1311,89 @@ class ChartManager {
         }, 300);
     }
 
+    switchToKeyword(keyword) {
+        if (!keyword) {
+            // 清除篩選：還原為全部文章
+            if (window.app && window.app.eventHandlers) {
+                window.app.eventHandlers.filterArticles();
+            }
+            this.renderKeywordCloud();
+            return;
+        }
+
+        // 篩選包含此關鍵詞的文章
+        const articlesData = this.stateManager.getState('articlesData') || [];
+        const filtered = articlesData.filter(article =>
+            article.keywords && Array.isArray(article.keywords) && article.keywords.includes(keyword)
+        );
+        this.stateManager.setFilteredArticles(filtered);
+        if (window.app && window.app.eventHandlers) {
+            window.app.eventHandlers.updateFilterResultCount(filtered.length);
+        }
+        if (window.app && window.app.uiComponents) {
+            window.app.uiComponents.renderArticles(1);
+            window.app.uiComponents.renderPagination();
+        }
+
+        // 切換趨勢圖到此關鍵詞的月別時間序列
+        this.renderKeywordTrendForSingleKeyword(keyword);
+
+        // 重新渲染詞雲（加入高亮）
+        this.renderKeywordCloud();
+    }
+
+    renderKeywordTrendForSingleKeyword(keyword) {
+        const articlesData = this.stateManager.getState('articlesData') || [];
+        const chartAnimationDuration = this.stateManager.getState('chartAnimationDuration');
+
+        const monthlyCounts = {};
+        articlesData.forEach(article => {
+            if (article.keywords && article.keywords.includes(keyword)) {
+                const d = new Date(article.date);
+                if (!isNaN(d)) {
+                    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    monthlyCounts[ym] = (monthlyCounts[ym] || 0) + 1;
+                }
+            }
+        });
+
+        const months = Object.keys(monthlyCounts).sort();
+        const labels = months.map(m => this.utilities.formatMonthDisplay(m));
+        const data = months.map(m => monthlyCounts[m]);
+
+        const existingChart = this.stateManager.getState('trendChart');
+        if (existingChart) existingChart.destroy();
+
+        const ctx = document.getElementById('trend').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: `「${keyword}」出現次數`,
+                    data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: '#2563eb',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: chartAnimationDuration, easing: 'easeOutQuart' },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
+                    x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { callbacks: { label: ctx => ` 出現 ${ctx.raw} 次` } }
+                }
+            }
+        });
+        if (this.stateManager.setTrendChart) this.stateManager.setTrendChart(chart);
+    }
+
     // 渲染關鍵詞文字雲
     renderKeywordCloud(topN = 50) {
         this.uiComponents.showLoading('正在生成關鍵詞文字雲...');
@@ -1381,6 +1464,8 @@ class ChartManager {
         // 使用 Constants 定義的專業配色方案（文字雲）
         const colors = Constants.COLORS.CHART_GRADIENT;
 
+        const selectedKeyword = this.stateManager.getState('selectedCloudKeyword') || null;
+
         // 渲染文字雲
         WordCloud(canvas, {
             list: wordCloudData,
@@ -1390,7 +1475,8 @@ class ChartManager {
                 return Math.pow(size, 0.5) * canvas.width / 40;
             },
             fontFamily: '"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif',
-            color: function() {
+            color: function(word) {
+                if (selectedKeyword && word === selectedKeyword) return '#f59e0b';
                 return colors[Math.floor(Math.random() * colors.length)];
             },
             rotateRatio: 0.3,
@@ -1400,6 +1486,17 @@ class ChartManager {
             drawOutOfBound: false,
             shrinkToFit: true
         });
+
+        // 點擊詞雲關鍵詞
+        canvas.removeEventListener('wordclicked', canvas._wordClickHandler);
+        canvas._wordClickHandler = (e) => {
+            const word = e.detail[0];
+            const current = this.stateManager.getState('selectedCloudKeyword');
+            const next = current === word ? null : word;
+            this.stateManager.updateState('selectedCloudKeyword', next);
+            this.switchToKeyword(next);
+        };
+        canvas.addEventListener('wordclicked', canvas._wordClickHandler);
 
         console.log(`文字雲渲染完成，包含 ${wordCloudData.length} 個關鍵詞`);
         this.uiComponents.hideLoading();
