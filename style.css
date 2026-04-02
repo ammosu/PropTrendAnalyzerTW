@@ -4361,7 +4361,6 @@ body.dark-mode .chart-interaction-hint:hover {
 }
 
 /* 深色模式下的卡片樣式 */
-[data-theme="dark"] .card,
 [data-theme="dark"] #filter-options {
     border-color: var(--border-light);
 }
@@ -4376,6 +4375,7 @@ body.dark-mode .chart-interaction-hint:hover {
 [data-theme="dark"] .stat-card {
     background: #1e293b;
     border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
 }
 
 [data-theme="dark"] .insight-trend-badge.trend-up {
