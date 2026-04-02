@@ -401,6 +401,14 @@ class App {
         // 更新資料統計
         this.updateDataStatistics();
 
+        // 渲染洞察摘要
+        setTimeout(() => {
+            const insightData = this.stateManager.getState('insightData');
+            if (insightData && this.uiComponents) {
+                this.uiComponents.renderInsights(insightData);
+            }
+        }, 200);
+
         // 初始化匯出功能
         this.initializeExportButtons();
     }

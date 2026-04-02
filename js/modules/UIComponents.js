@@ -1096,6 +1096,68 @@ class UIComponents {
             <text x="200" y="195" font-family="Arial, sans-serif" font-size="10" fill="${textColor}" text-anchor="middle" opacity="0.8">${title.substring(0, 20)}${title.length > 20 ? '...' : ''}</text>
         </svg>`;
     }
+
+    renderInsights(insightData) {
+        const section = document.getElementById('insights-section');
+        const content = document.getElementById('insights-content');
+        if (!section || !content || !insightData) return;
+
+        section.style.display = 'block';
+
+        const { topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate } = insightData;
+
+        // Top 5 關鍵詞橫條圖
+        const keywordRows = topKeywords.map(({ keyword, count }) => {
+            const pct = Math.round((count / maxKeywordCount) * 100);
+            return `<div class="insight-keyword-row mb-2">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="insight-keyword-label">${this.securityUtils.escapeHtml(keyword)}</span>
+                    <span class="insight-keyword-count text-muted">${count}</span>
+                </div>
+                <div class="insight-bar-bg">
+                    <div class="insight-bar-fill" style="width:${pct}%"></div>
+                </div>
+            </div>`;
+        }).join('');
+
+        // 趨勢分佈
+        const total = Object.values(trendCounts).reduce((a, b) => a + b, 0);
+        const trendHtml = [
+            { key: '上漲', cls: 'trend-up' },
+            { key: '下跌', cls: 'trend-down' },
+            { key: '平穩', cls: 'trend-stable' }
+        ].map(({ key, cls }) => {
+            const count = trendCounts[key] || 0;
+            const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+            return `<span class="insight-trend-badge ${cls}">${key} ${count} 篇 (${pct}%)</span>`;
+        }).join('');
+
+        // 高峰月份
+        const peakHtml = peakMonth
+            ? `<span class="insight-peak">資料高峰：${this.securityUtils.escapeHtml(peakMonth.month)}（${peakMonth.count} 篇）</span>`
+            : '';
+
+        // 近期方向
+        const recentPct = (recentUpRate * 100).toFixed(1);
+        const overallPct = (overallUpRate * 100).toFixed(1);
+        const trendIcon = recentTrend === '升溫' ? '↑' : '→';
+        const trendCls = recentTrend === '升溫' ? 'trend-up' : 'trend-stable';
+        const recentHtml = `<span class="insight-recent ${trendCls}">近 3 個月上漲 ${recentPct}%（整體 ${overallPct}%）— 趨勢${recentTrend} ${trendIcon}</span>`;
+
+        content.innerHTML = `
+            <div class="insights-grid">
+                <div class="insight-block">
+                    <div class="insight-block-title"><i class="fas fa-fire mr-1"></i>Top 5 熱門關鍵詞</div>
+                    ${keywordRows}
+                </div>
+                <div class="insight-block">
+                    <div class="insight-block-title"><i class="fas fa-chart-pie mr-1"></i>趨勢走向分佈</div>
+                    <div class="insight-trend-badges">${trendHtml}</div>
+                    <div class="mt-3">${peakHtml}</div>
+                    <div class="mt-2">${recentHtml}</div>
+                </div>
+            </div>`;
+    }
 }
 
 // 導出供其他模組使用
