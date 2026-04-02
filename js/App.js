@@ -567,6 +567,7 @@ class App {
     // 處理過濾後文章變化
     handleFilteredArticlesChanged() {
         const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
+        if (!filteredArticlesData || !Array.isArray(filteredArticlesData)) return;
         console.log(`過濾後的文章數量: ${filteredArticlesData.length}`);
         if (this.eventHandlers) {
             this.eventHandlers.updateFilterResultCount(filteredArticlesData.length);
