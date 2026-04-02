@@ -31,6 +31,7 @@ class StateManager {
         this.state = {
             articlesData: [],
             filteredArticlesData: [],
+            insightData: null,
             currentPage: constants.STATE.INITIAL_PAGE,
             articlesPerPage: constants.PAGINATION.ARTICLES_PER_PAGE,
             trendChart: null,

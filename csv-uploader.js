@@ -900,6 +900,12 @@ function updateDataSummary(articles) {
         const currentValue = parseInt(publishersCount.textContent) || 0;
         animateValue(publishersCount, currentValue, publishers.size, 800);
     }
+
+    // 計算洞察資料
+    if (window.app && window.app.stateManager) {
+        const insight = computeInsightData(articles);
+        window.app.stateManager.updateState('insightData', insight);
+    }
 }
 
 // ========================================
@@ -1413,6 +1419,63 @@ function showSampleDataLoadedToast(count) {
             }
         }, 300);
     }, 2000);
+}
+
+function computeInsightData(articles) {
+    if (!articles || articles.length === 0) return null;
+
+    // Top 5 關鍵詞
+    const keywordCounts = {};
+    articles.forEach(article => {
+        if (article.keywords && Array.isArray(article.keywords)) {
+            article.keywords.forEach(kw => {
+                if (kw) keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
+            });
+        }
+    });
+    const topKeywords = Object.entries(keywordCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([keyword, count]) => ({ keyword, count }));
+    const maxKeywordCount = topKeywords[0]?.count || 1;
+
+    // 趨勢走向分佈
+    const trendCounts = { "上漲": 0, "下跌": 0, "平穩": 0, "無相關": 0, "無法判斷": 0 };
+    articles.forEach(article => {
+        const trend = article.expectedMarketTrend || "無法判斷";
+        if (trendCounts.hasOwnProperty(trend)) trendCounts[trend]++;
+    });
+
+    // 高峰月份
+    const monthlyCounts = {};
+    articles.forEach(article => {
+        const d = new Date(article.date);
+        if (!isNaN(d)) {
+            const ym = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+            monthlyCounts[ym] = (monthlyCounts[ym] || 0) + 1;
+        }
+    });
+    const peakEntry = Object.entries(monthlyCounts).sort((a, b) => b[1] - a[1])[0];
+    const peakMonth = peakEntry ? { month: peakEntry[0], count: peakEntry[1] } : null;
+
+    // 近期方向（最近 3 個月 vs 整體上漲比例）
+    const sortedMonths = Object.keys(monthlyCounts).sort();
+    const recentMonths = sortedMonths.slice(-3);
+    const recentArticles = articles.filter(article => {
+        const d = new Date(article.date);
+        if (isNaN(d)) return false;
+        const ym = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+        return recentMonths.includes(ym);
+    });
+    const recentUpRate = recentArticles.length > 0
+        ? recentArticles.filter(a => a.expectedMarketTrend === "上漲").length / recentArticles.length
+        : 0;
+    const overallUpRate = articles.length > 0
+        ? trendCounts["上漲"] / articles.length
+        : 0;
+    const recentTrend = recentUpRate > overallUpRate ? "升溫" : "趨緩";
+
+    return { topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate };
 }
 
 // 導出函數供其他模塊使用
