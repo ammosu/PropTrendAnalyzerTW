@@ -113,9 +113,19 @@ select:disabled {
 /* General Styles */
 :root {
     /* Primary Colors - 現代專業藍 */
-    --primary: #3B82F6;
-    --primary-light: #60A5FA;
+    --blue-400: #60a5fa;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --primary: var(--blue-500);
+    --primary-hover: var(--blue-600);
+    --primary-light: var(--blue-400);
     --primary-dark: #2563EB;
+
+    /* 趨勢語意色 */
+    --trend-up:     #16a34a;
+    --trend-down:   #dc2626;
+    --trend-stable: #64748b;
+    --trend-none:   #94a3b8;
 
     /* Secondary Colors - 現代綠 */
     --secondary: #10B981;
@@ -525,12 +535,14 @@ h1, h3 {
 }
 
 .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border: none;
     border-radius: var(--radius-md);
     padding: 0.5rem 1rem;
     font-weight: 500;
-    transition: all var(--transition-normal);
+    transition: all 0.15s ease;
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -557,6 +569,8 @@ h1, h3 {
 }
 
 .btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
@@ -5185,3 +5199,22 @@ body > .search-options-dropdown {
 [data-theme="dark"] .dual-range-label {
     color: rgba(255,255,255,0.6);
 }
+
+/* 趨勢語意色 */
+.trend-up    { color: var(--trend-up); }
+.trend-down  { color: var(--trend-down); }
+.trend-stable { color: var(--trend-stable); }
+.trend-none  { color: var(--trend-none); }
+
+.insight-trend-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+.insight-trend-badge.trend-up    { background: rgba(22,163,74,0.12); color: var(--trend-up); }
+.insight-trend-badge.trend-down  { background: rgba(220,38,38,0.12); color: var(--trend-down); }
+.insight-trend-badge.trend-stable { background: rgba(100,116,139,0.12); color: var(--trend-stable); }
