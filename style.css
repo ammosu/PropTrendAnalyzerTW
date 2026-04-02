@@ -119,7 +119,7 @@ select:disabled {
     --primary: var(--blue-500);
     --primary-hover: var(--blue-600);
     --primary-light: var(--blue-400);
-    --primary-dark: #2563EB;
+    --primary-dark: var(--blue-600);
 
     /* 趨勢語意色 */
     --trend-up:     #16a34a;
@@ -535,14 +535,12 @@ h1, h3 {
 }
 
 .btn-primary {
-    background-color: var(--primary);
-    border-color: var(--primary);
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border: none;
     border-radius: var(--radius-md);
     padding: 0.5rem 1rem;
     font-weight: 500;
-    transition: all 0.15s ease;
+    transition: all var(--transition-fast);
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
@@ -569,8 +567,7 @@ h1, h3 {
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
+    background: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
@@ -5218,3 +5215,4 @@ body > .search-options-dropdown {
 .insight-trend-badge.trend-up    { background: rgba(22,163,74,0.12); color: var(--trend-up); }
 .insight-trend-badge.trend-down  { background: rgba(220,38,38,0.12); color: var(--trend-down); }
 .insight-trend-badge.trend-stable { background: rgba(100,116,139,0.12); color: var(--trend-stable); }
+.insight-trend-badge.trend-none  { background: rgba(148,163,184,0.12); color: var(--trend-none); }
