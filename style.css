@@ -172,9 +172,9 @@ select:disabled {
     --border-light: #F1F5F9;
 
     /* Font Families */
-    --font-heading: 'Poppins', 'Noto Sans TC', sans-serif;
-    --font-body: 'Open Sans', 'Noto Sans TC', sans-serif;
-    --font-mono: 'Fira Code', monospace;
+    --font-body: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    --font-display: 'DM Sans', 'Noto Sans TC', sans-serif;
+    --font-mono: 'DM Mono', monospace;
 }
 
 /* Dark Mode Colors */
@@ -232,8 +232,11 @@ body {
     transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
+h1, h2, h3, h4, h5, h6, .card-header, .btn {
+    font-family: var(--font-display);
+}
+
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
     color: var(--primary);
     margin-bottom: var(--space-lg);
     font-weight: 600;
@@ -1940,6 +1943,7 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 .stat-value {
+    font-family: var(--font-mono);
     font-size: clamp(1.1rem, 2.5vw, 2rem);
     font-weight: 700;
     line-height: 1.2;
@@ -1947,6 +1951,7 @@ canvas#trend, canvas#expectedTrendChart {
     letter-spacing: -0.5px;
     overflow: visible;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .stat-value.small-text {
