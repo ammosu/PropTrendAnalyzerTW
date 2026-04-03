@@ -902,9 +902,9 @@ function updateDataSummary(articles) {
     }
 
     // 計算洞察資料
-    if (window.app && window.app.stateManager) {
+    if (window.App && window.App.stateManager) {
         const insight = computeInsightData(articles);
-        window.app.stateManager.updateState('insightData', insight);
+        window.App.stateManager.updateState('insightData', insight);
     }
 }
 
