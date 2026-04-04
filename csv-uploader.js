@@ -397,6 +397,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (uploadStatus) {
                 showDatabaseLoadedStatus(articles.length);
             }
+            // 將資料傳入 App StateManager，觸發頁面渲染
+            if (typeof setArticlesData === 'function') {
+                setArticlesData(articles);
+                updateDataSummary(articles);
+            }
         }
     } catch (error) {
         console.error('初始化錯誤:', error);
