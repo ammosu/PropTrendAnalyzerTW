@@ -1,3 +1,6 @@
+/* Design tokens（自動產生 - 修改色票請改 design-tokens/tokens.json 並執行 npm run build:tokens） */
+@import url('css/tokens.css');
+
 /* Accessibility Styles */
 /* Skip to main content link */
 .skip-to-main-content {
@@ -59,7 +62,7 @@ textarea:focus,
 [role="button"]:focus {
     outline: 3px solid var(--primary);
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 0 0 4px var(--primary-a20);
 }
 
 /* High contrast focus for better visibility */
@@ -168,44 +171,8 @@ select:disabled {
     }
 }
 
-/* General Styles */
+/* === 非色彩 token（色彩由 css/tokens.css 提供，請勿在此處定義顏色） === */
 :root {
-    /* Primary Colors - 現代專業藍 */
-    --blue-400: #60a5fa;
-    --blue-500: #3b82f6;
-    --blue-600: #2563eb;
-    --primary: var(--blue-500);
-    --primary-hover: var(--blue-600);
-    --primary-light: var(--blue-400);
-    --primary-dark: var(--blue-600);
-
-    /* 趨勢語意色 */
-    --trend-up:     #16a34a;
-    --trend-down:   #dc2626;
-    --trend-stable: #64748b;
-    --trend-none:   #94a3b8;
-
-    /* Secondary Colors - 現代綠 */
-    --secondary: #10B981;
-    --secondary-light: #34D399;
-    --secondary-dark: #059669;
-
-    /* Neutral Colors */
-    --neutral-dark: #334155;
-    --neutral-medium: #64748B;
-    --neutral-light: #F1F5F9;
-
-    /* Functional Colors */
-    --info: #3B82F6;
-    --success: #10B981;
-    --warning: #F59E0B;
-    --danger: #EF4444;
-
-    /* Shadows - 更柔和的陰影 */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1), 0 16px 32px rgba(0, 0, 0, 0.12);
-
     /* Spacing */
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
@@ -213,79 +180,38 @@ select:disabled {
     --space-lg: 1.5rem;
     --space-xl: 2rem;
 
-    /* Transitions - 優化過渡效果 */
+    /* Transitions */
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Border Radius */
+    /* Border radius */
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
     --radius-round: 50%;
 
-    /* Background Colors - 更柔和的灰階 */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F8FAFC;
-    --bg-tertiary: #F1F5F9;
+    /* Shadows - 複合定義，色彩取自 --shadow-rgb（隨主題切換） */
+    --shadow-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 1px 1px rgb(var(--shadow-rgb) / 0.04);
+    --shadow-md: 0 2px 6px rgb(var(--shadow-rgb) / 0.08), 0 1px 2px rgb(var(--shadow-rgb) / 0.06);
+    --shadow-lg: 0 6px 16px rgb(var(--shadow-rgb) / 0.10), 0 2px 4px rgb(var(--shadow-rgb) / 0.06);
 
-    /* Text Colors - 更好的對比度（WCAG AA 4.5:1+） */
-    --text-primary: #0F172A;
-    --text-secondary: #334155;
-    --text-muted: #64748B;
+    /* Neutral palette aliases（沿用 text/bg token，避免重複定義） */
+    --neutral-dark: var(--text-secondary);
+    --neutral-medium: var(--text-muted);
+    --neutral-light: var(--bg-secondary);
 
-    /* Border Colors */
-    --border-color: #E2E8F0;
-    --border-light: #F1F5F9;
-
-    /* Font Families */
+    /* Font */
     --font-body: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
     --font-display: 'DM Sans', 'Noto Sans TC', sans-serif;
     --font-mono: 'DM Mono', monospace;
 }
 
-/* Dark Mode Colors */
 [data-theme="dark"] {
-    /* Primary Colors - 稍微調亮以在深色背景上更清晰 */
-    --primary: #60A5FA;
-    --primary-light: #93C5FD;
-    --primary-dark: #3B82F6;
-
-    /* Secondary Colors */
-    --secondary: #34D399;
-    --secondary-light: #6EE7B7;
-    --secondary-dark: #10B981;
-
-    /* Neutral Colors - 提升對比度以符合 WCAG AA 標準 */
-    --neutral-dark: #F1F5F9;
-    --neutral-medium: #E2E8F0;  /* 從 #CBD5E1 提升 */
-    --neutral-light: #334155;
-
-    /* Functional Colors */
-    --info: #60A5FA;
-    --success: #34D399;
-    --warning: #FBBF24;
-    --danger: #F87171;
-
-    /* Shadows - 深色模式使用更柔和的陰影 */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.5);
-
-    /* Background Colors */
-    --bg-primary: #0F172A;
-    --bg-secondary: #1E293B;
-    --bg-tertiary: #334155;
-
-    /* Text Colors - 提升對比度確保可讀性 */
-    --text-primary: #F8FAFC;
-    --text-secondary: #E2E8F0;  /* 從 #CBD5E1 提升到 #E2E8F0 */
-    --text-muted: #CBD5E1;      /* 從 #94A3B8 提升到 #CBD5E1 */
-
-    /* Border Colors */
-    --border-color: #334155;
-    --border-light: #475569;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35), 0 1px 1px rgb(0 0 0 / 0.30);
+    --shadow-md: 0 2px 6px rgb(0 0 0 / 0.40), 0 1px 2px rgb(0 0 0 / 0.30);
+    --shadow-lg: 0 6px 16px rgb(0 0 0 / 0.50), 0 2px 4px rgb(0 0 0 / 0.35);
 }
 
 body {
@@ -391,7 +317,7 @@ h1, h3 {
     margin-bottom: var(--space-lg);
     transition: box-shadow var(--transition-normal), transform 0.2s ease, border-left-width 0.3s ease;
     border-left: 4px solid;
-    border-image: linear-gradient(180deg, var(--primary), var(--secondary)) 1;
+    border-color: var(--primary);
     overflow: visible;
 }
 
@@ -424,7 +350,7 @@ h1, h3 {
 
 #filter-options .form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 4px var(--primary-a18);
     transform: translateY(-1px);
     outline: none;
     background-color: var(--bg-primary);
@@ -593,7 +519,7 @@ h1, h3 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     border: none;
     border-radius: var(--radius-md);
     padding: 0.5rem 1rem;
@@ -602,7 +528,7 @@ h1, h3 {
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 12px var(--primary-a25);
     position: relative;
     overflow: hidden;
     color: white;
@@ -616,7 +542,7 @@ h1, h3 {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: transparent;
     transition: left var(--transition-slow);
 }
 
@@ -627,12 +553,12 @@ h1, h3 {
 .btn-primary:hover {
     background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px var(--primary-a40);
 }
 
 .btn-primary:active {
     transform: translateY(0) scale(0.98);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px var(--primary-a30);
 }
 
 /* Trend Chart */
@@ -680,7 +606,7 @@ h1, h3 {
 .pagination button.active {
     background-color: var(--primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 2px 8px var(--primary-a40);
 }
 
 .pagination button:hover:not(.active) {
@@ -780,12 +706,12 @@ button[data-target="#advanced-filters"][aria-expanded="true"] i {
     background-color: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 2px 5px var(--primary-a30);
 }
 
 /* Modal */
 .modal-header {
-    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+    background: var(--primary);
     color: #ffffff;
     border-radius: var(--radius-md) var(--radius-md) 0 0;
     padding: var(--space-md) var(--space-lg);
@@ -889,14 +815,14 @@ button[data-target="#advanced-filters"][aria-expanded="true"] i {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+    background: transparent;
     transform: translateX(-100%);
 }
 
 #toggle-news-button:hover {
     background-color: var(--primary-dark);
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 5px 15px var(--primary-a40);
 }
 
 #toggle-news-button:hover::before {
@@ -971,7 +897,7 @@ button.btn-secondary:focus:not(:active)::after {
 .section-divider {
     position: relative;
     height: 1px;
-    background: linear-gradient(to right, transparent, #dcdcdc, transparent);
+    background: var(--border-color);
     margin: var(--space-xl) 0;
 }
 
@@ -1015,7 +941,7 @@ button.btn-secondary:focus:not(:active)::after {
     left: 0;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--secondary));
+    background: var(--primary);
     opacity: 0.8;
 }
 
@@ -1026,7 +952,7 @@ button.btn-secondary:focus:not(:active)::after {
         0 12px 40px rgba(31, 38, 135, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: var(--primary-a30);
 }
 
 /* 統一所有 section h2 樣式，避免裝飾不一致 */
@@ -1101,7 +1027,7 @@ button.btn-secondary:focus:not(:active)::after {
 .chart-toggle-btn.btn-primary {
     background: var(--primary);
     color: white;
-    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 2px 4px var(--primary-a30);
 }
 
 /* Hover 效果 */
@@ -1190,7 +1116,7 @@ button.btn-secondary:focus:not(:active)::after {
 .chart-type-btn.active {
     background: var(--primary);
     color: white;
-    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 2px 4px var(--primary-a30);
 }
 
 .chart-type-btn:hover:not(.active) {
@@ -1277,13 +1203,13 @@ button.btn-secondary:focus:not(:active)::after {
     background: var(--primary);
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 2px 6px var(--primary-a40);
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .month-slider-input::-webkit-slider-thumb:hover {
     transform: scale(1.15);
-    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.5);
+    box-shadow: 0 3px 10px var(--primary-a50);
 }
 
 .month-slider-input::-moz-range-thumb {
@@ -1293,7 +1219,7 @@ button.btn-secondary:focus:not(:active)::after {
     border-radius: 50%;
     cursor: pointer;
     border: none;
-    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 2px 6px var(--primary-a40);
 }
 
 .month-slider-label {
@@ -1392,9 +1318,9 @@ button.btn-secondary:focus:not(:active)::after {
     margin-bottom: 0.3rem;
     font-weight: 500;
     transition: all var(--transition-fast);
-    background-color: rgba(52, 152, 219, 0.1);
+    background-color: var(--primary-a12);
     color: var(--primary);
-    border: 1px solid rgba(52, 152, 219, 0.2);
+    border: 1px solid var(--primary-a20);
 }
 
 .badge-pill:hover {
@@ -1413,7 +1339,7 @@ button.btn-secondary:focus:not(:active)::after {
     width: 100%;
     max-width: 1000px;
     margin: 0 auto;
-    background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), rgba(255, 255, 255, 0.9));
+    background: var(--bg-secondary);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
     box-shadow:
@@ -1547,28 +1473,18 @@ button.btn-secondary:focus:not(:active)::after {
     animation: fadeIn 0.3s ease-in;
 }
 
-/* 骨架屏基礎樣式 */
+/* 骨架屏基礎樣式 - 純色 + opacity 脈動，扁平無漸層 */
 .skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(229, 231, 235, 0.8) 0%,
-        rgba(243, 244, 246, 0.9) 50%,
-        rgba(229, 231, 235, 0.8) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s ease-in-out infinite;
+    background-color: var(--bg-tertiary);
+    animation: skeletonPulse 1.4s ease-in-out infinite;
     border-radius: var(--radius-md);
     position: relative;
     overflow: hidden;
 }
 
-@keyframes skeletonLoading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
 }
 
 /* 骨架屏文字行 */
@@ -1606,7 +1522,7 @@ button.btn-secondary:focus:not(:active)::after {
 
 /* 骨架屏統計卡片 */
 .skeleton-stat-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    background: var(--bg-primary);
     border-radius: 14px;
     padding: 1.5rem;
     display: flex;
@@ -1644,14 +1560,8 @@ button.btn-secondary:focus:not(:active)::after {
 .skeleton-chart {
     height: 400px;
     border-radius: var(--radius-lg);
-    background: linear-gradient(
-        90deg,
-        rgba(229, 231, 235, 0.5) 0%,
-        rgba(243, 244, 246, 0.7) 50%,
-        rgba(229, 231, 235, 0.5) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeletonLoading 2s ease-in-out infinite;
+    background-color: var(--bg-tertiary);
+    animation: skeletonPulse 1.6s ease-in-out infinite;
 }
 
 /* 骨架屏按鈕 */
@@ -1672,27 +1582,15 @@ button.btn-secondary:focus:not(:active)::after {
 
 /* 深色模式骨架屏 */
 [data-theme="dark"] .skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(51, 65, 85, 0.8) 0%,
-        rgba(71, 85, 105, 0.9) 50%,
-        rgba(51, 65, 85, 0.8) 100%
-    );
-    background-size: 200% 100%;
+    background-color: var(--bg-tertiary);
 }
 
 [data-theme="dark"] .skeleton-stat-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(30, 41, 59, 0.85));
+    background: var(--bg-secondary);
 }
 
 [data-theme="dark"] .skeleton-chart {
-    background: linear-gradient(
-        90deg,
-        rgba(51, 65, 85, 0.5) 0%,
-        rgba(71, 85, 105, 0.7) 50%,
-        rgba(51, 65, 85, 0.5) 100%
-    );
-    background-size: 200% 100%;
+    background-color: var(--bg-tertiary);
 }
 
 /* 卡片頁腳樣式 */
@@ -1850,7 +1748,7 @@ canvas#trend, canvas#expectedTrendChart {
     border-left: 4px solid var(--primary);
     margin: 1.5rem 0;
     padding: 1rem 1.5rem;
-    background-color: rgba(59, 130, 246, 0.08);
+    background-color: var(--primary-a10);
     font-style: italic;
     color: var(--text-secondary);
 }
@@ -1880,54 +1778,21 @@ canvas#trend, canvas#expectedTrendChart {
 #upload-progress-container .progress {
     height: 32px;
     border-radius: var(--radius-md);
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--primary-a12);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
     overflow: visible;
     position: relative;
 }
 
 #upload-progress-bar {
-    background: linear-gradient(90deg,
-        #3B82F6 0%,
-        #8B5CF6 50%,
-        #EC4899 100%);
-    background-size: 200% 100%;
+    background: var(--primary);
     font-weight: 600;
-    color: white;
+    color: #fff;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: var(--radius-md);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px var(--primary-a30);
     position: relative;
     overflow: hidden;
-    animation: gradientShift 2s ease-in-out infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-}
-
-#upload-progress-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent);
-    animation: shimmerProgress 2s infinite;
-}
-
-@keyframes shimmerProgress {
-    0% { left: -100%; }
-    100% { left: 100%; }
 }
 
 #upload-progress-text {
@@ -1951,7 +1816,7 @@ canvas#trend, canvas#expectedTrendChart {
 
 /* 資料統計卡片樣式 - 現代化設計 */
 .stat-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+    background: var(--bg-primary);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 12px;
@@ -1974,7 +1839,7 @@ canvas#trend, canvas#expectedTrendChart {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--card-color-start), var(--card-color-end));
+    background: var(--card-color-start);
     opacity: 0;
     transition: opacity var(--transition-normal);
 }
@@ -2043,14 +1908,14 @@ canvas#trend, canvas#expectedTrendChart {
 .stat-card-green,
 .stat-card-orange,
 .stat-card-purple {
-    --card-color-start: #0F766E;
-    --card-color-end: #0369A1;
+    --card-color-start: var(--primary);
+    --card-color-end: var(--primary);
 }
 
-.stat-card-blue .stat-icon   { background: rgba(3, 105, 161, 0.10); color: #0369A1; }
-.stat-card-green .stat-icon  { background: rgba(15, 118, 110, 0.10); color: #0F766E; }
-.stat-card-orange .stat-icon { background: rgba(20, 184, 166, 0.12); color: #0D9488; }
-.stat-card-purple .stat-icon { background: rgba(15, 23, 42, 0.06);  color: #334155; }
+.stat-card-blue .stat-icon   { background: var(--primary-a12); color: var(--primary); }
+.stat-card-green .stat-icon  { background: var(--primary-a12); color: var(--primary); }
+.stat-card-orange .stat-icon { background: var(--primary-a12); color: var(--primary); }
+.stat-card-purple .stat-icon { background: var(--secondary-a15);  color: var(--text-secondary); }
 /* 數字色統一從主題變數來，不再 per-color 重複 */
 .stat-card .stat-value { color: var(--text-primary); }
 
@@ -2088,7 +1953,7 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 .list-view-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--primary);
     color: white;
 }
 
@@ -2133,10 +1998,10 @@ canvas#trend, canvas#expectedTrendChart {
 .list-view-publisher {
     display: inline-block;
     padding: 0.25rem 0.6rem;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    background: var(--primary-a10);
     border-radius: 12px;
     font-size: 0.8rem;
-    color: #667eea;
+    color: var(--primary);
     font-weight: 500;
 }
 
@@ -2155,18 +2020,18 @@ canvas#trend, canvas#expectedTrendChart {
 
 /* 趨勢標籤配色 - 與 JavaScript Constants 保持一致 */
 .list-view-trend.trend-up {
-    background: rgba(38, 166, 154, 0.1);  /* #26A69A */
-    color: #26A69A;
+    background: rgba(22, 163, 74, 0.1);
+    color: var(--trend-up);
 }
 
 .list-view-trend.trend-down {
-    background: rgba(239, 83, 80, 0.1);  /* #EF5350 */
-    color: #EF5350;
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--trend-down);
 }
 
 .list-view-trend.trend-stable {
-    background: rgba(59, 130, 246, 0.1);  /* #3B82F6 */
-    color: #3B82F6;
+    background: var(--primary-a12);
+    color: var(--primary);
 }
 
 .list-view-keywords {
@@ -2194,7 +2059,7 @@ canvas#trend, canvas#expectedTrendChart {
 
 .list-view-action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 4px 8px var(--primary-a30);
 }
 
 /* 快速日期篩選按鈕樣式 - 增強視覺反饋 */
@@ -2229,7 +2094,7 @@ canvas#trend, canvas#expectedTrendChart {
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(102, 126, 234, 0.3);
+    background: var(--primary-a30);
     transform: translate(-50%, -50%);
     transition: width 0.6s ease, height 0.6s ease;
 }
@@ -2240,27 +2105,27 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 .quick-date-btn:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: var(--primary);
+    border-color: var(--primary);
     color: white;
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px var(--primary-a40);
 }
 
 .quick-date-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: var(--primary);
+    border-color: var(--primary);
     color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px var(--primary-a40);
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
     0%, 100% {
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 2px 8px var(--primary-a40);
     }
     50% {
-        box-shadow: 0 2px 16px rgba(102, 126, 234, 0.6);
+        box-shadow: 0 2px 16px var(--primary-a60);
     }
 }
 
@@ -2286,7 +2151,7 @@ canvas#trend, canvas#expectedTrendChart {
     display: inline-flex;
     align-items: center;
     padding: 0.4rem 0.8rem;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.1));
+    background: var(--primary-a10);
     border: 1.5px solid var(--primary);
     border-radius: var(--radius-md);
     font-size: 0.85rem;
@@ -2316,7 +2181,7 @@ canvas#trend, canvas#expectedTrendChart {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: transparent;
     transition: left 0.5s ease;
 }
 
@@ -2325,9 +2190,9 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 .filter-tag:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+    background: var(--primary-a20);
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 8px var(--primary-a30);
     border-color: var(--primary-dark);
 }
 
@@ -2403,7 +2268,7 @@ canvas#trend, canvas#expectedTrendChart {
     }
     50% {
         transform: scale(1.15);
-        background-color: rgba(59, 130, 246, 0.3);
+        background-color: var(--primary-a30);
     }
     100% {
         transform: scale(1);
@@ -2472,7 +2337,7 @@ canvas#trend, canvas#expectedTrendChart {
     #keywordTrendContainer,
     #expectedTrendContainer,
     #keywordCloudContainer {
-        background: rgba(30, 41, 59, 0.85);
+        background: var(--bg-primary);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2484,7 +2349,7 @@ canvas#trend, canvas#expectedTrendChart {
     #keywordTrendContainer:hover,
     #expectedTrendContainer:hover,
     #keywordCloudContainer:hover {
-        border-color: rgba(96, 165, 250, 0.3);
+        border-color: var(--primary-a30);
         box-shadow:
             0 12px 40px rgba(0, 0, 0, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -2535,7 +2400,7 @@ canvas#trend, canvas#expectedTrendChart {
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
+        background: var(--primary-dark);
         border-bottom: 1px solid var(--border-color);
         color: #ffffff;
     }
@@ -2587,7 +2452,7 @@ canvas#trend, canvas#expectedTrendChart {
     }
 
     .article-content blockquote {
-        background-color: rgba(59, 130, 246, 0.15);
+        background-color: var(--primary-a18);
         color: var(--text-secondary);
         border-left-color: var(--primary);
     }
@@ -2681,7 +2546,7 @@ canvas#trend, canvas#expectedTrendChart {
 
     /* 徽章深色模式 */
     .badge-pill {
-        background-color: rgba(93, 173, 226, 0.2);
+        background-color: var(--primary-a20);
         color: var(--primary);
         border-color: var(--primary);
     }
@@ -2704,7 +2569,7 @@ canvas#trend, canvas#expectedTrendChart {
 
     /* 載入動畫深色模式 - 提升不透明度 */
     #loading-overlay {
-        background-color: rgba(15, 23, 42, 0.95);
+        background-color: var(--bg-primary);
         backdrop-filter: blur(8px) saturate(150%);
         -webkit-backdrop-filter: blur(8px) saturate(150%);
     }
@@ -2721,15 +2586,12 @@ canvas#trend, canvas#expectedTrendChart {
 
     /* 進度條深色模式 */
     #upload-progress-container .progress {
-        background-color: rgba(59, 130, 246, 0.15);
+        background-color: var(--primary-a18);
     }
 
     #upload-progress-bar {
-        background: linear-gradient(90deg,
-            #3B82F6 0%,
-            #8B5CF6 50%,
-            #EC4899 100%);
-        box-shadow: 0 2px 12px rgba(59, 130, 246, 0.4);
+        background: var(--primary);
+        box-shadow: 0 2px 12px var(--primary-a40);
     }
 
     /* 文字顏色調整 */
@@ -2745,13 +2607,13 @@ canvas#trend, canvas#expectedTrendChart {
     }
 
     .alert-info {
-        background-color: rgba(93, 173, 226, 0.2);
+        background-color: var(--primary-a20);
         border-color: var(--primary);
         color: var(--primary);
     }
 
     .alert-danger {
-        background-color: rgba(236, 112, 99, 0.2);
+        background-color: rgba(239, 68, 68, 0.2);
         border-color: var(--danger);
         color: var(--danger);
     }
@@ -2771,8 +2633,8 @@ canvas#trend, canvas#expectedTrendChart {
     }
 
     .quick-date-btn:hover {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-color: #667eea;
+        background: var(--primary);
+        border-color: var(--primary);
         color: white;
     }
 
@@ -2871,7 +2733,7 @@ canvas#trend, canvas#expectedTrendChart {
 
 .form-range::-webkit-slider-track {
     height: 8px;
-    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    background: var(--primary);
     border-radius: var(--radius-round);
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
@@ -2897,7 +2759,7 @@ canvas#trend, canvas#expectedTrendChart {
 
 .form-range::-moz-range-track {
     height: 8px;
-    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    background: var(--primary);
     border-radius: var(--radius-round);
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
@@ -2950,25 +2812,14 @@ canvas#trend, canvas#expectedTrendChart {
    ======================================== */
 
 .skeleton-loader {
-    background: linear-gradient(
-        90deg,
-        rgba(241, 245, 249, 0.8) 25%,
-        rgba(226, 232, 240, 0.8) 50%,
-        rgba(241, 245, 249, 0.8) 75%
-    );
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s ease-in-out infinite;
+    background-color: var(--bg-tertiary);
+    animation: skeletonPulse 1.4s ease-in-out infinite;
     border-radius: var(--radius-md);
 }
 
 /* 深色模式骨架屏 */
 [data-theme="dark"] .skeleton-loader {
-    background: linear-gradient(
-        90deg,
-        rgba(51, 65, 85, 0.8) 25%,
-        rgba(71, 85, 105, 0.8) 50%,
-        rgba(51, 65, 85, 0.8) 75%
-    );
+    background-color: var(--bg-tertiary);
     background-size: 200% 100%;
 }
 
@@ -3110,7 +2961,7 @@ canvas#trend, canvas#expectedTrendChart {
 }
 
 .trend-mode-toggle .btn:hover:not(.active) {
-    background-color: rgba(52, 152, 219, 0.1);
+    background-color: var(--primary-a12);
 }
 
 /* 月份複選框容器 */
@@ -3155,20 +3006,20 @@ canvas#trend, canvas#expectedTrendChart {
 
 .month-checkbox-label:hover {
     border-color: var(--primary);
-    background-color: rgba(52, 152, 219, 0.05);
+    background-color: var(--primary-a08);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
 
 .month-checkbox-item input[type="checkbox"]:checked + .month-checkbox-label {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 4px 8px var(--primary-a30);
 }
 
 .month-checkbox-item input[type="checkbox"]:focus + .month-checkbox-label {
-    outline: 3px solid #f39c12;
+    outline: 3px solid var(--primary);
     outline-offset: 2px;
 }
 
@@ -3183,7 +3034,7 @@ canvas#trend, canvas#expectedTrendChart {
 
 #time-range-controls select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 3px var(--primary-a20);
 }
 
 /* 圖表重置按鈕 */
@@ -3418,44 +3269,44 @@ canvas#trend, canvas#expectedTrendChart {
 
 /* Toast 類型變體 */
 .toast-success {
-    border-left-color: #10B981;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--card-bg) 100%);
+    border-left-color: var(--success);
+    background: rgba(22, 163, 74, 0.08);
 }
 
 .toast-success i {
-    color: #10B981;
+    color: var(--success);
 }
 
 .toast-warning {
-    border-left-color: #F59E0B;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, var(--card-bg) 100%);
+    border-left-color: var(--warning);
+    background: rgba(245, 158, 11, 0.08);
 }
 
 .toast-warning i {
-    color: #F59E0B;
+    color: var(--warning);
 }
 
 .toast-error {
-    border-left-color: #EF4444;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--card-bg) 100%);
+    border-left-color: var(--danger);
+    background: rgba(239, 68, 68, 0.08);
 }
 
 .toast-error i {
-    color: #EF4444;
+    color: var(--danger);
 }
 
 .toast-info {
-    border-left-color: #3B82F6;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, var(--card-bg) 100%);
+    border-left-color: var(--primary);
+    background: var(--primary-a10);
 }
 
 .toast-info i {
-    color: #3B82F6;
+    color: var(--primary);
 }
 
 /* 暗色模式下的 Toast 調整 */
 body.dark-mode .toast {
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--bg-primary);
     backdrop-filter: blur(12px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
@@ -3501,8 +3352,8 @@ body.dark-mode .toast:hover {
 
 #csv-upload-section.drag-over .card {
     border: 3px dashed var(--primary);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    background: var(--primary-a08);
+    box-shadow: 0 8px 24px var(--primary-a20);
 }
 
 #csv-upload-section.drag-over .card-body::before {
@@ -3536,19 +3387,19 @@ body.dark-mode .toast:hover {
 
 /* 暗色模式下的拖放效果 */
 body.dark-mode #csv-upload-section.drag-over .card {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    background: var(--primary-a15);
+    box-shadow: 0 8px 24px var(--primary-a40);
 }
 
 body.dark-mode #csv-upload-section.drag-over .card-body::before {
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--bg-primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 /* 上傳區域 hover 提示 */
 #csv-upload-section:not(.drag-over):hover .card {
     border-color: var(--primary);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 4px 12px var(--primary-a12);
 }
 
 /* 確保 card-body 有正確的定位上下文 */
@@ -3649,13 +3500,13 @@ body.dark-mode #csv-upload-section.drag-over .card-body::before {
 }
 
 #clearDataModal .modal-footer .btn-danger {
-    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    background: #dc2626;
     border: none;
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 #clearDataModal .modal-footer .btn-danger:hover:not(:disabled) {
-    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    background: #b91c1c;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
@@ -3672,7 +3523,7 @@ body.dark-mode #clearDataModal .modal-content {
 }
 
 body.dark-mode #clearDataModal .modal-header {
-    background: linear-gradient(135deg, #991B1B 0%, #7F1D1D 100%);
+    background: #991b1b;
 }
 
 body.dark-mode #clearDataModal .modal-body {
@@ -3735,13 +3586,13 @@ body.dark-mode #clearDataModal .modal-footer .btn-secondary:hover {
 
 /* 已收藏狀態 */
 .bookmark-btn.bookmarked {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    background: #d97706;
     color: white;
     border-color: #F59E0B;
 }
 
 .bookmark-btn.bookmarked:hover {
-    background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+    background: #b45309;
     color: white;
     transform: scale(1.1);
 }
@@ -3786,7 +3637,7 @@ body.dark-mode #clearDataModal .modal-footer .btn-secondary:hover {
     font-weight: 600;
     line-height: 18px;
     text-align: center;
-    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    background: #dc2626;
     color: white;
     border-radius: 9px;
     box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
@@ -3811,7 +3662,7 @@ body.dark-mode .bookmark-btn:hover {
 }
 
 body.dark-mode .bookmark-btn.bookmarked {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    background: #d97706;
     color: white;
 }
 
@@ -3826,7 +3677,7 @@ body.dark-mode .bookmark-filter-btn.btn-outline-warning:hover {
 }
 
 body.dark-mode .bookmark-filter-btn.btn-warning {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    background: #d97706;
     border-color: #F59E0B;
     color: white;
 }
@@ -3866,7 +3717,7 @@ body.dark-mode .bookmark-filter-btn.btn-warning {
     gap: 6px;
     margin-top: 8px;
     padding: 6px 12px;
-    background: rgba(59, 130, 246, 0.08);
+    background: var(--primary-a10);
     border-radius: 6px;
     font-size: 0.75rem;
     color: var(--text-secondary);
@@ -3884,12 +3735,12 @@ body.dark-mode .bookmark-filter-btn.btn-warning {
 
 /* 暗色模式圖表互動提示 */
 body.dark-mode .chart-interaction-hint {
-    background: rgba(59, 130, 246, 0.15);
+    background: var(--primary-a18);
     color: var(--text-secondary);
 }
 
 body.dark-mode .chart-interaction-hint:hover {
-    background: rgba(59, 130, 246, 0.2);
+    background: var(--primary-a20);
 }
 
 /* ===========================
@@ -3903,11 +3754,11 @@ body.dark-mode .chart-interaction-hint:hover {
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     border: none;
     color: white;
     font-size: 1.5rem;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 24px var(--primary-a40);
     cursor: pointer;
     z-index: 999;
     transition: all var(--transition-normal);
@@ -3998,7 +3849,7 @@ body.dark-mode .chart-interaction-hint:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     color: white;
 }
 
@@ -4038,7 +3889,7 @@ body.dark-mode .chart-interaction-hint:hover {
 
 /* 範例 CSV 區塊樣式 */
 .sample-csv-section {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+    background: var(--primary-a08);
     border: 1px dashed var(--border-color);
     border-radius: var(--radius-md);
     padding: 1rem;
@@ -4080,7 +3931,7 @@ body.dark-mode .chart-interaction-hint:hover {
 
 /* 深色模式下的範例 CSV 區塊 */
 [data-theme="dark"] .sample-csv-section {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+    background: var(--primary-a12);
     border-color: var(--border-light);
 }
 
@@ -4176,7 +4027,7 @@ body.dark-mode .chart-interaction-hint:hover {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    background: var(--primary);
     color: white;
     display: flex;
     align-items: center;
@@ -4317,7 +4168,7 @@ body.dark-mode .chart-interaction-hint:hover {
 .filter-tag:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 2px 8px var(--primary-a30);
 }
 
 .filter-tag i {
@@ -4470,8 +4321,8 @@ body.dark-mode .chart-interaction-hint:hover {
 .chart-preview-icon-blue,
 .chart-preview-icon-orange,
 .chart-preview-icon-purple {
-    background: rgba(15, 118, 110, 0.10);
-    color: #0F766E;
+    background: var(--primary-a12);
+    color: var(--primary);
 }
 
 .chart-preview-title {
@@ -4581,14 +4432,8 @@ body.dark-mode .chart-interaction-hint:hover {
    =========================== */
 
 .skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--bg-secondary) 0%,
-        var(--bg-tertiary) 50%,
-        var(--bg-secondary) 100%
-    );
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s ease-in-out infinite;
+    background-color: var(--bg-tertiary);
+    animation: skeletonPulse 1.4s ease-in-out infinite;
     border-radius: var(--radius-md);
 }
 
@@ -4687,13 +4532,7 @@ body.dark-mode .chart-interaction-hint:hover {
 
 /* 深色模式骨架屏 */
 [data-theme="dark"] .skeleton {
-    background: linear-gradient(
-        90deg,
-        var(--bg-secondary) 0%,
-        var(--bg-tertiary) 50%,
-        var(--bg-secondary) 100%
-    );
-    background-size: 200% 100%;
+    background-color: var(--bg-tertiary);
 }
 
 /* ===========================
@@ -4713,7 +4552,7 @@ body.dark-mode .chart-interaction-hint:hover {
 
 .search-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 0.2rem var(--primary-a25);
 }
 
 /* 清除搜尋按鈕 */
@@ -5018,10 +4857,10 @@ body.dark-mode .chart-interaction-hint:hover {
         box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
     }
     50% {
-        box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.25);
+        box-shadow: 0 0 0 0.3rem var(--primary-a25);
     }
     100% {
-        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+        box-shadow: 0 0 0 0.2rem var(--primary-a25);
     }
 }
 
@@ -5164,7 +5003,7 @@ body > .search-options-dropdown {
 .dual-range-fill {
     position: absolute;
     height: 100%;
-    background: var(--primary, #3b82f6);
+    background: var(--primary);
     border-radius: 3px;
 }
 .dual-range-input {
@@ -5183,7 +5022,7 @@ body > .search-options-dropdown {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--primary, #3b82f6);
+    background: var(--primary);
     border: 2px solid #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     cursor: pointer;
@@ -5197,7 +5036,7 @@ body > .search-options-dropdown {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--primary, #3b82f6);
+    background: var(--primary);
     border: 2px solid #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     cursor: pointer;
@@ -5209,9 +5048,9 @@ body > .search-options-dropdown {
     font-weight: 500;
 }
 .quick-range-btn.active {
-    background: var(--primary, #3b82f6);
+    background: var(--primary);
     color: #fff;
-    border-color: var(--primary, #3b82f6);
+    border-color: var(--primary);
 }
 [data-theme="dark"] .dual-range-track {
     background: rgba(255,255,255,0.15);
@@ -5269,8 +5108,8 @@ body > .search-options-dropdown {
     width: 36px;
     height: 36px;
     border-radius: var(--radius-md);
-    background: rgba(15, 118, 110, 0.10);
-    color: #0F766E;
+    background: var(--primary-a12);
+    color: var(--primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;

@@ -165,14 +165,14 @@ class BookmarkManager {
             min-width: 160px !important;
             max-width: 280px !important;
             height: auto !important;
-            background: linear-gradient(135deg, ${bgColor} 0%, #fff 100%) !important;
+            background: ${bgColor} !important;
             border-left: 4px solid ${borderColor} !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             pointer-events: all !important;
             font-size: 0.875rem !important;
             font-weight: 500 !important;
-            color: #1e293b !important;
+            color: ${window.DesignTokens.color('text-primary')} !important;
         `;
 
         const displayTitle = title.length > 20 ? title.substring(0, 17) + '...' : title;

@@ -88,7 +88,7 @@ class UIComponents {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            border-left-color: #3498db;
+            border-left-color: ${window.DesignTokens.color('primary')};
             animation: spin 1s linear infinite;
             margin-bottom: 10px;
         `;
@@ -97,7 +97,7 @@ class UIComponents {
         loadingMessage.id = 'loading-message';
         loadingMessage.textContent = message;
         loadingMessage.style.cssText = `
-            color: #3498db;
+            color: ${window.DesignTokens.color('primary')};
             font-weight: bold;
         `;
 

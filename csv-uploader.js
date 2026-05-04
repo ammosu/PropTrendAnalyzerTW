@@ -235,7 +235,7 @@ function processCSVData(csvData) {
         
         // 生成安全的圖片 URL - 使用 SVG 避免外部依賴
         const titleHash = generateHashFromString(safeTitle || 'default');
-        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#34495e'];
+        const colors = window.DesignTokens.palette;
         const bgColor = colors[titleHash % colors.length];
         
         let svgContent;
@@ -1039,14 +1039,14 @@ function showDragDropToast(filename) {
         min-width: 160px !important;
         max-width: 280px !important;
         height: auto !important;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, #fff 100%) !important;
-        border-left: 4px solid #3B82F6 !important;
+        background: ${window.DesignTokens.withAlpha('primary', 0.10)} !important;
+        border-left: 4px solid ${window.DesignTokens.color('primary')} !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         pointer-events: all !important;
         font-size: 0.875rem !important;
         font-weight: 500 !important;
-        color: #1e293b !important;
+        color: ${window.DesignTokens.color('text-primary')} !important;
     `;
 
     // 截斷過長的檔案名稱
@@ -1180,7 +1180,7 @@ function showClearDataSuccessToast() {
         min-width: 160px !important;
         max-width: 280px !important;
         height: auto !important;
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, #fff 100%) !important;
+        background: rgba(239, 68, 68, 0.08) !important;
         border-left: 4px solid #EF4444 !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
@@ -1384,7 +1384,7 @@ function showSampleDataLoadedToast(count) {
         min-width: 160px !important;
         max-width: 280px !important;
         height: auto !important;
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, #fff 100%) !important;
+        background: rgba(22, 163, 74, 0.08) !important;
         border-left: 4px solid #10B981 !important;
         border-radius: 8px !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;

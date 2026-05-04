@@ -35,42 +35,27 @@ const Constants = {
         ERROR_MESSAGE_DURATION: 3000,  // 錯誤訊息顯示時間 (毫秒)
     },
 
-    // 顏色相關
-    COLORS: {
-        // 預設調色盤 (用於 SVG 圖片生成)
-        PALETTE: [
-            '#3498db',  // 藍色
-            '#e74c3c',  // 紅色
-            '#2ecc71',  // 綠色
-            '#f39c12',  // 橙色
-            '#9b59b6',  // 紫色
-            '#1abc9c',  // 青色
-            '#34495e'   // 深灰色
-        ],
+    // 顏色相關 - 直接從 design tokens 衍生（單一真相：design-tokens/tokens.json）
+    // 修改色票請改 tokens.json 並執行 `npm run build:tokens`
+    COLORS: (function () {
+        const t = (window.DesignTokens && window.DesignTokens.light) || {};
+        return {
+            // 通用調色盤（用於頭像 / SVG 占位 / 隨機分色）
+            PALETTE: (window.DesignTokens && window.DesignTokens.palette) || [],
 
-        // 趨勢標籤顏色 - 專業視覺化配色方案
-        TREND: {
-            UP: '#26A69A',              // 上漲 (Teal 綠 - 更柔和專業)
-            DOWN: '#EF5350',            // 下跌 (Material Red - 更現代)
-            STABLE: '#3B82F6',          // 平穩 (現代藍 - 與主題色一致)
-            UNRELATED: '#F59E0B',       // 無相關 (橙色 - 更易區分)
-            UNKNOWN: '#94A3B8',         // 無法判斷 (灰色 - 低對比度)
-        },
+            // 趨勢標籤顏色（與 CSS --trend-* 同步）
+            TREND: {
+                UP:        t['trend-up']     || '#6B9080',
+                DOWN:      t['trend-down']   || '#C57B57',
+                STABLE:    t['trend-stable'] || '#9CAFAA',
+                UNRELATED: t['secondary']    || '#D6A99D',
+                UNKNOWN:   t['trend-none']   || '#B5B0A8',
+            },
 
-        // 圖表配色方案 - 專業漸層色（用於關鍵詞趨勢圖）
-        CHART_GRADIENT: [
-            '#6366F1',  // 靛藍 - Indigo
-            '#EC4899',  // 粉紅 - Pink
-            '#F59E0B',  // 琥珀 - Amber
-            '#10B981',  // 翠綠 - Emerald
-            '#8B5CF6',  // 紫色 - Purple
-            '#06B6D4',  // 青色 - Cyan
-            '#F43F5E',  // 玫瑰 - Rose
-            '#EAB308',  // 黃色 - Yellow
-            '#14B8A6',  // 蒂芙尼綠 - Teal
-            '#F87171',  // 紅色 - Red
-        ],
-    },
+            // Bar chart 4 色循環（從 tokens.chartBars 取得）
+            CHART_GRADIENT: (window.DesignTokens && window.DesignTokens.chartBars) || [],
+        };
+    })(),
 
     // 滑桿寬度配置 (根據月份數量)
     SLIDER: {

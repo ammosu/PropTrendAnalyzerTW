@@ -523,12 +523,12 @@ class ChartManager {
     getTooltipConfig() {
         return {
             enabled: true,
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            backgroundColor: window.DesignTokens.withAlpha('bg-primary', 0.95),
             titleFont: { size: 15, weight: '600', family: "'Noto Sans TC', sans-serif" },
             bodyFont: { size: 14, family: "'Noto Sans TC', sans-serif" },
             padding: 14,
             cornerRadius: 8,
-            borderColor: 'rgba(59, 130, 246, 0.5)',
+            borderColor: window.DesignTokens.withAlpha('primary', 0.5),
             borderWidth: 1,
             displayColors: true,
             boxPadding: 6
@@ -674,19 +674,13 @@ class ChartManager {
             existingChart.destroy();
         }
 
-        // 使用 Constants 定義的專業漸層配色方案
-        const gradientColors = Constants.COLORS.CHART_GRADIENT.map(color =>
-            this.hexToRgba(color, 0.8)
-        );
-
+        // 使用 Constants 4 色低飽和粉彩配色，扁平無漸層
+        const palette = Constants.COLORS.CHART_GRADIENT;
         const ctx = document.getElementById('trend').getContext('2d');
 
-        const backgroundColors = data.map((_, index) => {
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, gradientColors[index % gradientColors.length]);
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
-            return gradient;
-        });
+        const backgroundColors = data.map((_, index) => palette[index % palette.length]);
+        const borderColors = backgroundColors;
+        const hoverBackgroundColors = backgroundColors.map(c => this.hexToRgba(c, 0.85));
 
         const chart = new Chart(ctx, {
             type: 'bar',
@@ -696,11 +690,11 @@ class ChartManager {
                     label: `關鍵詞出現次數 (${this.utilities.formatMonthDisplay(selectedMonth)})`,
                     data: data,
                     backgroundColor: backgroundColors,
-                    borderColor: gradientColors.map(color => color.replace('0.8', '1')),
+                    borderColor: borderColors,
                     borderWidth: 1,
                     borderRadius: 4,
-                    hoverBackgroundColor: gradientColors.map(color => color.replace('0.8', '0.9')),
-                    hoverBorderColor: gradientColors.map(color => color.replace('0.8', '1')),
+                    hoverBackgroundColor: hoverBackgroundColors,
+                    hoverBorderColor: borderColors,
                     hoverBorderWidth: 2
                 }]
             },
@@ -751,7 +745,7 @@ class ChartManager {
                     },
                     tooltip: {
                         enabled: true,
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        backgroundColor: window.DesignTokens.withAlpha('bg-primary', 0.95),
                         titleFont: {
                             size: 15,
                             weight: '600',
@@ -767,7 +761,7 @@ class ChartManager {
                         },
                         padding: 14,
                         cornerRadius: 8,
-                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: window.DesignTokens.withAlpha('primary', 0.5),
                         borderWidth: 1,
                         displayColors: false,
                         callbacks: {
@@ -875,8 +869,8 @@ class ChartManager {
             min-width: 160px !important;
             max-width: 320px !important;
             height: auto !important;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, #fff 100%) !important;
-            border-left: 4px solid #3B82F6 !important;
+            background: ${window.DesignTokens.withAlpha('primary', 0.10)} !important;
+            border-left: 4px solid ${window.DesignTokens.color('primary')} !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
             pointer-events: all !important;
@@ -1061,7 +1055,7 @@ class ChartManager {
                     },
                     tooltip: {
                         enabled: true,
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        backgroundColor: window.DesignTokens.withAlpha('bg-primary', 0.95),
                         titleFont: {
                             size: 15,
                             weight: '600',
@@ -1073,7 +1067,7 @@ class ChartManager {
                         },
                         padding: 14,
                         cornerRadius: 8,
-                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: window.DesignTokens.withAlpha('primary', 0.5),
                         borderWidth: 1,
                         displayColors: true,
                         boxPadding: 6,
@@ -1278,7 +1272,7 @@ class ChartManager {
                     },
                     tooltip: {
                         enabled: true,
-                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        backgroundColor: window.DesignTokens.withAlpha('bg-primary', 0.95),
                         titleFont: {
                             size: 15,
                             weight: '600',
@@ -1290,7 +1284,7 @@ class ChartManager {
                         },
                         padding: 14,
                         cornerRadius: 8,
-                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: window.DesignTokens.withAlpha('primary', 0.5),
                         borderWidth: 1,
                         displayColors: true,
                         boxPadding: 6,
@@ -1459,8 +1453,8 @@ class ChartManager {
                 datasets: [{
                     label: `「${keyword}」出現次數`,
                     data,
-                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                    borderColor: '#2563eb',
+                    backgroundColor: window.DesignTokens.withAlpha('primary', 0.7),
+                    borderColor: window.DesignTokens.color('primary-hover'),
                     borderWidth: 1
                 }]
             },
@@ -1662,8 +1656,8 @@ class ChartManager {
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: window.DesignTokens.withAlpha('primary', 0.6),
+                    borderColor: window.DesignTokens.color('primary'),
                     borderWidth: 2,
                     borderRadius: 4
                 }]
