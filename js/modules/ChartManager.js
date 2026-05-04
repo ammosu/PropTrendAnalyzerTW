@@ -693,13 +693,12 @@ class ChartManager {
             existingChart.destroy();
         }
 
-        // 使用 Constants 4 色低飽和粉彩配色，扁平無漸層
-        const palette = Constants.COLORS.CHART_GRADIENT;
+        // 同類資料使用單一主色，靠長度與排序傳達資訊（金融分析慣例）
         const ctx = document.getElementById('trend').getContext('2d');
-
-        const backgroundColors = data.map((_, index) => palette[index % palette.length]);
+        const primaryColor = window.DesignTokens.color('primary');
+        const backgroundColors = data.map(() => primaryColor);
         const borderColors = backgroundColors;
-        const hoverBackgroundColors = backgroundColors.map(c => this.hexToRgba(c, 0.85));
+        const hoverBackgroundColors = data.map(() => window.DesignTokens.color('primary-hover'));
 
         const chart = new Chart(ctx, {
             type: 'bar',
@@ -710,13 +709,16 @@ class ChartManager {
                     data: data,
                     backgroundColor: backgroundColors,
                     borderColor: borderColors,
-                    borderWidth: 1,
-                    borderRadius: 4,
+                    borderWidth: 0,
+                    borderRadius: 2,
                     hoverBackgroundColor: hoverBackgroundColors,
                     hoverBorderColor: borderColors,
-                    hoverBorderWidth: 2
+                    hoverBorderWidth: 0,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.85
                 }]
             },
+            plugins: [ChartManager.barValueLabelPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -724,44 +726,33 @@ class ChartManager {
                     duration: chartAnimationDuration,
                     easing: 'easeOutQuart'
                 },
+                layout: { padding: { top: 24 } },
                 scales: {
                     y: {
                         beginAtZero: true,
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                            color: 'rgba(15, 23, 42, 0.06)',
+                            drawBorder: false
                         },
                         ticks: {
-                            font: {
-                                size: 12
-                            },
+                            font: { size: 12 },
+                            color: window.DesignTokens.color('text-muted'),
                             precision: 0,
                             stepSize: 1
                         }
                     },
                     x: {
-                        grid: {
-                            display: false
-                        },
+                        grid: { display: false, drawBorder: false },
                         ticks: {
-                            font: {
-                                size: 12
-                            },
+                            font: { size: 12 },
+                            color: window.DesignTokens.color('text-secondary'),
                             maxRotation: 45,
                             minRotation: 45
                         }
                     }
                 },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 14,
-                                weight: 'bold'
-                            }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
                         enabled: true,
                         backgroundColor: window.DesignTokens.withAlpha('bg-primary', 0.95),
@@ -1541,6 +1532,9 @@ class ChartManager {
         // 準備文字雲資料格式：[['關鍵詞', 權重], ...]
         const wordCloudData = sortedKeywords.map(([keyword, count]) => [keyword, count]);
 
+        // 同步渲染下方 Top 15 排行表格
+        this.renderKeywordRankTable(sortedKeywords);
+
         // 檢查是否載入了 WordCloud
         if (typeof WordCloud === 'undefined') {
             console.error('WordCloud 庫未載入');
@@ -1748,11 +1742,11 @@ class ChartManager {
                 datasets: [{
                     data: data,
                     backgroundColor: [
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(148, 163, 184, 0.8)',
-                        'rgba(203, 213, 225, 0.8)'
+                        window.DesignTokens.color('trend-up'),
+                        window.DesignTokens.color('trend-down'),
+                        window.DesignTokens.color('trend-stable'),
+                        window.DesignTokens.color('secondary'),
+                        window.DesignTokens.color('trend-none')
                     ],
                     borderWidth: 0
                 }]
@@ -1820,7 +1814,90 @@ class ChartManager {
         this.renderMiniTrendChart();
         this.renderMiniKeywordCloud();
     }
+
+    /**
+     * 在文字雲下方渲染 Top 15 關鍵詞排行表格（雙呈現提升資訊密度）
+     */
+    renderKeywordRankTable(sortedKeywords) {
+        const tbody = document.getElementById('keyword-rank-tbody');
+        if (!tbody) return;
+
+        const top = sortedKeywords.slice(0, 15);
+        if (top.length === 0) { tbody.innerHTML = ''; return; }
+
+        const total = sortedKeywords.reduce((sum, [, c]) => sum + c, 0);
+        const max = top[0][1];
+        const sanitize = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+        tbody.innerHTML = top.map(([word, count], i) => {
+            const pct = total > 0 ? (count / total * 100).toFixed(1) : '0.0';
+            const barW = max > 0 ? (count / max * 100) : 0;
+            return `
+                <tr data-keyword="${sanitize(word)}" tabindex="0" role="button" aria-label="篩選關鍵詞 ${sanitize(word)}">
+                    <td class="rank-col">${i + 1}</td>
+                    <td class="word-col">${sanitize(word)}</td>
+                    <td class="num-col">${count}</td>
+                    <td class="num-col">${pct}%</td>
+                    <td class="bar-col"><span class="rank-bar" style="width:${barW}%"></span></td>
+                </tr>
+            `;
+        }).join('');
+
+        // 點擊一列即等同點圖中柱子：套關鍵字篩選並滾到新聞
+        if (!tbody._wired) {
+            tbody.addEventListener('click', (e) => {
+                const tr = e.target.closest('tr[data-keyword]');
+                if (!tr) return;
+                this._applyKeywordFilterFromTable(tr.dataset.keyword);
+            });
+            tbody.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const tr = e.target.closest('tr[data-keyword]');
+                if (!tr) return;
+                e.preventDefault();
+                this._applyKeywordFilterFromTable(tr.dataset.keyword);
+            });
+            tbody._wired = true;
+        }
+    }
+
+    _applyKeywordFilterFromTable(keyword) {
+        if (!keyword) return;
+        const input = document.getElementById('keyword-filter');
+        if (input) {
+            input.value = keyword;
+            if (window.app && window.app.eventHandlers) {
+                window.app.eventHandlers.filterArticles();
+            }
+            this.showChartClickToast(`已篩選關鍵詞：${keyword}`);
+            this.scrollToNewsSection();
+        }
+    }
 }
+
+// Bar chart 數值標籤 plugin（直接寫在柱頂，金融分析慣例）
+ChartManager.barValueLabelPlugin = {
+    id: 'barValueLabel',
+    afterDatasetsDraw(chart) {
+        const { ctx, data } = chart;
+        if (!data.datasets || !data.datasets[0]) return;
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || meta.hidden) return;
+        const values = data.datasets[0].data;
+        const color = (window.DesignTokens && window.DesignTokens.color('text-primary')) || '#0F172A';
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.font = '600 12px "Noto Sans TC", system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        meta.data.forEach((bar, i) => {
+            const v = values[i];
+            if (v == null) return;
+            ctx.fillText(String(v), bar.x, bar.y - 6);
+        });
+        ctx.restore();
+    }
+};
 
 // 導出供其他模組使用
 window.ChartManager = ChartManager;

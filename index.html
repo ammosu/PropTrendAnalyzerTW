@@ -23,7 +23,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -162,46 +162,34 @@
         <section id="data-summary-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
             <div class="row">
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="stat-card stat-card-blue">
-                        <div class="stat-icon">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-newspaper"></use></svg>
-                        </div>
+                    <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-value" id="total-articles-count" data-target="0">0</div>
                             <div class="stat-label">篇文章</div>
+                            <div class="stat-value" id="total-articles-count" data-target="0">0</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="stat-card stat-card-green">
-                        <div class="stat-icon">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-                        </div>
+                    <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-value small-text" id="date-range-display">-</div>
                             <div class="stat-label">資料範圍</div>
+                            <div class="stat-value small-text" id="date-range-display">-</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="stat-card stat-card-orange">
-                        <div class="stat-icon">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-key"></use></svg>
-                        </div>
+                    <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-value" id="keywords-count" data-target="0">0</div>
                             <div class="stat-label">個關鍵詞</div>
+                            <div class="stat-value" id="keywords-count" data-target="0">0</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3 col-sm-6 mb-3">
-                    <div class="stat-card stat-card-purple">
-                        <div class="stat-icon">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-rss"></use></svg>
-                        </div>
+                    <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-value" id="publishers-count" data-target="0">0</div>
                             <div class="stat-label">家媒體</div>
+                            <div class="stat-value" id="publishers-count" data-target="0">0</div>
                         </div>
                     </div>
                 </div>
@@ -295,18 +283,15 @@
         <div class="section-divider data-dependent-section" style="display: none;"></div>
 
         <!-- 圖表切換按鈕 -->
-        <section id="chart-toggle-section" class="text-center mb-3 animate__animated animate__fadeIn data-dependent-section" aria-label="圖表類型切換" style="display: none;">
-            <div class="chart-toggle-btn-group" role="group" aria-label="圖表類型切換">
-                <button id="showKeywordTrend" class="chart-toggle-btn active" aria-label="關鍵詞趨勢" aria-pressed="true">
-                    <svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg>
+        <section id="chart-toggle-section" class="mb-3 animate__animated animate__fadeIn data-dependent-section" aria-label="圖表類型切換" style="display: none;">
+            <div class="chart-toggle-btn-group" role="tablist" aria-label="圖表類型切換">
+                <button id="showKeywordTrend" class="chart-toggle-btn active" role="tab" aria-pressed="true">
                     <span class="btn-text">關鍵詞趨勢</span>
                 </button>
-                <button id="showExpectedTrend" class="chart-toggle-btn" aria-label="市場趨勢" aria-pressed="false">
-                    <svg class="icon" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>
+                <button id="showExpectedTrend" class="chart-toggle-btn" role="tab" aria-pressed="false">
                     <span class="btn-text">市場趨勢</span>
                 </button>
-                <button id="showKeywordCloud" class="chart-toggle-btn" aria-label="關鍵詞雲" aria-pressed="false">
-                    <svg class="icon" aria-hidden="true"><use href="#icon-cloud"></use></svg>
+                <button id="showKeywordCloud" class="chart-toggle-btn" role="tab" aria-pressed="false">
                     <span class="btn-text">關鍵詞雲</span>
                 </button>
             </div>
@@ -461,6 +446,25 @@
             </div>
             <div class="text-muted text-center mt-3">
                 <small>此文字雲顯示所有文章中出現頻率最高的關鍵詞，字體大小代表出現次數</small>
+            </div>
+
+            <!-- Top 15 關鍵詞表格（雙呈現，提升資訊密度） -->
+            <div class="keyword-rank-section mt-4">
+                <h3 class="keyword-rank-title">Top 15 關鍵詞</h3>
+                <div class="keyword-rank-tablewrap">
+                    <table class="keyword-rank-table" aria-label="Top 15 關鍵詞表格">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="rank-col">#</th>
+                                <th scope="col">關鍵詞</th>
+                                <th scope="col" class="num-col">出現次數</th>
+                                <th scope="col" class="num-col">佔比</th>
+                                <th scope="col" class="bar-col">分佈</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keyword-rank-tbody"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
