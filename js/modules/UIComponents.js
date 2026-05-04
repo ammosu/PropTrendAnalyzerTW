@@ -476,17 +476,17 @@ class UIComponents {
 
             // 設定焦點陷阱
             if (this.accessibilityManager) {
-                $(modal).on('shown.bs.modal', () => {
+                modal.addEventListener('shown.bs.modal', () => {
                     this.accessibilityManager.setupFocusTrap(modal);
                     this.accessibilityManager.announceToScreenReader(`已開啟文章：${article.title}`);
                 });
             }
 
             // 顯示 Modal
-            $(modal).modal('show');
+            window.BSCompat.Modal.show(modal);
 
             // 設定關閉事件
-            $(modal).on('hidden.bs.modal', () => {
+            modal.addEventListener('hidden.bs.modal', () => {
                 if (this.accessibilityManager) {
                     this.accessibilityManager.removeFocusTrap(modal);
                     this.accessibilityManager.announceToScreenReader('已關閉文章詳情');

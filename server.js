@@ -14,11 +14,11 @@ app.use((req, res, next) => {
     // 內容安全政策（與 index.html 的 meta CSP 保持一致）
     res.setHeader('Content-Security-Policy',
         "default-src 'self'; " +
-        "script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
-        "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
+        "script-src 'self' https://cdn.jsdelivr.net; " +
+        "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://fonts.googleapis.com; " +
         "img-src 'self' data: blob: https:; " +
         "font-src 'self' https://fonts.gstatic.com; " +
-        "connect-src 'self' https://stackpath.bootstrapcdn.com https://cdn.jsdelivr.net; " +
+        "connect-src 'self' https://cdn.jsdelivr.net; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +
         "base-uri 'self'; " +

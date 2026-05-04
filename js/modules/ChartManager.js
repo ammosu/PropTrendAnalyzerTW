@@ -912,10 +912,8 @@ class ChartManager {
         const newsContent = document.getElementById('news-content');
 
         // 如果新聞內容是摺疊的，先展開
-        if (newsContent && !newsContent.classList.contains('show')) {
-            if (typeof $ !== 'undefined') {
-                $(newsContent).collapse('show');
-            }
+        if (newsContent && !newsContent.classList.contains('show') && window.BSCompat) {
+            window.BSCompat.Collapse.show(newsContent);
         }
 
         // 滾動到新聞區塊

@@ -1084,13 +1084,10 @@ function showDragDropToast(filename) {
  */
 function showClearDataModal() {
     const modal = document.getElementById('clearDataModal');
-    if (modal && typeof $ !== 'undefined') {
-        $(modal).modal('show');
-    } else {
-        // 如果 Bootstrap modal 不可用，回退到 confirm()
-        if (confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
-            executeClearData();
-        }
+    if (modal && window.BSCompat) {
+        window.BSCompat.Modal.show(modal);
+    } else if (confirm('確定要清除所有資料嗎？此操作無法撤銷。')) {
+        executeClearData();
     }
 }
 
@@ -1099,8 +1096,8 @@ function showClearDataModal() {
  */
 function hideClearDataModal() {
     const modal = document.getElementById('clearDataModal');
-    if (modal && typeof $ !== 'undefined') {
-        $(modal).modal('hide');
+    if (modal && window.BSCompat) {
+        window.BSCompat.Modal.hide(modal);
     }
 }
 

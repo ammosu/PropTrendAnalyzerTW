@@ -129,10 +129,28 @@ select:disabled {
     to { transform: rotate(360deg); }
 }
 
-/* 縮短入場動畫，讓首屏更俐落 */
-.animate__animated.animate__fadeIn {
-    --animate-duration: 0.3s;
+/* 內嵌 animate.css 子集（fadeIn / fadeInRight / fadeOutRight），取代 CDN 載入 */
+.animate__animated {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
 }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.animate__fadeIn { animation-name: fadeIn; }
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translate3d(100%, 0, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.animate__fadeInRight { animation-name: fadeInRight; }
+
+@keyframes fadeOutRight {
+    from { opacity: 1; transform: translate3d(0, 0, 0); }
+    to   { opacity: 0; transform: translate3d(100%, 0, 0); }
+}
+.animate__fadeOutRight { animation-name: fadeOutRight; }
 
 /* 尊重使用者降低動效偏好 */
 @media (prefers-reduced-motion: reduce) {
@@ -2029,37 +2047,12 @@ canvas#trend, canvas#expectedTrendChart {
     --card-color-end: #0369A1;
 }
 
-.stat-card-blue .stat-icon {
-    background: rgba(3, 105, 161, 0.10);
-    color: #0369A1;
-}
-.stat-card-blue .stat-value {
-    color: var(--text-primary);
-}
-
-.stat-card-green .stat-icon {
-    background: rgba(15, 118, 110, 0.10);
-    color: #0F766E;
-}
-.stat-card-green .stat-value {
-    color: var(--text-primary);
-}
-
-.stat-card-orange .stat-icon {
-    background: rgba(20, 184, 166, 0.12);
-    color: #0D9488;
-}
-.stat-card-orange .stat-value {
-    color: var(--text-primary);
-}
-
-.stat-card-purple .stat-icon {
-    background: rgba(15, 23, 42, 0.06);
-    color: #334155;
-}
-.stat-card-purple .stat-value {
-    color: var(--text-primary);
-}
+.stat-card-blue .stat-icon   { background: rgba(3, 105, 161, 0.10); color: #0369A1; }
+.stat-card-green .stat-icon  { background: rgba(15, 118, 110, 0.10); color: #0F766E; }
+.stat-card-orange .stat-icon { background: rgba(20, 184, 166, 0.12); color: #0D9488; }
+.stat-card-purple .stat-icon { background: rgba(15, 23, 42, 0.06);  color: #334155; }
+/* 數字色統一從主題變數來，不再 per-color 重複 */
+.stat-card .stat-value { color: var(--text-primary); }
 
 /* 檢視模式切換按鈕樣式 */
 .btn-group .btn.active {
@@ -4370,13 +4363,8 @@ body.dark-mode .chart-interaction-hint:hover {
 }
 
 /* ===========================
-   深色模式對比度增強
+   深色模式對比度增強（--text-muted 已在主 dark 區塊定義，line 284）
    =========================== */
-
-[data-theme="dark"] {
-    /* 確保文字對比度符合 WCAG AA 標準 */
-    --text-muted: #CBD5E1; /* 從 #94A3B8 提升 */
-}
 
 [data-theme="dark"] .stat-value,
 [data-theme="dark"] .stat-label,
