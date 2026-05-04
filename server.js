@@ -17,7 +17,7 @@ app.use((req, res, next) => {
         "script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com; " +
         "style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
         "img-src 'self' data: blob: https:; " +
-        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
         "connect-src 'self' https://stackpath.bootstrapcdn.com https://cdn.jsdelivr.net; " +
         "frame-src 'none'; " +
         "object-src 'none'; " +

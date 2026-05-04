@@ -343,10 +343,10 @@ class SearchManager {
         this.searchHistorySection.style.display = 'block';
         this.searchHistoryList.innerHTML = history.map(term => `
             <div class="search-suggestion-item" data-term="${this.utilities.escapeHtml(term)}">
-                <span class="search-suggestion-icon"><i class="fas fa-history"></i></span>
+                <span class="search-suggestion-icon"><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg></span>
                 <span class="search-suggestion-text">${this.utilities.escapeHtml(term)}</span>
                 <button class="search-suggestion-remove" data-action="remove">
-                    <i class="fas fa-times"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>
                 </button>
             </div>
         `).join('');
@@ -415,7 +415,7 @@ class SearchManager {
 
         this.searchPopularList.innerHTML = keywords.map(({ keyword, count }) => `
             <div class="search-suggestion-item" data-term="${this.utilities.escapeHtml(keyword)}">
-                <span class="search-suggestion-icon"><i class="fas fa-fire"></i></span>
+                <span class="search-suggestion-icon"><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg></span>
                 <span class="search-suggestion-text">${this.utilities.escapeHtml(keyword)}</span>
                 <span class="search-suggestion-count">${count}</span>
             </div>

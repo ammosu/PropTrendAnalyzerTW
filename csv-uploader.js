@@ -548,20 +548,14 @@ function showUploadStatus(message, type = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
     
-    const icon = document.createElement('i');
-    switch (type) {
-        case 'success':
-            icon.className = 'fas fa-check-circle';
-            break;
-        case 'danger':
-            icon.className = 'fas fa-times-circle';
-            break;
-        case 'warning':
-            icon.className = 'fas fa-exclamation-triangle';
-            break;
-        default:
-            icon.className = 'fas fa-spinner fa-spin';
-    }
+    const iconNameByType = {
+        success: 'check-circle',
+        danger: 'x-circle',
+        warning: 'alert-triangle'
+    };
+    const iconName = iconNameByType[type] || 'loader';
+    const iconExtra = iconName === 'loader' ? 'icon--spin' : '';
+    const icon = window.IconHelper.make(iconName, iconExtra);
     
     alertDiv.appendChild(icon);
     alertDiv.appendChild(document.createTextNode(' ' + message));
@@ -584,8 +578,7 @@ function showSuccessWithClearButton(count) {
 
     // 左側成功訊息
     const messageSpan = document.createElement('span');
-    const icon = document.createElement('i');
-    icon.className = 'fas fa-check-circle';
+    const icon = window.IconHelper.make('check-circle');
     messageSpan.appendChild(icon);
     messageSpan.appendChild(document.createTextNode(` 成功處理 ${count} 篇文章。`));
     alertDiv.appendChild(messageSpan);
@@ -594,7 +587,7 @@ function showSuccessWithClearButton(count) {
     const clearButton = document.createElement('button');
     clearButton.id = 'clear-data';
     clearButton.className = 'btn btn-sm btn-outline-danger';
-    clearButton.innerHTML = '<i class="fas fa-trash-alt"></i> 清除資料';
+    clearButton.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg> 清除資料';
 
     // 使用 Bootstrap modal 而非 confirm()
     clearButton.addEventListener('click', function() {
@@ -620,8 +613,7 @@ function showDatabaseLoadedStatus(count) {
 
     // 左側資訊訊息
     const messageSpan = document.createElement('span');
-    const icon = document.createElement('i');
-    icon.className = 'fas fa-database';
+    const icon = window.IconHelper.make('database');
     messageSpan.appendChild(icon);
     messageSpan.appendChild(document.createTextNode(` 已從資料庫載入 ${count} 篇文章。`));
     alertDiv.appendChild(messageSpan);
@@ -629,7 +621,7 @@ function showDatabaseLoadedStatus(count) {
     // 創建清除按鈕
     const clearButton = document.createElement('button');
     clearButton.className = 'btn btn-sm btn-outline-danger';
-    clearButton.innerHTML = '<i class="fas fa-trash-alt"></i> 清除資料';
+    clearButton.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg> 清除資料';
 
     // 使用 Bootstrap modal 而非 confirm()
     clearButton.addEventListener('click', function() {
@@ -1061,7 +1053,7 @@ function showDragDropToast(filename) {
     const displayName = filename.length > 25 ? filename.substring(0, 22) + '...' : filename;
 
     toast.innerHTML = `
-        <i class="fas fa-check-circle" style="color: #10B981; font-size: 1rem; flex-shrink: 0;"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
     `;
 
@@ -1122,7 +1114,7 @@ async function executeClearData() {
         // 禁用確認按鈕並顯示載入狀態
         if (confirmBtn) {
             confirmBtn.disabled = true;
-            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 清除中...';
+            confirmBtn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-loader"></use></svg> 清除中...';
         }
 
         // 關閉對話框
@@ -1148,7 +1140,7 @@ async function executeClearData() {
         // 恢復確認按鈕
         if (confirmBtn) {
             confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 確認清除';
+            confirmBtn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg> 確認清除';
         }
     }
 }
@@ -1202,7 +1194,7 @@ function showClearDataSuccessToast() {
     `;
 
     toast.innerHTML = `
-        <i class="fas fa-check-circle" style="color: #EF4444; font-size: 1rem; flex-shrink: 0;"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
         <span>資料已清除</span>
     `;
 
@@ -1254,7 +1246,7 @@ async function loadSampleData() {
         // 禁用按鈕並顯示載入狀態
         if (loadBtn) {
             loadBtn.disabled = true;
-            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> 載入中...';
+            loadBtn.innerHTML = '<svg class="icon me-1" aria-hidden="true"><use href="#icon-loader"></use></svg> 載入中...';
         }
 
         // 顯示進度條
@@ -1355,7 +1347,7 @@ function resetLoadSampleButton() {
     const loadBtn = document.getElementById('load-sample-data-btn');
     if (loadBtn) {
         loadBtn.disabled = false;
-        loadBtn.innerHTML = '<i class="fas fa-play me-1"></i> 載入範例資料';
+        loadBtn.innerHTML = '<svg class="icon me-1" aria-hidden="true"><use href="#icon-play"></use></svg> 載入範例資料';
     }
 }
 
@@ -1406,7 +1398,7 @@ function showSampleDataLoadedToast(count) {
     `;
 
     toast.innerHTML = `
-        <i class="fas fa-check-circle" style="color: #10B981; font-size: 1rem; flex-shrink: 0;"></i>
+        <svg class="icon" aria-hidden="true"><use href="#icon-check-circle"></use></svg>
         <span>已載入 ${count} 筆範例資料</span>
     `;
 

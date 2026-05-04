@@ -274,8 +274,7 @@ class ErrorHandler {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         `;
         
-        const icon = document.createElement('i');
-        icon.className = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle';
+        const icon = window.IconHelper.make(type === 'error' ? 'alert-circle' : 'alert-triangle');
         
         const closeButton = document.createElement('button');
         closeButton.type = 'button';

@@ -557,7 +557,7 @@ class ChartManager {
             description = descriptions[chartType] || descriptions['bar'];
         }
 
-        descEl.innerHTML = `<i class="fas fa-info-circle" aria-hidden="true"></i> ${description}`;
+        descEl.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg> ${description}`;
     }
 
     // 處理趨勢圖表點擊事件
@@ -886,7 +886,7 @@ class ChartManager {
         `;
 
         toast.innerHTML = `
-            <i class="fas fa-filter" style="color: #3B82F6; font-size: 1rem; flex-shrink: 0;"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-filter"></use></svg>
             <span>${message}</span>
         `;
 
@@ -1348,7 +1348,7 @@ class ChartManager {
             const resetButton = document.getElementById('resetZoom');
             if (resetButton) {
                 const originalText = resetButton.innerHTML;
-                resetButton.innerHTML = '<i class="fas fa-check me-1"></i> 已重置';
+                resetButton.innerHTML = '<svg class="icon me-1" aria-hidden="true"><use href="#icon-check"></use></svg> 已重置';
                 resetButton.classList.add('btn-success');
                 resetButton.classList.remove('btn-outline-secondary');
 
@@ -1385,8 +1385,8 @@ class ChartManager {
         const toggleButton = document.getElementById('toggleChartType');
         if (toggleButton) {
             toggleButton.innerHTML = newType === 'bar' ?
-                '<i class="fas fa-exchange-alt me-1"></i> 切換到折線圖' :
-                '<i class="fas fa-exchange-alt me-1"></i> 切換到柱狀圖';
+                '<svg class="icon me-1" aria-hidden="true"><use href="#icon-arrow-right-left"></use></svg> 切換到折線圖' :
+                '<svg class="icon me-1" aria-hidden="true"><use href="#icon-arrow-right-left"></use></svg> 切換到柱狀圖';
 
             toggleButton.classList.add('animate__animated', 'animate__pulse');
             setTimeout(() => {

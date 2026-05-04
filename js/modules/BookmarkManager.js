@@ -154,7 +154,7 @@ class BookmarkManager {
         const bgColor = isBookmarked ? 'rgba(245, 158, 11, 0.1)' : 'rgba(107, 114, 128, 0.1)';
         const borderColor = isBookmarked ? '#F59E0B' : '#6B7280';
         const iconColor = isBookmarked ? '#F59E0B' : '#6B7280';
-        const icon = isBookmarked ? 'fa-bookmark' : 'fa-bookmark';
+        const iconName = isBookmarked ? 'bookmark-fill' : 'bookmark';
         const message = isBookmarked ? '已加入收藏' : '已取消收藏';
 
         toast.style.cssText = `
@@ -178,7 +178,7 @@ class BookmarkManager {
         const displayTitle = title.length > 20 ? title.substring(0, 17) + '...' : title;
 
         toast.innerHTML = `
-            <i class="fas ${icon}" style="color: ${iconColor}; font-size: 1rem; flex-shrink: 0;"></i>
+            <span style="color: ${iconColor}; font-size: 1rem; flex-shrink: 0; display: inline-flex;">${window.IconHelper.html(iconName)}</span>
             <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${message}</span>
         `;
 

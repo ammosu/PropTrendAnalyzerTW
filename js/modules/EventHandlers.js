@@ -286,16 +286,13 @@ class EventHandlers {
     applyDarkMode(isDark) {
         const htmlElement = document.documentElement;
         const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const icon = darkModeToggle?.querySelector('i');
+        const icon = darkModeToggle?.querySelector('svg.icon');
         const text = darkModeToggle?.querySelector('.dark-mode-text');
 
         if (isDark) {
             // 啟用深色模式
             htmlElement.setAttribute('data-theme', 'dark');
-            if (icon) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
+            window.IconHelper.set(icon, 'sun');
             if (text) {
                 text.textContent = '淺色模式';
             }
@@ -306,10 +303,7 @@ class EventHandlers {
         } else {
             // 停用深色模式
             htmlElement.removeAttribute('data-theme');
-            if (icon) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
+            window.IconHelper.set(icon, 'moon');
             if (text) {
                 text.textContent = '深色模式';
             }
@@ -661,7 +655,7 @@ class EventHandlers {
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'filter-tag-remove';
-        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>';
         removeBtn.title = '移除此篩選條件';
         removeBtn.setAttribute('aria-label', `移除${label}篩選條件`);
         removeBtn.addEventListener('click', (e) => {
@@ -757,13 +751,13 @@ class EventHandlers {
         sortDirectionBtn.dataset.direction = newDirection;
 
         // 更新圖示
-        const icon = sortDirectionBtn.querySelector('i');
+        const icon = sortDirectionBtn.querySelector('svg.icon');
         if (icon) {
             if (newDirection === 'asc') {
-                icon.className = 'fas fa-sort-amount-up';
+                window.IconHelper.set(icon, 'sort-asc');
                 sortDirectionBtn.title = '升序排列';
             } else {
-                icon.className = 'fas fa-sort-amount-down';
+                window.IconHelper.set(icon, 'sort-desc');
                 sortDirectionBtn.title = '降序排列';
             }
         }
@@ -876,8 +870,7 @@ class EventHandlers {
         const errorMessage = document.createElement('div');
         errorMessage.className = 'alert alert-warning mt-2';
 
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-exclamation-triangle';
+        const icon = window.IconHelper.make('alert-triangle');
         errorMessage.appendChild(icon);
 
         const message = customError || `請輸入有效的頁碼（1-${maxPage}）！`;
@@ -908,8 +901,7 @@ class EventHandlers {
         const errorMessage = document.createElement('div');
         errorMessage.className = 'alert alert-warning mt-2';
 
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-exclamation-triangle';
+        const icon = window.IconHelper.make('alert-triangle');
         errorMessage.appendChild(icon);
         errorMessage.appendChild(document.createTextNode(` ${message}`));
 
@@ -1172,9 +1164,7 @@ class EventHandlers {
         while (toggleButton.firstChild) {
             toggleButton.removeChild(toggleButton.firstChild);
         }
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-times-circle';
-        icon.setAttribute('aria-hidden', 'true');
+        const icon = window.IconHelper.make('x-circle');
         toggleButton.appendChild(icon);
         toggleButton.appendChild(document.createTextNode(' 隱藏新聞內容'));
 
@@ -1204,9 +1194,7 @@ class EventHandlers {
         while (toggleButton.firstChild) {
             toggleButton.removeChild(toggleButton.firstChild);
         }
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-newspaper';
-        icon.setAttribute('aria-hidden', 'true');
+        const icon = window.IconHelper.make('newspaper');
         toggleButton.appendChild(icon);
         toggleButton.appendChild(document.createTextNode(' 顯示新聞內容'));
 

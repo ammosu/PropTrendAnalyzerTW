@@ -8,7 +8,7 @@
         script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://stackpath.bootstrapcdn.com;
         style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://cdnjs.cloudflare.com https://fonts.googleapis.com;
         img-src 'self' data: blob: https:;
-        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        font-src 'self' https://fonts.gstatic.com;
         connect-src 'self' https://stackpath.bootstrapcdn.com https://cdn.jsdelivr.net;
         frame-src 'none';
         object-src 'none';
@@ -20,7 +20,6 @@
     <meta name="description" content="台灣房地產市場新聞趨勢分析工具，提供房市新聞摘要與市場預期走向分析">
     <title>房市新聞摘要與趨勢分析</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,6 +31,65 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 <body>
+    <!-- Lucide SVG sprite（線條風格 icon，stroke 2 / 24x24 viewBox） -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+        <symbol id="icon-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+        <symbol id="icon-bookmark-fill" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></symbol>
+        <symbol id="icon-calendar-days" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></symbol>
+        <symbol id="icon-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+        <symbol id="icon-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+        <symbol id="icon-area-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12v5h12V8l-5 5-4-4Z"/></symbol>
+        <symbol id="icon-line-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></symbol>
+        <symbol id="icon-pie-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
+        <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></symbol>
+        <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></symbol>
+        <symbol id="icon-loader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+        <symbol id="icon-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
+        <symbol id="icon-cloud-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="icon-crosshair" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+        <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></symbol>
+        <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></symbol>
+        <symbol id="icon-file-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m9 18 3-3-3-3"/><path d="m15 12 3 3-3 3"/></symbol>
+        <symbol id="icon-file-spreadsheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></symbol>
+        <symbol id="icon-file-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></symbol>
+        <symbol id="icon-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+        <symbol id="icon-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></symbol>
+        <symbol id="icon-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
+        <symbol id="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+        <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol>
+        <symbol id="icon-lightbulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></symbol>
+        <symbol id="icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></symbol>
+        <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+        <symbol id="icon-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></symbol>
+        <symbol id="icon-percent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+        <symbol id="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+        <symbol id="icon-rss" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></symbol>
+        <symbol id="icon-search-minus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/><line x1="8" x2="14" y1="11" y2="11"/></symbol>
+        <symbol id="icon-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></symbol>
+        <symbol id="icon-sort-desc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/></symbol>
+        <symbol id="icon-sort-asc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h4"/><path d="M11 16h7"/><path d="M11 20h10"/></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></symbol>
+        <symbol id="icon-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+        <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+        <symbol id="icon-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+        <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+        <symbol id="icon-database" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
+        <symbol id="icon-arrow-right-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></symbol>
+        <symbol id="icon-alert-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="icon-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+        <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></symbol>
+        <symbol id="icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+    </svg>
+
     <!-- 跳過導航連結 -->
     <a href="#main-content" class="skip-to-main-content sr-only sr-only-focusable">跳到主要內容</a>
 
@@ -40,7 +98,7 @@
             <!-- 深色模式切換按鈕 -->
             <div class="dark-mode-toggle-container">
                 <button id="dark-mode-toggle" class="btn btn-sm btn-outline-secondary" aria-label="切換深色模式" title="切換深色模式">
-                    <i class="fas fa-moon" aria-hidden="true"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
                     <span class="dark-mode-text">深色模式</span>
                 </button>
             </div>
@@ -56,7 +114,7 @@
         
         <!-- CSV上傳浮動按鈕 -->
         <button id="upload-fab" class="upload-fab" aria-label="上傳CSV資料" title="上傳CSV資料">
-            <i class="fas fa-cloud-upload-alt"></i>
+            <svg class="icon" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>
         </button>
 
         <!-- 骨架屏 - 統計卡片 -->
@@ -107,7 +165,7 @@
                 <div class="col-md-3 col-sm-6 mb-3">
                     <div class="stat-card stat-card-blue">
                         <div class="stat-icon">
-                            <i class="fas fa-newspaper"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-newspaper"></use></svg>
                         </div>
                         <div class="stat-content">
                             <div class="stat-value" id="total-articles-count" data-target="0">0</div>
@@ -118,7 +176,7 @@
                 <div class="col-md-3 col-sm-6 mb-3">
                     <div class="stat-card stat-card-green">
                         <div class="stat-icon">
-                            <i class="fas fa-calendar-week"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>
                         </div>
                         <div class="stat-content">
                             <div class="stat-value small-text" id="date-range-display">-</div>
@@ -129,7 +187,7 @@
                 <div class="col-md-3 col-sm-6 mb-3">
                     <div class="stat-card stat-card-orange">
                         <div class="stat-icon">
-                            <i class="fas fa-key"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-key"></use></svg>
                         </div>
                         <div class="stat-content">
                             <div class="stat-value" id="keywords-count" data-target="0">0</div>
@@ -140,7 +198,7 @@
                 <div class="col-md-3 col-sm-6 mb-3">
                     <div class="stat-card stat-card-purple">
                         <div class="stat-icon">
-                            <i class="fas fa-rss"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-rss"></use></svg>
                         </div>
                         <div class="stat-content">
                             <div class="stat-value" id="publishers-count" data-target="0">0</div>
@@ -156,7 +214,7 @@
             <div class="card insights-card">
                 <div class="insights-card-header d-flex align-items-center">
                     <span class="insights-card-icon" aria-hidden="true">
-                        <i class="fas fa-lightbulb"></i>
+                        <svg class="icon" aria-hidden="true"><use href="#icon-lightbulb"></use></svg>
                     </span>
                     <h5 id="insights-heading" class="mb-0">本期洞察</h5>
                 </div>
@@ -175,7 +233,7 @@
                     <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞趨勢分析詳情">
                         <div class="chart-preview-header">
                             <div class="chart-preview-icon chart-preview-icon-blue">
-                                <i class="fas fa-chart-line"></i>
+                                <svg class="icon" aria-hidden="true"><use href="#icon-line-chart"></use></svg>
                             </div>
                             <div class="chart-preview-title">
                                 <h6>關鍵詞趨勢</h6>
@@ -196,7 +254,7 @@
                     <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看市場趨勢分佈詳情">
                         <div class="chart-preview-header">
                             <div class="chart-preview-icon chart-preview-icon-orange">
-                                <i class="fas fa-chart-pie"></i>
+                                <svg class="icon" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>
                             </div>
                             <div class="chart-preview-title">
                                 <h6>市場趨勢</h6>
@@ -217,7 +275,7 @@
                     <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞文字雲詳情">
                         <div class="chart-preview-header">
                             <div class="chart-preview-icon chart-preview-icon-purple">
-                                <i class="fas fa-cloud"></i>
+                                <svg class="icon" aria-hidden="true"><use href="#icon-cloud"></use></svg>
                             </div>
                             <div class="chart-preview-title">
                                 <h6>關鍵詞雲</h6>
@@ -241,15 +299,15 @@
         <section id="chart-toggle-section" class="text-center mb-3 animate__animated animate__fadeIn data-dependent-section" aria-label="圖表類型切換" style="display: none;">
             <div class="chart-toggle-btn-group" role="group" aria-label="圖表類型切換">
                 <button id="showKeywordTrend" class="chart-toggle-btn active" aria-label="關鍵詞趨勢" aria-pressed="true">
-                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg>
                     <span class="btn-text">關鍵詞趨勢</span>
                 </button>
                 <button id="showExpectedTrend" class="chart-toggle-btn" aria-label="市場趨勢" aria-pressed="false">
-                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>
                     <span class="btn-text">市場趨勢</span>
                 </button>
                 <button id="showKeywordCloud" class="chart-toggle-btn" aria-label="關鍵詞雲" aria-pressed="false">
-                    <i class="fas fa-cloud" aria-hidden="true"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-cloud"></use></svg>
                     <span class="btn-text">關鍵詞雲</span>
                 </button>
             </div>
@@ -348,19 +406,19 @@
             <div class="text-center mb-3">
                 <div class="chart-type-toggle" role="group" aria-label="圖表類型切換">
                     <button type="button" class="chart-type-btn active" data-chart-type="bar" title="堆疊長條圖">
-                        <i class="fas fa-chart-bar"></i> 長條圖
+                        <svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg> 長條圖
                     </button>
                     <button type="button" class="chart-type-btn" data-chart-type="line" title="折線圖">
-                        <i class="fas fa-chart-line"></i> 折線圖
+                        <svg class="icon" aria-hidden="true"><use href="#icon-line-chart"></use></svg> 折線圖
                     </button>
                     <button type="button" class="chart-type-btn" data-chart-type="area" title="堆疊面積圖">
-                        <i class="fas fa-chart-area"></i> 面積圖
+                        <svg class="icon" aria-hidden="true"><use href="#icon-area-chart"></use></svg> 面積圖
                     </button>
                     <button type="button" class="chart-type-btn" data-chart-type="percentage" title="百分比堆疊圖">
-                        <i class="fas fa-percentage"></i> 百分比
+                        <svg class="icon" aria-hidden="true"><use href="#icon-percent"></use></svg> 百分比
                     </button>
                     <button type="button" class="chart-type-btn" data-chart-type="doughnut" title="甜甜圈圖">
-                        <i class="fas fa-circle-notch"></i> 甜甜圈
+                        <svg class="icon" aria-hidden="true"><use href="#icon-loader"></use></svg> 甜甜圈
                     </button>
                 </div>
             </div>
@@ -369,13 +427,13 @@
             <div id="doughnut-month-controls" class="text-center mb-3" style="display: none;">
                 <div class="month-slider-container">
                     <button id="doughnut-prev-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="上一個月">
-                        <i class="fas fa-chevron-left"></i>
+                        <svg class="icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
                     </button>
                     <div class="month-slider-wrapper">
                         <input type="range" id="doughnut-month-slider" class="month-slider-input" min="0" max="12" value="0" aria-label="選擇月份">
                     </div>
                     <button id="doughnut-next-month" class="btn btn-sm btn-secondary month-slider-btn" aria-label="下一個月">
-                        <i class="fas fa-chevron-right"></i>
+                        <svg class="icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
                     </button>
                     <span id="doughnut-selected-month" class="month-slider-label"></span>
                 </div>
@@ -417,7 +475,7 @@
                         共 <span id="filtered-count">0</span> 篇
                     </div>
                     <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
-                        <i class="far fa-bookmark"></i>
+                        <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
                         <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
                     </button>
                     <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
@@ -439,38 +497,38 @@
                             <option value="relevance">相關性</option>
                         </select>
                         <button id="sort-direction-btn" class="btn btn-sm btn-outline-secondary sort-direction-btn" data-direction="desc" title="目前：新到舊" aria-label="切換排序方向">
-                            <i class="fas fa-sort-amount-down"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-sort-desc"></use></svg>
                         </button>
                     </div>
                     <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#more-filters" aria-expanded="false" aria-controls="more-filters" title="更多篩選選項">
-                        <i class="fas fa-sliders-h"></i> 更多
+                        <svg class="icon" aria-hidden="true"><use href="#icon-sliders"></use></svg> 更多
                     </button>
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
-                            <i class="fas fa-download"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
                         </button>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <h6 class="dropdown-header"><i class="fas fa-file-alt"></i> 資料格式</h6>
+                            <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-file-text"></use></svg> 資料格式</h6>
                             <button id="export-csv-btn" class="dropdown-item" type="button">
-                                <i class="fas fa-file-csv text-success"></i> CSV 格式
+                                <svg class="icon text-success" aria-hidden="true"><use href="#icon-file-spreadsheet"></use></svg> CSV 格式
                             </button>
                             <button id="export-json-btn" class="dropdown-item" type="button">
-                                <i class="fas fa-file-code text-info"></i> JSON 格式
+                                <svg class="icon text-info" aria-hidden="true"><use href="#icon-file-code"></use></svg> JSON 格式
                             </button>
                             <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header"><i class="fas fa-chart-bar"></i> 圖表</h6>
+                            <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg> 圖表</h6>
                             <button id="export-chart-keyword-btn" class="dropdown-item" type="button">
-                                <i class="fas fa-chart-line text-primary"></i> 關鍵詞趨勢圖
+                                <svg class="icon text-primary" aria-hidden="true"><use href="#icon-line-chart"></use></svg> 關鍵詞趨勢圖
                             </button>
                             <button id="export-chart-trend-btn" class="dropdown-item" type="button">
-                                <i class="fas fa-chart-pie text-warning"></i> 市場趨勢圖
+                                <svg class="icon text-warning" aria-hidden="true"><use href="#icon-pie-chart"></use></svg> 市場趨勢圖
                             </button>
                             <button id="export-chart-cloud-btn" class="dropdown-item" type="button">
-                                <i class="fas fa-cloud text-secondary"></i> 文字雲圖
+                                <svg class="icon text-secondary" aria-hidden="true"><use href="#icon-cloud"></use></svg> 文字雲圖
                             </button>
                             <div class="dropdown-divider"></div>
                             <button id="export-full-report-btn" class="dropdown-item font-weight-bold" type="button">
-                                <i class="fas fa-file-download text-danger"></i> 完整報表
+                                <svg class="icon text-danger" aria-hidden="true"><use href="#icon-file-down"></use></svg> 完整報表
                             </button>
                         </div>
                     </div>
@@ -481,7 +539,7 @@
             <div class="active-filters-container mt-2" id="active-filters-container" style="display: none;">
                 <div id="active-filters-tags" class="d-flex align-items-center gap-2 flex-wrap"></div>
                 <button id="clear-all-filters-btn" class="clear-all-filters-btn" style="display: none;" title="清除所有篩選條件">
-                    <i class="fas fa-times-circle"></i> 清除全部
+                    <svg class="icon" aria-hidden="true"><use href="#icon-x-circle"></use></svg> 清除全部
                 </button>
             </div>
 
@@ -490,7 +548,7 @@
                 <div class="more-filters-panel">
                     <!-- 日期範圍 -->
                     <div class="filter-group">
-                        <label class="filter-group-label"><i class="far fa-calendar-alt"></i> 日期範圍</label>
+                        <label class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-calendar-days"></use></svg> 日期範圍</label>
                         <div class="d-flex align-items-center gap-2">
                             <input type="date" id="start-date" class="form-control form-control-sm" aria-label="起始日期">
                             <span class="text-muted">~</span>
@@ -500,7 +558,7 @@
 
                     <!-- 搜尋 -->
                     <div class="filter-group">
-                        <label class="filter-group-label"><i class="fas fa-search"></i> 關鍵字搜尋</label>
+                        <label class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg> 關鍵字搜尋</label>
                         <div class="search-container">
                             <div class="input-group input-group-sm">
                                 <input type="text"
@@ -515,7 +573,7 @@
                                             id="search-clear-btn"
                                             title="清除搜尋"
                                             style="display: none;">
-                                        <i class="fas fa-times"></i>
+                                        <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>
                                     </button>
                                     <button id="search-options-dropdown-btn"
                                             class="btn btn-outline-secondary dropdown-toggle search-options-btn"
@@ -524,10 +582,10 @@
                                             aria-haspopup="true"
                                             aria-expanded="false"
                                             title="搜尋選項">
-                                        <i class="fas fa-cog"></i>
+                                        <svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
-                                        <h6 class="dropdown-header"><i class="fas fa-crosshairs"></i> 搜尋範圍</h6>
+                                        <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-crosshair"></use></svg> 搜尋範圍</h6>
                                         <div class="px-3 py-2">
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
@@ -547,7 +605,7 @@
                                             </div>
                                         </div>
                                         <div class="dropdown-divider"></div>
-                                        <h6 class="dropdown-header"><i class="fas fa-cog"></i> 搜尋選項</h6>
+                                        <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg> 搜尋選項</h6>
                                         <div class="px-3 py-2">
                                             <div class="custom-control custom-checkbox">
                                                 <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
@@ -565,16 +623,16 @@
                             <div class="search-suggestions" id="search-suggestions" style="display: none;">
                                 <div class="search-suggestions-section" id="search-history-section" style="display: none;">
                                     <div class="search-suggestions-header">
-                                        <span><i class="fas fa-history"></i> 最近搜尋</span>
+                                        <span><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg> 最近搜尋</span>
                                         <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
-                                            <i class="fas fa-trash-alt"></i>
+                                            <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
                                         </button>
                                     </div>
                                     <div class="search-suggestions-list" id="search-history-list"></div>
                                 </div>
                                 <div class="search-suggestions-section" id="search-popular-section">
                                     <div class="search-suggestions-header">
-                                        <span><i class="fas fa-fire"></i> 熱門關鍵詞</span>
+                                        <span><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg> 熱門關鍵詞</span>
                                     </div>
                                     <div class="search-suggestions-list" id="search-popular-list"></div>
                                 </div>
@@ -584,7 +642,7 @@
 
                     <!-- 新聞媒體篩選 -->
                     <div class="filter-group">
-                        <label id="media-filter-label" class="filter-group-label"><i class="fas fa-newspaper"></i> 新聞媒體</label>
+                        <label id="media-filter-label" class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-newspaper"></use></svg> 新聞媒體</label>
                         <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
                             <label class="btn btn-sm btn-outline-primary active m-1">
                                 <input type="checkbox" class="media-filter" value="中國時報" checked id="media-filter-chinatimes">
@@ -622,10 +680,10 @@
                     <!-- 檢視模式切換按鈕 -->
                     <div class="btn-group" role="group" aria-label="檢視模式切換">
                         <button id="view-mode-card" class="btn btn-sm btn-outline-primary active" title="卡片檢視" aria-label="切換為卡片檢視">
-                            <i class="fas fa-th-large"></i> 卡片
+                            <svg class="icon" aria-hidden="true"><use href="#icon-grid"></use></svg> 卡片
                         </button>
                         <button id="view-mode-list" class="btn btn-sm btn-outline-primary" title="列表檢視" aria-label="切換為列表檢視">
-                            <i class="fas fa-list"></i> 列表
+                            <svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg> 列表
                         </button>
                     </div>
                 </div>
@@ -634,17 +692,17 @@
                 <nav aria-label="頁面跳轉" id="pagination-options" class="mb-4 mt-4">
                     <div class="form-row align-items-end">
                         <div class="col-md-3">
-                            <label for="jump-page"><i class="fas fa-file-alt" aria-hidden="true"></i> 跳轉至頁碼：</label>
+                            <label for="jump-page"><svg class="icon" aria-hidden="true"><use href="#icon-file-text"></use></svg> 跳轉至頁碼：</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text" id="jump-page-icon"><i class="fas fa-hashtag" aria-hidden="true"></i></span>
+                                    <span class="input-group-text" id="jump-page-icon"><svg class="icon" aria-hidden="true"><use href="#icon-hash"></use></svg></span>
                                 </div>
                                 <input type="number" id="jump-page" class="form-control" placeholder="輸入頁碼" min="1" aria-label="輸入要跳轉的頁碼" aria-describedby="jump-page-icon">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <button id="jump-button" class="btn btn-secondary btn-block" aria-label="跳轉到指定頁碼">
-                                <i class="fas fa-arrow-right" aria-hidden="true"></i> 跳轉
+                                <svg class="icon" aria-hidden="true"><use href="#icon-arrow-right"></use></svg> 跳轉
                             </button>
                         </div>
                     </div>
@@ -664,9 +722,9 @@
         <div class="upload-sidebar-overlay"></div>
         <div class="upload-sidebar-content">
             <div class="upload-sidebar-header">
-                <h5 id="upload-sidebar-heading"><i class="fas fa-cloud-upload-alt me-2"></i> 上傳CSV資料</h5>
+                <h5 id="upload-sidebar-heading"><svg class="icon me-2" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg> 上傳CSV資料</h5>
                 <button class="upload-sidebar-close" aria-label="關閉上傳側邊欄">
-                    <i class="fas fa-times"></i>
+                    <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>
                 </button>
             </div>
             <div class="upload-sidebar-body">
@@ -677,21 +735,21 @@
                             <input type="file" class="custom-file-input" id="csv-file" accept=".csv" aria-describedby="csv-file-help" aria-required="true">
                             <label class="custom-file-label" for="csv-file">選擇檔案...</label>
                         </div>
-                        <small id="csv-file-help" class="form-text text-muted"><i class="fas fa-info-circle" aria-hidden="true"></i> 請上傳包含新聞資料的CSV檔案。支援標題、摘要、關鍵詞、日期等欄位。檔案大小限制為1GB。</small>
+                        <small id="csv-file-help" class="form-text text-muted"><svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg> 請上傳包含新聞資料的CSV檔案。支援標題、摘要、關鍵詞、日期等欄位。檔案大小限制為1GB。</small>
                     </div>
                     <!-- 範例 CSV 區塊 -->
                     <div class="sample-csv-section mb-3">
                         <div class="sample-csv-header">
-                            <i class="fas fa-file-csv"></i>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-file-spreadsheet"></use></svg>
                             <span>範例檔案</span>
                         </div>
                         <p class="sample-csv-description">不確定格式？下載範例檔案查看，或直接載入測試資料體驗功能。</p>
                         <div class="sample-csv-buttons">
                             <a href="sample_data.csv" download="sample_data.csv" class="btn btn-outline-info btn-sm">
-                                <i class="fas fa-download me-1"></i> 下載範例 CSV
+                                <svg class="icon me-1" aria-hidden="true"><use href="#icon-download"></use></svg> 下載範例 CSV
                             </a>
                             <button type="button" id="load-sample-data-btn" class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-play me-1"></i> 載入範例資料
+                                <svg class="icon me-1" aria-hidden="true"><use href="#icon-play"></use></svg> 載入範例資料
                             </button>
                         </div>
                     </div>
@@ -704,7 +762,7 @@
                         </div>
                         <small id="upload-progress-message" class="text-muted"></small>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block" aria-label="上傳並處理CSV檔案"><i class="fas fa-cloud-upload-alt me-1" aria-hidden="true"></i> 上傳並處理</button>
+                    <button type="submit" class="btn btn-primary btn-block" aria-label="上傳並處理CSV檔案"><svg class="icon me-1" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg> 上傳並處理</button>
                 </form>
                 <div id="upload-status" class="mt-3" role="status" aria-live="polite" aria-atomic="true"></div>
             </div>
@@ -748,7 +806,7 @@
             </ol>
 
             <button id="empty-state-upload-btn" class="btn btn-primary btn-lg">
-                <i class="fas fa-cloud-upload-alt me-2"></i>上傳CSV檔案
+                <svg class="icon me-2" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>上傳CSV檔案
             </button>
         </div>
     </div>
@@ -759,7 +817,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="clearDataModalLabel">
-                        <i class="fas fa-exclamation-triangle"></i> 確認清除資料
+                        <svg class="icon" aria-hidden="true"><use href="#icon-alert-triangle"></use></svg> 確認清除資料
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="關閉">
                         <span aria-hidden="true">&times;</span>
@@ -767,21 +825,21 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
-                        <i class="fas fa-trash-alt text-danger" style="font-size: 3rem;"></i>
+                        <svg class="icon text-danger" aria-hidden="true"><use href="#icon-trash"></use></svg>
                     </div>
                     <p class="text-center mb-2"><strong>您確定要清除所有資料嗎？</strong></p>
                     <p class="text-center text-muted mb-3">此操作將刪除 IndexedDB 中儲存的所有文章資料，且無法復原。</p>
                     <div class="alert alert-warning mb-0">
-                        <i class="fas fa-info-circle"></i>
+                        <svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg>
                         <small>清除後，您需要重新上傳 CSV 檔案才能使用應用程式。</small>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times"></i> 取消
+                        <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg> 取消
                     </button>
                     <button type="button" class="btn btn-danger" id="confirm-clear-data-btn">
-                        <i class="fas fa-trash-alt"></i> 確認清除
+                        <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg> 確認清除
                     </button>
                 </div>
             </div>
@@ -798,6 +856,7 @@
     
     <!-- 引入模組化的 JavaScript 檔案 -->
     <script src="js/modules/Constants.js"></script>
+    <script src="js/modules/IconHelper.js"></script>
     <script src="js/modules/Validator.js"></script>
     <script src="js/modules/SecurityUtils.js"></script>
     <script src="js/modules/ErrorHandler.js"></script>

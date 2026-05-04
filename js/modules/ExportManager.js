@@ -279,16 +279,16 @@ class ExportManager {
         const toast = document.createElement('div');
         toast.className = `toast toast-${type} animate__animated animate__fadeInRight`;
 
-        // 圖示對應
+        // 圖示對應（Lucide sprite）
         const iconMap = {
-            success: 'fa-check-circle',
-            warning: 'fa-exclamation-triangle',
-            error: 'fa-times-circle',
-            info: 'fa-info-circle'
+            success: 'check-circle',
+            warning: 'alert-triangle',
+            error: 'x-circle',
+            info: 'info'
         };
 
         toast.innerHTML = `
-            <i class="fas ${iconMap[type]}" aria-hidden="true"></i>
+            ${window.IconHelper.html(iconMap[type] || 'info')}
             <span>${message}</span>
         `;
 

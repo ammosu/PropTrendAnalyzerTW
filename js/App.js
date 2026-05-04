@@ -511,15 +511,16 @@ class App {
         // 更新按鈕樣式
         const bookmarkFilterBtn = document.getElementById('bookmark-filter-btn');
         if (bookmarkFilterBtn) {
+            const iconEl = bookmarkFilterBtn.querySelector('svg.icon');
             if (newState) {
                 bookmarkFilterBtn.classList.remove('btn-outline-warning');
                 bookmarkFilterBtn.classList.add('btn-warning');
-                bookmarkFilterBtn.querySelector('i').className = 'fas fa-bookmark';
+                window.IconHelper.set(iconEl, 'bookmark-fill');
                 bookmarkFilterBtn.title = '顯示所有文章';
             } else {
                 bookmarkFilterBtn.classList.remove('btn-warning');
                 bookmarkFilterBtn.classList.add('btn-outline-warning');
-                bookmarkFilterBtn.querySelector('i').className = 'far fa-bookmark';
+                window.IconHelper.set(iconEl, 'bookmark');
                 bookmarkFilterBtn.title = '顯示收藏的文章';
             }
         }
@@ -790,10 +791,10 @@ class App {
         if (container) {
             container.innerHTML = `
                 <div class="alert alert-danger mt-4">
-                    <h4><i class="fas fa-exclamation-triangle"></i> 應用程式初始化失敗</h4>
+                    <h4><svg class="icon" aria-hidden="true"><use href="#icon-alert-triangle"></use></svg> 應用程式初始化失敗</h4>
                     <p>錯誤訊息：${this.utilities ? this.utilities.escapeHtml(error.message) : error.message}</p>
                     <button class="btn btn-primary" onclick="location.reload()">
-                        <i class="fas fa-refresh"></i> 重新載入頁面
+                        <svg class="icon" aria-hidden="true"><use href="#icon-refresh"></use></svg> 重新載入頁面
                     </button>
                 </div>
             `;

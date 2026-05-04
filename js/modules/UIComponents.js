@@ -325,7 +325,7 @@ class UIComponents {
             class: 'btn btn-primary btn-sm list-view-action-btn',
             type: 'button'
         });
-        const icon = this.securityUtils.createSafeElement('i', { class: 'fas fa-eye' });
+        const icon = window.IconHelper.make('eye');
         viewBtn.appendChild(icon);
         viewBtn.appendChild(document.createTextNode(' 查看'));
 
@@ -559,17 +559,17 @@ class UIComponents {
         const metaInfo = this.securityUtils.createSafeElement('div', { class: 'article-meta text-muted border-top pt-3' });
 
         const dateInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
-        const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });
+        const dateIcon = window.IconHelper.make('calendar-days');
         dateInfo.appendChild(dateIcon);
         dateInfo.appendChild(document.createTextNode(' 發布時間：' + article.date));
 
         const authorInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
-        const authorIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-user' });
+        const authorIcon = window.IconHelper.make('user');
         authorInfo.appendChild(authorIcon);
         authorInfo.appendChild(document.createTextNode(' 作者：' + article.author));
 
         const publisherInfo = this.securityUtils.createSafeElement('p', { class: 'mb-2' });
-        const publisherIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-newspaper' });
+        const publisherIcon = window.IconHelper.make('newspaper');
         publisherInfo.appendChild(publisherIcon);
         publisherInfo.appendChild(document.createTextNode(' 發布單位：'));
         if (article.url) {
@@ -590,7 +590,7 @@ class UIComponents {
         // 預期趨勢
         if (article.expectedMarketTrend) {
             const trendInfo = this.securityUtils.createSafeElement('p', { class: 'mb-0' });
-            const trendIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-chart-line' });
+            const trendIcon = window.IconHelper.make('line-chart');
             trendInfo.appendChild(trendIcon);
             trendInfo.appendChild(document.createTextNode(' 預期趨勢：'));
 
@@ -705,7 +705,7 @@ class UIComponents {
     createNoArticlesMessage() {
         const container = this.securityUtils.createSafeElement('div', { class: 'col-12 text-center py-5' });
         const alert = this.securityUtils.createSafeElement('div', { class: 'alert alert-info' });
-        const icon = this.securityUtils.createSafeElement('i', { class: 'fas fa-info-circle fa-2x mb-3' });
+        const icon = window.IconHelper.make('info', 'icon--xl mb-3');
         const title = this.securityUtils.createSafeElement('h4', {}, '沒有符合條件的文章');
         const text = this.securityUtils.createSafeElement('p', {}, '請嘗試調整篩選條件或上傳更多資料。');
         
@@ -874,14 +874,14 @@ class UIComponents {
         // 日期和作者資訊
         const infoContainer = this.securityUtils.createSafeElement('p', { class: 'text-muted mb-0' });
 
-        const dateIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-calendar-alt' });
+        const dateIcon = window.IconHelper.make('calendar-days');
         infoContainer.appendChild(dateIcon);
 
         const dateText = document.createTextNode(` ${this.formatDate(article.date)}`);
         infoContainer.appendChild(dateText);
 
         if (article.author) {
-            const authorIcon = this.securityUtils.createSafeElement('i', { class: 'far fa-user' });
+            const authorIcon = window.IconHelper.make('user');
             const authorSpan = this.securityUtils.createSafeElement('span', { class: 'ml-2' });
             authorSpan.appendChild(authorIcon);
             authorSpan.appendChild(document.createTextNode(` ${article.author}`));
@@ -903,7 +903,7 @@ class UIComponents {
             'data-article-id': article.id
         });
 
-        const btnIcon = this.securityUtils.createSafeElement('i', { class: 'fas fa-book-open' });
+        const btnIcon = window.IconHelper.make('book-open');
         readMoreBtn.appendChild(btnIcon);
         readMoreBtn.appendChild(document.createTextNode(' 閱讀更多'));
 
@@ -932,9 +932,7 @@ class UIComponents {
             title: isBookmarked ? '取消收藏' : '加入收藏'
         });
 
-        const icon = this.securityUtils.createSafeElement('i', {
-            class: isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'
-        });
+        let icon = window.IconHelper.make(isBookmarked ? 'bookmark-fill' : 'bookmark');
         btn.appendChild(icon);
 
         // 事件處理
@@ -954,12 +952,12 @@ class UIComponents {
                 btn.classList.add('bookmarked');
                 btn.setAttribute('aria-label', '取消收藏');
                 btn.setAttribute('title', '取消收藏');
-                icon.className = 'fas fa-bookmark';
+                icon = window.IconHelper.set(icon, 'bookmark-fill');
             } else {
                 btn.classList.remove('bookmarked');
                 btn.setAttribute('aria-label', '加入收藏');
                 btn.setAttribute('title', '加入收藏');
-                icon.className = 'far fa-bookmark';
+                icon = window.IconHelper.set(icon, 'bookmark');
             }
 
             // 添加動畫效果
@@ -1147,11 +1145,11 @@ class UIComponents {
         content.innerHTML = `
             <div class="insights-grid">
                 <div class="insight-block">
-                    <div class="insight-block-title"><i class="fas fa-fire mr-1"></i>Top 5 熱門關鍵詞</div>
+                    <div class="insight-block-title"><svg class="icon mr-1" aria-hidden="true"><use href="#icon-flame"></use></svg>Top 5 熱門關鍵詞</div>
                     ${keywordRows}
                 </div>
                 <div class="insight-block">
-                    <div class="insight-block-title"><i class="fas fa-chart-pie mr-1"></i>趨勢走向分佈</div>
+                    <div class="insight-block-title"><svg class="icon mr-1" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>趨勢走向分佈</div>
                     <div class="insight-trend-badges">${trendHtml}</div>
                     <div class="mt-3">${peakHtml}</div>
                     <div class="mt-2">${recentHtml}</div>

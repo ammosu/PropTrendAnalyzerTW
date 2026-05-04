@@ -72,7 +72,7 @@ async function loadArticlesData() {
       if (uploadStatus) {
         uploadStatus.innerHTML = `
           <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> 尚未載入任何資料。請上傳CSV檔案以開始分析。
+            <svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg> 尚未載入任何資料。請上傳CSV檔案以開始分析。
           </div>
         `;
       }
