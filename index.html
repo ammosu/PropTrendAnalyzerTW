@@ -45,7 +45,7 @@
                 </button>
             </div>
             <h1 id="page-title" class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
-            <p class="text-center text-muted mb-4 animate__animated animate__fadeIn animate__delay-1s">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
+            <p class="text-center text-muted mb-4 animate__animated animate__fadeIn">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
         </header>
         
         <!-- 測試SVG圖片 -->
@@ -154,8 +154,10 @@
         <!-- 洞察摘要區塊 -->
         <section id="insights-section" class="mb-4 data-dependent-section" style="display:none;" aria-labelledby="insights-heading">
             <div class="card insights-card">
-                <div class="card-header bg-primary text-white d-flex align-items-center">
-                    <i class="fas fa-lightbulb mr-2" aria-hidden="true"></i>
+                <div class="insights-card-header d-flex align-items-center">
+                    <span class="insights-card-icon" aria-hidden="true">
+                        <i class="fas fa-lightbulb"></i>
+                    </span>
                     <h5 id="insights-heading" class="mb-0">本期洞察</h5>
                 </div>
                 <div class="card-body" id="insights-content">
@@ -166,7 +168,7 @@
 
         <!-- 圖表預覽卡片區塊 -->
         <section id="chart-preview-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
-            <h5 class="mb-3"><i class="fas fa-chart-area"></i> 數據總覽</h5>
+            <h5 class="mb-3">數據總覽</h5>
             <div class="row">
                 <!-- 關鍵詞趨勢預覽 -->
                 <div class="col-md-4 mb-3">
@@ -184,7 +186,7 @@
                             <canvas id="mini-keyword-chart" width="300" height="150"></canvas>
                         </div>
                         <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
+                            <span class="chart-preview-link">查看完整分析</span>
                         </div>
                     </div>
                 </div>
@@ -205,7 +207,7 @@
                             <canvas id="mini-trend-chart" width="300" height="150"></canvas>
                         </div>
                         <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
+                            <span class="chart-preview-link">查看完整分析</span>
                         </div>
                     </div>
                 </div>
@@ -226,7 +228,7 @@
                             <div id="mini-cloud-preview" class="mini-cloud-container"></div>
                         </div>
                         <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析 <i class="fas fa-arrow-right"></i></span>
+                            <span class="chart-preview-link">查看完整分析</span>
                         </div>
                     </div>
                 </div>
@@ -256,20 +258,14 @@
 
         <!-- 關鍵詞趨勢分析圖表容器 -->
         <section id="keywordTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-trend-title" style="display: none;">
-            <h2 id="keyword-trend-title"><i class="fas fa-chart-bar" aria-hidden="true"></i> 關鍵詞趨勢分析</h2>
+            <h2 id="keyword-trend-title">關鍵詞趨勢分析</h2>
 
             <!-- 檢視模式切換 -->
             <div class="text-center mb-3">
                 <div class="btn-group trend-mode-toggle" role="group" aria-label="趨勢檢視模式切換">
-                    <button type="button" id="single-month-mode" class="btn btn-outline-primary active" title="單月檢視">
-                        <i class="fas fa-calendar-day"></i> 單月檢視
-                    </button>
-                    <button type="button" id="multi-month-mode" class="btn btn-outline-primary" title="多月比較">
-                        <i class="fas fa-calendar-alt"></i> 多月比較
-                    </button>
-                    <button type="button" id="time-range-mode" class="btn btn-outline-primary" title="時間範圍分析">
-                        <i class="fas fa-chart-line"></i> 時間範圍
-                    </button>
+                    <button type="button" id="single-month-mode" class="btn btn-outline-primary active" title="單月檢視">單月檢視</button>
+                    <button type="button" id="multi-month-mode" class="btn btn-outline-primary" title="多月比較">多月比較</button>
+                    <button type="button" id="time-range-mode" class="btn btn-outline-primary" title="時間範圍分析">時間範圍</button>
                 </div>
             </div>
 
@@ -302,12 +298,8 @@
                 <label class="form-label text-center d-block">選擇要比較的月份（最多 5 個）：</label>
                 <div id="month-checkboxes" class="month-checkbox-container"></div>
                 <div class="text-center mt-2">
-                    <button id="apply-multi-month" class="btn btn-primary btn-sm">
-                        <i class="fas fa-chart-bar"></i> 套用比較
-                    </button>
-                    <button id="clear-month-selection" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-times"></i> 清除選擇
-                    </button>
+                    <button id="apply-multi-month" class="btn btn-primary btn-sm">套用比較</button>
+                    <button id="clear-month-selection" class="btn btn-secondary btn-sm">清除選擇</button>
                 </div>
             </div>
 
@@ -328,9 +320,7 @@
                     </div>
                 </div>
                 <div class="text-center mt-2">
-                    <button id="apply-time-range" class="btn btn-primary btn-sm">
-                        <i class="fas fa-chart-line"></i> 套用範圍
-                    </button>
+                    <button id="apply-time-range" class="btn btn-primary btn-sm">套用範圍</button>
                 </div>
             </div>
 
@@ -340,14 +330,11 @@
 
             <!-- 圖表控制按鈕 -->
             <div class="text-center mt-3">
-                <button id="reset-chart-zoom" class="btn btn-sm btn-outline-secondary" title="重置圖表縮放">
-                    <i class="fas fa-search-minus"></i> 重置縮放
-                </button>
+                <button id="reset-chart-zoom" class="btn btn-sm btn-outline-secondary" title="重置圖表縮放">重置縮放</button>
             </div>
 
             <div class="text-muted text-center mt-3">
                 <small id="trend-chart-description">
-                    <i class="fas fa-info-circle" aria-hidden="true"></i>
                     <span id="trend-description-text">此圖表顯示選定月份中出現頻率最高的關鍵詞</span>
                 </small>
             </div>
@@ -355,7 +342,7 @@
 
         <!-- 每月預期市場趨勢分佈圖表容器 -->
         <section id="expectedTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="expected-trend-title" style="display: none;">
-            <h2 id="expected-trend-title"><i class="fas fa-chart-pie" aria-hidden="true"></i> 每月預期市場趨勢分佈</h2>
+            <h2 id="expected-trend-title">每月預期市場趨勢分佈</h2>
 
             <!-- 圖表類型切換 -->
             <div class="text-center mb-3">
@@ -393,9 +380,7 @@
                     <span id="doughnut-selected-month" class="month-slider-label"></span>
                 </div>
                 <div class="mt-2">
-                    <button id="doughnut-show-all" class="btn btn-sm btn-outline-primary show-all-btn">
-                        <i class="fas fa-layer-group"></i> 顯示全部月份
-                    </button>
+                    <button id="doughnut-show-all" class="btn btn-sm btn-outline-primary show-all-btn">顯示全部月份</button>
                 </div>
             </div>
 
@@ -403,13 +388,13 @@
                 <canvas id="expectedTrendChart" width="600" height="400" role="img" aria-label="每月預期市場趨勢分佈圖表"></canvas>
             </div>
             <div class="text-muted text-center mt-3">
-                <small id="expected-trend-description"><i class="fas fa-info-circle" aria-hidden="true"></i> 此圖表顯示每月新聞中預期市場趨勢的分佈情況</small>
+                <small id="expected-trend-description">此圖表顯示每月新聞中預期市場趨勢的分佈情況</small>
             </div>
         </section>
 
         <!-- 關鍵詞文字雲視覺化容器 -->
         <section id="keywordCloudContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-cloud-title" style="display: none;">
-            <h2 id="keyword-cloud-title"><i class="fas fa-cloud" aria-hidden="true"></i> 關鍵詞文字雲視覺化</h2>
+            <h2 id="keyword-cloud-title">關鍵詞文字雲視覺化</h2>
             <div class="cloud-controls text-center mb-3">
                 <label for="cloud-size-slider" class="form-label">顯示關鍵詞數量：<span id="cloud-size-value">50</span></label>
                 <input type="range" id="cloud-size-slider" class="form-range cloud-slider" min="20" max="100" step="10" value="50" aria-label="選擇顯示的關鍵詞數量">
@@ -418,18 +403,18 @@
                 <canvas id="keywordCloudCanvas" width="800" height="500" role="img" aria-label="關鍵詞文字雲視覺化圖表"></canvas>
             </div>
             <div class="text-muted text-center mt-3">
-                <small><i class="fas fa-info-circle" aria-hidden="true"></i> 此文字雲顯示所有文章中出現頻率最高的關鍵詞，字體大小代表出現次數</small>
+                <small>此文字雲顯示所有文章中出現頻率最高的關鍵詞，字體大小代表出現次數</small>
             </div>
         </section>
 
         <div class="section-divider data-dependent-section" style="display: none;"></div>
 
-        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn animate__delay-2s data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
+        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
             <!-- 預設顯示區：快速選擇 + 排序 + 文章數 -->
             <div class="filter-compact-bar">
                 <div class="filter-compact-left">
                     <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 0.9rem;">
-                        <i class="fas fa-list"></i> 共 <span id="filtered-count">0</span> 篇
+                        共 <span id="filtered-count">0</span> 篇
                     </div>
                     <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
                         <i class="far fa-bookmark"></i>
@@ -627,15 +612,13 @@
             </div>
         </section>
 
-        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn animate__delay-3s data-dependent-section" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容" style="display: none;">
-            <i class="fas fa-newspaper" aria-hidden="true"></i> 顯示/隱藏新聞內容
-        </button>
+        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn data-dependent-section" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容" style="display: none;">顯示/隱藏新聞內容</button>
 
         <div id="news-content" class="collapse">
             <main id="main-content" role="main">
                 <!-- 新聞列表標題與檢視模式切換 -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 id="articles-heading" class="mb-0"><i class="fas fa-list-alt" aria-hidden="true"></i> 新聞列表</h2>
+                    <h2 id="articles-heading" class="mb-0">新聞列表</h2>
                     <!-- 檢視模式切換按鈕 -->
                     <div class="btn-group" role="group" aria-label="檢視模式切換">
                         <button id="view-mode-card" class="btn btn-sm btn-outline-primary active" title="卡片檢視" aria-label="切換為卡片檢視">

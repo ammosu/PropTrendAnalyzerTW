@@ -110,6 +110,27 @@ select:disabled {
     filter: grayscale(50%);
 }
 
+/* 縮短入場動畫，讓首屏更俐落 */
+.animate__animated.animate__fadeIn {
+    --animate-duration: 0.3s;
+}
+
+/* 尊重使用者降低動效偏好 */
+@media (prefers-reduced-motion: reduce) {
+    .animate__animated {
+        animation: none !important;
+        transition: none !important;
+    }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 /* General Styles */
 :root {
     /* Primary Colors - 現代專業藍 */
@@ -172,10 +193,10 @@ select:disabled {
     --bg-secondary: #F8FAFC;
     --bg-tertiary: #F1F5F9;
 
-    /* Text Colors - 更好的對比度 */
-    --text-primary: #1E293B;
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
+    /* Text Colors - 更好的對比度（WCAG AA 4.5:1+） */
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
 
     /* Border Colors */
     --border-color: #E2E8F0;
@@ -971,28 +992,34 @@ button.btn-secondary:focus:not(:active)::after {
     border-color: rgba(59, 130, 246, 0.3);
 }
 
+/* 統一所有 section h2 樣式，避免裝飾不一致 */
 #keywordTrendContainer h2,
 #expectedTrendContainer h2,
-#keywordCloudContainer h2 {
-    font-size: 1.5rem;
-    color: var(--primary);
+#keywordCloudContainer h2,
+#articles-heading,
+#chart-preview-section h5 {
+    font-size: 1.4rem;
+    color: var(--text-primary);
     margin-bottom: var(--space-lg);
     position: relative;
     display: inline-block;
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 #keywordTrendContainer h2::after,
 #expectedTrendContainer h2::after,
-#keywordCloudContainer h2::after {
+#keywordCloudContainer h2::after,
+#articles-heading::after,
+#chart-preview-section h5::after {
     content: '';
     position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
+    bottom: -6px;
+    left: 0;
+    width: 36px;
     height: 3px;
     background-color: var(--primary);
-    border-radius: var(--radius-round);
+    border-radius: 2px;
 }
 
 /* 圖表切換按鈕群組 - 緊湊樣式 */
@@ -1974,61 +2001,45 @@ canvas#trend, canvas#expectedTrendChart {
     font-weight: 500;
 }
 
-/* 各種顏色主題 */
-.stat-card-blue {
-    --card-color-start: #3498db;
-    --card-color-end: #2980b9;
+/* 統一卡片配色：trust teal 為主，藍為輔；以 icon 顏色區分卡片類型，不再整張卡填色 */
+.stat-card-blue,
+.stat-card-green,
+.stat-card-orange,
+.stat-card-purple {
+    --card-color-start: #0F766E;
+    --card-color-end: #0369A1;
 }
 
 .stat-card-blue .stat-icon {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.15));
-    color: #3498db;
+    background: rgba(3, 105, 161, 0.10);
+    color: #0369A1;
 }
-
 .stat-card-blue .stat-value {
-    color: #2980b9;
-}
-
-.stat-card-green {
-    --card-color-start: #27ae60;
-    --card-color-end: #229954;
+    color: var(--text-primary);
 }
 
 .stat-card-green .stat-icon {
-    background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(34, 153, 84, 0.15));
-    color: #27ae60;
+    background: rgba(15, 118, 110, 0.10);
+    color: #0F766E;
 }
-
 .stat-card-green .stat-value {
-    color: #229954;
-}
-
-.stat-card-orange {
-    --card-color-start: #f39c12;
-    --card-color-end: #e67e22;
+    color: var(--text-primary);
 }
 
 .stat-card-orange .stat-icon {
-    background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(230, 126, 34, 0.15));
-    color: #f39c12;
+    background: rgba(20, 184, 166, 0.12);
+    color: #0D9488;
 }
-
 .stat-card-orange .stat-value {
-    color: #e67e22;
-}
-
-.stat-card-purple {
-    --card-color-start: #9b59b6;
-    --card-color-end: #8e44ad;
+    color: var(--text-primary);
 }
 
 .stat-card-purple .stat-icon {
-    background: linear-gradient(135deg, rgba(155, 89, 182, 0.1), rgba(142, 68, 173, 0.15));
-    color: #9b59b6;
+    background: rgba(15, 23, 42, 0.06);
+    color: #334155;
 }
-
 .stat-card-purple .stat-value {
-    color: #8e44ad;
+    color: var(--text-primary);
 }
 
 /* 檢視模式切換按鈕樣式 */
@@ -4448,19 +4459,12 @@ body.dark-mode .chart-interaction-hint:hover {
     flex-shrink: 0;
 }
 
-.chart-preview-icon-blue {
-    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-    color: white;
-}
-
-.chart-preview-icon-orange {
-    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-    color: white;
-}
-
+/* 統一三張預覽卡 icon：淡灰底 + 主色 icon，避免彩虹感 */
+.chart-preview-icon-blue,
+.chart-preview-icon-orange,
 .chart-preview-icon-purple {
-    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
-    color: white;
+    background: rgba(15, 118, 110, 0.10);
+    color: #0F766E;
 }
 
 .chart-preview-title {
@@ -4527,23 +4531,21 @@ body.dark-mode .chart-interaction-hint:hover {
     color: var(--primary);
     font-size: 0.875rem;
     font-weight: 500;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all var(--transition-fast);
+    transition: color var(--transition-fast);
 }
 
-.chart-preview-card:hover .chart-preview-link {
-    gap: 0.75rem;
-}
-
-.chart-preview-link i {
-    font-size: 0.75rem;
+.chart-preview-link::after {
+    content: '→';
+    margin-left: 0.4rem;
+    font-size: 0.95rem;
+    line-height: 1;
     transition: transform var(--transition-fast);
 }
 
-.chart-preview-card:hover .chart-preview-link i {
-    transform: translateX(4px);
+.chart-preview-card:hover .chart-preview-link::after {
+    transform: translateX(3px);
 }
 
 /* 響應式設計 */
@@ -5232,6 +5234,54 @@ body > .search-options-dropdown {
 .insight-trend-badge.trend-none  { background: rgba(148,163,184,0.12); color: var(--trend-none); }
 
 /* === 洞察摘要 === */
+.insights-card {
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius-lg);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.insights-card-header {
+    padding: 1rem 1.25rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-light);
+    gap: 0.75rem;
+}
+
+.insights-card-header h5 {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.insights-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgba(15, 118, 110, 0.10);
+    color: #0F766E;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .insights-card {
+    background: var(--bg-secondary);
+}
+[data-theme="dark"] .insights-card-header {
+    background: var(--bg-secondary);
+}
+[data-theme="dark"] .insights-card-icon {
+    background: rgba(20, 184, 166, 0.18);
+    color: #2DD4BF;
+}
+
 .insights-card .card-body { padding: 1.25rem; }
 
 .insights-grid {
