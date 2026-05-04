@@ -6,65 +6,65 @@
 (function (global) {
     const data = {
     "light": {
-        "primary": "#9CAFAA",
-        "primary-hover": "#7E948E",
-        "primary-light": "#B8C7C2",
-        "primary-dark": "#6B807B",
-        "secondary": "#D6A99D",
-        "secondary-light": "#E5C2B7",
-        "secondary-dark": "#B58C7F",
-        "bg-primary": "#FFFDF5",
-        "bg-secondary": "#FBF3D5",
-        "bg-tertiary": "#D6DAC8",
-        "text-primary": "#2F3A35",
-        "text-secondary": "#4A554F",
-        "text-muted": "#7B847F",
-        "border-color": "#D6DAC8",
-        "border-light": "#E8EBE0",
-        "info": "#9CAFAA",
-        "success": "#6B9080",
-        "warning": "#C9A66B",
-        "danger": "#C57B57",
-        "trend-up": "#6B9080",
-        "trend-down": "#C57B57",
-        "trend-stable": "#9CAFAA",
-        "trend-none": "#B5B0A8",
-        "shadow": "#4A554F"
+        "primary": "#1C4D8D",
+        "primary-hover": "#0F2854",
+        "primary-light": "#4988C4",
+        "primary-dark": "#0F2854",
+        "secondary": "#4988C4",
+        "secondary-light": "#BDE8F5",
+        "secondary-dark": "#1C4D8D",
+        "bg-primary": "#FFFFFF",
+        "bg-secondary": "#F0F8FC",
+        "bg-tertiary": "#BDE8F5",
+        "text-primary": "#0F2854",
+        "text-secondary": "#1C4D8D",
+        "text-muted": "#5A6B82",
+        "border-color": "#BDE8F5",
+        "border-light": "#DDEEF7",
+        "info": "#4988C4",
+        "success": "#2D7A5F",
+        "warning": "#D97706",
+        "danger": "#C84141",
+        "trend-up": "#2D7A5F",
+        "trend-down": "#C84141",
+        "trend-stable": "#4988C4",
+        "trend-none": "#94A3B8",
+        "shadow": "#0F2854"
     },
     "dark": {
-        "primary": "#B8C7C2",
-        "primary-hover": "#9CAFAA",
-        "primary-light": "#D0DBD7",
-        "primary-dark": "#7E948E",
-        "secondary": "#E5C2B7",
-        "secondary-light": "#F0D6CC",
-        "secondary-dark": "#D6A99D",
-        "bg-primary": "#2F3A35",
-        "bg-secondary": "#3A4742",
-        "bg-tertiary": "#4A554F",
-        "text-primary": "#FBF3D5",
-        "text-secondary": "#D6DAC8",
-        "text-muted": "#9CAFAA",
-        "border-color": "#4A554F",
-        "border-light": "#5C6862",
-        "info": "#B8C7C2",
-        "success": "#8FB39E",
-        "warning": "#D6BB87",
-        "danger": "#D69876",
-        "trend-up": "#8FB39E",
-        "trend-down": "#D69876",
-        "trend-stable": "#B8C7C2",
-        "trend-none": "#8A8580",
+        "primary": "#4988C4",
+        "primary-hover": "#6BA0D4",
+        "primary-light": "#BDE8F5",
+        "primary-dark": "#1C4D8D",
+        "secondary": "#BDE8F5",
+        "secondary-light": "#DDEEF7",
+        "secondary-dark": "#4988C4",
+        "bg-primary": "#0F2854",
+        "bg-secondary": "#15355E",
+        "bg-tertiary": "#1C4D8D",
+        "text-primary": "#BDE8F5",
+        "text-secondary": "#DDEEF7",
+        "text-muted": "#7DA3C5",
+        "border-color": "#1C4D8D",
+        "border-light": "#2A5BA0",
+        "info": "#6BA0D4",
+        "success": "#4ADE80",
+        "warning": "#FBBF24",
+        "danger": "#F87171",
+        "trend-up": "#4ADE80",
+        "trend-down": "#F87171",
+        "trend-stable": "#6BA0D4",
+        "trend-none": "#6B7B91",
         "shadow": "#000000"
     },
     "palette": [
-        "#9CAFAA",
-        "#D6A99D",
-        "#D6DAC8",
-        "#FBF3D5",
-        "#7E948E",
-        "#B58C7F",
-        "#4A554F"
+        "#1C4D8D",
+        "#4988C4",
+        "#BDE8F5",
+        "#0F2854",
+        "#7DA3C5",
+        "#5A6B82",
+        "#DDEEF7"
     ],
     "chartBars": [
         "#F5D2D2",
@@ -72,6 +72,23 @@
         "#BDE3C3",
         "#A3CCDA"
     ],
+    "wordcloud": {
+        "$comment": "文字雲色票（依主題分組）。必須與 .wordcloud-container 底色形成可讀對比（建議 ≥4.5:1）。",
+        "light": [
+            "#0F2854",
+            "#1C4D8D",
+            "#3A5478",
+            "#1F3A6B",
+            "#264273"
+        ],
+        "dark": [
+            "#FFFFFF",
+            "#BDE8F5",
+            "#DDEEF7",
+            "#E8F3FA",
+            "#C8E0F0"
+        ]
+    },
     "alphaSteps": [
         5,
         8,
@@ -111,5 +128,11 @@
         return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
     }
 
-    global.DesignTokens = Object.assign({}, data, { current, color, withAlpha });
+    /** 取文字雲色票（依當前主題自動切換）。 */
+    function wordcloudPalette() {
+        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        return data.wordcloud[theme];
+    }
+
+    global.DesignTokens = Object.assign({}, data, { current, color, withAlpha, wordcloudPalette });
 })(window);

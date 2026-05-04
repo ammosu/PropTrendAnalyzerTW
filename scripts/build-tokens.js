@@ -71,6 +71,7 @@ const jsPayload = {
     dark:      themes.dark,
     palette:   tokens.palette.values,
     chartBars: tokens.chartBars.values,
+    wordcloud: tokens.wordcloud,
     alphaSteps
 };
 
@@ -103,7 +104,13 @@ const jsBody = `/* ============================================================
         return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
     }
 
-    global.DesignTokens = Object.assign({}, data, { current, color, withAlpha });
+    /** 取文字雲色票（依當前主題自動切換）。 */
+    function wordcloudPalette() {
+        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        return data.wordcloud[theme];
+    }
+
+    global.DesignTokens = Object.assign({}, data, { current, color, withAlpha, wordcloudPalette });
 })(window);
 `;
 

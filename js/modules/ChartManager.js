@@ -17,6 +17,25 @@ class ChartManager {
         this.stateManager = stateManager;
         this.uiComponents = uiComponents;
         this.utilities = window.Utilities;
+        this._initThemeObserver();
+    }
+
+    /**
+     * 監聽 <html data-theme> 變化，主題切換時重繪可見的文字雲。
+     * （文字雲色票依主題分組，但 canvas 是一次性繪製，需手動重繪。）
+     */
+    _initThemeObserver() {
+        if (!('MutationObserver' in window)) return;
+        this._themeObserver = new MutationObserver(() => {
+            const container = document.getElementById('keywordCloudContainer');
+            if (container && container.style.display !== 'none' && container.offsetParent !== null) {
+                this.renderKeywordCloud();
+            }
+        });
+        this._themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
     }
 
     // 渲染預期趨勢圖表
@@ -1542,8 +1561,9 @@ class ChartManager {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 使用 Constants 定義的專業配色方案（文字雲）
-        const colors = Constants.COLORS.CHART_GRADIENT;
+        // 文字雲色票：依主題自動切換，必須與容器底色保持可讀對比
+        const colors = window.DesignTokens.wordcloudPalette();
+        const highlightColor = window.DesignTokens.color('warning');
 
         const selectedKeyword = this.stateManager.getState('selectedCloudKeyword') || null;
 
@@ -1557,7 +1577,7 @@ class ChartManager {
             },
             fontFamily: '"Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif',
             color: function(word) {
-                if (selectedKeyword && word === selectedKeyword) return '#f59e0b';
+                if (selectedKeyword && word === selectedKeyword) return highlightColor;
                 return colors[Math.floor(Math.random() * colors.length)];
             },
             rotateRatio: 0.3,
