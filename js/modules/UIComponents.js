@@ -1149,7 +1149,8 @@ class UIComponents {
         const recentPct = (recentUpRate * 100).toFixed(1);
         const overallPct = (overallUpRate * 100).toFixed(1);
         const recentCls = recentTrend === '升溫' ? 'trend-up' : 'trend-down';
-        const diffPt = (recentUpRate - overallUpRate) * 100;
+        // 用顯示的兩個取整值相減，讀者自己算得出同一個差距
+        const diffPt = parseFloat(recentPct) - parseFloat(overallPct);
         const diffText = Math.abs(diffPt) < 0.05 ? '與全期持平' : `較全期${diffPt > 0 ? '高' : '低'} ${Math.abs(diffPt).toFixed(1)} 個百分點`;
         const recentRange = recentStart ? `${esc(recentStart)} – ${esc(periodEnd)}` : '近 3 個月';
 
