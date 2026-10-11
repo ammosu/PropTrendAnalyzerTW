@@ -343,13 +343,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                             // 設定文章資料
                             setArticlesData(articlesData);
 
-                            // 確保月份滑桿寬度調整（如果函數存在）
-                            if (typeof adjustSliderWidth === 'function') {
-                                const months = getMonthRange(articlesData);
-                                if (months && months.length > 0) {
-                                    adjustSliderWidth(months.length);
-                                }
-                            }
 
                             updateProgress(90, '計算統計資料...');
 
@@ -1289,13 +1282,6 @@ async function loadSampleData() {
                     // 設定文章資料
                     setArticlesData(articlesData);
 
-                    // 確保月份滑桿寬度調整（如果函數存在）
-                    if (typeof adjustSliderWidth === 'function') {
-                        const months = getMonthRange(articlesData);
-                        if (months && months.length > 0) {
-                            adjustSliderWidth(months.length);
-                        }
-                    }
 
                     updateProgress(95, '計算統計資料...');
 

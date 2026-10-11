@@ -26,7 +26,6 @@ class StateManager {
          * @property {Chart|null} expectedTrendChart - 市場趨勢圖表實例
          * @property {string} currentChartType - 當前圖表類型 ('bar' | 'line')
          * @property {number} chartAnimationDuration - 圖表動畫持續時間（毫秒）
-         * @property {Object|null} savedMonthSliderState - 儲存的月份滑桿狀態
          */
         this.state = {
             articlesData: [],
@@ -38,7 +37,6 @@ class StateManager {
             expectedTrendChart: null,
             currentChartType: constants.STATE.DEFAULT_CHART_TYPE,
             chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
-            savedMonthSliderState: null,
             viewMode: 'card', // 'card' 或 'list'
             darkMode: false, // 深色模式狀態
             selectedCloudKeyword: null
@@ -164,16 +162,6 @@ class StateManager {
     }
 
     /**
-     * 儲存月份滑桿狀態
-     * @param {number} value - 滑桿值（索引）
-     * @param {string} month - 月份字串（如 '2024-01'）
-     * @description 用於在切換圖表時保存與恢復滑桿位置
-     */
-    saveMonthSliderState(value, month) {
-        this.updateState('savedMonthSliderState', { value, month });
-    }
-
-    /**
      * 設定檢視模式
      * @param {string} mode - 檢視模式 ('card' | 'list')
      * @description 切換文章顯示為卡片檢視或列表檢視
@@ -205,7 +193,6 @@ class StateManager {
             expectedTrendChart: null,
             currentChartType: 'bar',
             chartAnimationDuration: 800,
-            savedMonthSliderState: null,
             viewMode: 'card',
             selectedCloudKeyword: null
         };

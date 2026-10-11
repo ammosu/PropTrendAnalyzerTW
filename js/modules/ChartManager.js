@@ -1000,7 +1000,8 @@ class ChartManager {
             });
 
             monthArticles.forEach(article => {
-                article.keywords.forEach(keyword => {
+                // 同一篇只算一次，單位與期間排行一致（提及篇數）
+                new Set(article.keywords).forEach(keyword => {
                     allKeywords.add(keyword);
                     monthKeywordCounts[month][keyword] = (monthKeywordCounts[month][keyword] || 0) + 1;
                 });
@@ -1030,18 +1031,17 @@ class ChartManager {
             return;
         }
 
-        // 使用 Constants 定義的專業配色方案（多月比較）
-        const colorPalette = Constants.COLORS.CHART_GRADIENT.slice(0, 5);
-        const datasets = selectedMonths.map((month, index) => {
-            const backgroundColor = this.hexToRgba(colorPalette[index % colorPalette.length], 0.7);
-            const borderColor = colorPalette[index % colorPalette.length];
+        // 月份有先後順序：用主色由淺到深，越新的月份越深
+        const sortedMonths = [...selectedMonths].sort();
+        const datasets = sortedMonths.map((month, index) => {
+            const alpha = sortedMonths.length === 1 ? 1 : 0.3 + 0.7 * index / (sortedMonths.length - 1);
 
             return {
                 label: this.utilities.formatMonthDisplay(month),
                 data: topKeywords.map(keyword => monthKeywordCounts[month][keyword] || 0),
-                backgroundColor: backgroundColor,
-                borderColor: borderColor,
-                borderWidth: 2
+                backgroundColor: window.DesignTokens.withAlpha('primary', alpha),
+                borderWidth: 0,
+                borderRadius: 2
             };
         });
 
@@ -1064,28 +1064,33 @@ class ChartManager {
                     duration: chartAnimationDuration,
                     easing: 'easeOutQuart'
                 },
+                // 水平長條，與期間排行一致；長詞不必斜排
+                indexAxis: 'y',
                 scales: {
-                    y: {
+                    x: {
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '提及新聞數（篇）',
+                            color: window.DesignTokens.color('text-muted'),
+                            font: { size: 13 }
+                        },
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                            color: window.DesignTokens.withAlpha('shadow', 0.06),
+                            drawBorder: false
                         },
                         ticks: {
-                            font: {
-                                size: 12
-                            }
+                            font: { size: 12 },
+                            color: window.DesignTokens.color('text-muted'),
+                            precision: 0
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
-                        },
+                    y: {
+                        grid: { display: false, drawBorder: false },
                         ticks: {
-                            font: {
-                                size: 12
-                            },
-                            maxRotation: 45,
-                            minRotation: 45
+                            font: { size: 14 },
+                            color: window.DesignTokens.color('text-primary'),
+                            autoSkip: false
                         }
                     }
                 },
@@ -1124,7 +1129,7 @@ class ChartManager {
                                 return context[0].label;
                             },
                             label: function(context) {
-                                return `${context.dataset.label}: ${context.raw} 次`;
+                                return `${context.dataset.label}: ${context.raw} 篇`;
                             }
                         }
                     },
@@ -1136,14 +1141,14 @@ class ChartManager {
                             pinch: {
                                 enabled: true
                             },
-                            mode: 'xy',
+                            mode: 'x',
                         },
                         pan: {
                             enabled: true,
-                            mode: 'xy',
+                            mode: 'x',
                         },
                         limits: {
-                            y: {min: 0, max: 'original'}
+                            x: {min: 0, max: 'original'}
                         }
                     }
                 }

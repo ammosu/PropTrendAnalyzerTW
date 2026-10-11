@@ -125,13 +125,6 @@ class AccessibilityManager {
             uploadStatus.setAttribute('aria-atomic', 'true');
         }
 
-        // 確保選定月份標籤有 aria-live 屬性
-        const selectedMonth = document.getElementById('selected-month');
-        if (selectedMonth && !selectedMonth.hasAttribute('aria-live')) {
-            selectedMonth.setAttribute('aria-live', 'polite');
-            selectedMonth.setAttribute('aria-atomic', 'true');
-        }
-
         // 確保文章容器有 aria-busy 屬性
         const articlesContainer = document.getElementById('articles');
         if (articlesContainer && !articlesContainer.hasAttribute('aria-busy')) {
@@ -294,23 +287,6 @@ class AccessibilityManager {
                 }
             }
         });
-    }
-
-    /**
-     * 更新月份滑動器的 ARIA 屬性
-     * @param {number} value - 當前值
-     * @param {number} min - 最小值
-     * @param {number} max - 最大值
-     * @param {string} monthText - 月份文字
-     */
-    updateMonthSliderAria(value, min, max, monthText) {
-        const slider = document.getElementById('month-slider');
-        if (slider) {
-            slider.setAttribute('aria-valuenow', value.toString());
-            slider.setAttribute('aria-valuemin', min.toString());
-            slider.setAttribute('aria-valuemax', max.toString());
-            slider.setAttribute('aria-valuetext', monthText);
-        }
     }
 
     /**

@@ -47,7 +47,6 @@ class EventHandlers {
         this.initializeNavigationEvents();
         this.initializeChartEvents();
         this.initializeContentToggleEvents();
-        this.initializeSliderEvents();
         this.initializeFileUploadLabel();
         this.initializeTrendModeToggle();
     }
@@ -418,22 +417,6 @@ class EventHandlers {
     }
 
     // 初始化滑桿事件
-    initializeSliderEvents() {
-        const monthSlider = document.getElementById('month-slider');
-        const prevButton = document.getElementById('prev-month');
-        const nextButton = document.getElementById('next-month');
-
-        if (monthSlider) {
-            monthSlider.addEventListener('input', () => this.handleSliderChange());
-        }
-        if (prevButton) {
-            prevButton.addEventListener('click', () => this.handlePrevMonth());
-        }
-        if (nextButton) {
-            nextButton.addEventListener('click', () => this.handleNextMonth());
-        }
-    }
-
     // 篩選文章
     filterArticles() {
         const articlesData = this.stateManager.getState('articlesData');
@@ -951,12 +934,12 @@ class EventHandlers {
             if (expectedTrendContainer.style.display !== 'none') {
                 this.switchChartContainers(expectedTrendContainer, keywordTrendContainer, () => {
                     this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
-                    this.restoreMonthSliderState();
+                    this.uiComponents.hideLoading();
                 });
             } else {
                 this.showChartContainer(keywordTrendContainer);
                 this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
-                this.adjustSliderForKeywordTrend();
+                this.uiComponents.hideLoading();
             }
         }, 300);
     }
@@ -971,7 +954,6 @@ class EventHandlers {
 
         this.uiComponents.showLoading('正在載入市場趨勢分佈...');
 
-        this.saveCurrentMonthSliderState();
 
         setTimeout(() => {
             // 隱藏其他容器
@@ -1002,7 +984,6 @@ class EventHandlers {
 
         this.uiComponents.showLoading('正在載入關鍵詞文字雲...');
 
-        this.saveCurrentMonthSliderState();
 
         setTimeout(() => {
             // 隱藏其他容器
@@ -1089,56 +1070,7 @@ class EventHandlers {
         }
     }
 
-    // 儲存當前月份滑桿狀態
-    saveCurrentMonthSliderState() {
-        const monthSlider = document.getElementById('month-slider');
-        const selectedMonth = document.getElementById('selected-month');
-        
-        if (monthSlider && selectedMonth) {
-            this.stateManager.saveMonthSliderState(monthSlider.value, selectedMonth.textContent);
-        }
-    }
-
-    // 恢復月份滑桿狀態
-    restoreMonthSliderState() {
-        const savedState = this.stateManager.getState('savedMonthSliderState');
-        
-        if (savedState) {
-            const monthSlider = document.getElementById('month-slider');
-            const selectedMonthLabel = document.getElementById('selected-month');
-            
-            if (monthSlider && selectedMonthLabel) {
-                const filteredData = this.stateManager.getState('filteredArticlesData');
-                const articlesData = this.stateManager.getState('articlesData');
-                const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
-                
-                if (months && months.length > 0) {
-                    this.adjustSliderWidth(months.length);
-                    
-                    if (savedState.value <= monthSlider.max) {
-                        monthSlider.value = savedState.value;
-                        selectedMonthLabel.textContent = savedState.month;
-                    }
-                }
-                
-                this.chartManager.renderTrendChart(selectedMonthLabel.textContent);
-            }
-        }
-    }
-
     // 調整關鍵詞趨勢的滑桿
-    adjustSliderForKeywordTrend() {
-        const filteredData = this.stateManager.getState('filteredArticlesData');
-        const articlesData = this.stateManager.getState('articlesData');
-        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
-        
-        if (months && months.length > 0) {
-            this.adjustSliderWidth(months.length);
-        }
-        
-        this.uiComponents.hideLoading();
-    }
-
     // 處理新聞內容切換
     handleNewsToggle() {
         const toggleNewsButton = document.getElementById('toggle-news-button');
@@ -1205,54 +1137,7 @@ class EventHandlers {
         }
     }
 
-    // 處理滑桿變化
-    handleSliderChange() {
-        const monthSlider = document.getElementById('month-slider');
-        const selectedMonthLabel = document.getElementById('selected-month');
-
-        if (!monthSlider || !selectedMonthLabel) return;
-
-        const filteredData = this.stateManager.getState('filteredArticlesData');
-        const articlesData = this.stateManager.getState('articlesData');
-        const months = this.utilities.getMonthRange(filteredData.length > 0 ? filteredData : articlesData);
-
-        if (months && months.length > monthSlider.value) {
-            const monthText = months[monthSlider.value];
-            const formattedMonth = this.utilities.formatMonthDisplay(monthText);
-
-            selectedMonthLabel.textContent = formattedMonth;
-            this.chartManager.renderTrendChart(monthText);
-
-            // 更新月份滑動器的 ARIA 屬性
-            if (this.accessibilityManager) {
-                this.accessibilityManager.updateMonthSliderAria(
-                    parseInt(monthSlider.value),
-                    0,
-                    parseInt(monthSlider.max),
-                    formattedMonth
-                );
-            }
-        }
-    }
-
-    // 處理上一個月
-    handlePrevMonth() {
-        const monthSlider = document.getElementById('month-slider');
-        if (monthSlider && monthSlider.value > 0) {
-            monthSlider.value--;
-            this.handleSliderChange();
-        }
-    }
-
     // 處理下一個月
-    handleNextMonth() {
-        const monthSlider = document.getElementById('month-slider');
-        if (monthSlider && monthSlider.value < monthSlider.max) {
-            monthSlider.value++;
-            this.handleSliderChange();
-        }
-    }
-
     // 初始化月份滑桿
     initializeMonthSlider() {
         const filteredData = this.stateManager.getState('filteredArticlesData');
@@ -1274,28 +1159,6 @@ class EventHandlers {
     }
 
     // 根據月份數量動態調整滑桿寬度
-    adjustSliderWidth(monthCount) {
-        const monthSlider = document.getElementById('month-slider');
-        if (!monthSlider) return;
-
-        let width;
-
-        if (monthCount <= 3) {
-            width = '30%';
-        } else if (monthCount <= 6) {
-            width = '45%';
-        } else if (monthCount <= 12) {
-            width = '60%';
-        } else if (monthCount <= 24) {
-            width = '75%';
-        } else {
-            width = '85%';
-        }
-
-        monthSlider.style.width = width;
-        console.log(`根據 ${monthCount} 個月份調整滑桿寬度為 ${width}`);
-    }
-
     // 初始化趨勢模式切換
     initializeTrendModeToggle() {
         const singleMonthBtn = document.getElementById('single-month-mode');

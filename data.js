@@ -40,12 +40,14 @@ async function loadArticlesData() {
     
     // 如果沒有上傳的資料，嘗試從預設位置載入
     try {
-      // 首先載入元資料以取得可用月份
-      const metadataResponse = await fetch('data/metadata.json');
-      if (metadataResponse.ok) {
-        const metadata = await metadataResponse.json();
+      // 先確認伺服器上有預設資料，避免在 data/ 為空時產生 404
+      const filesResponse = await fetch('/api/data-files');
+      const filesInfo = filesResponse.ok ? await filesResponse.json() : { files: [] };
+      const hasDefaultData = (filesInfo.files || []).some(f => f.name === 'all_articles.json');
+      if (!hasDefaultData) {
+        throw new Error('沒有預設資料');
       }
-      
+
       // 載入所有文章資料
       const response = await fetch('data/all_articles.json');
       if (response.ok) {
@@ -121,13 +123,6 @@ function setArticlesData(data) {
     initializePage();
   }
   
-  // 確保月份滑桿寬度調整（如果函數存在）
-  if (typeof adjustSliderWidth === 'function') {
-    const months = getMonthRange(articlesData);
-    if (months && months.length > 0) {
-      adjustSliderWidth(months.length);
-    }
-  }
   
   console.log(`成功設定 ${articlesData.length} 篇文章`);
   return articlesData.length;
