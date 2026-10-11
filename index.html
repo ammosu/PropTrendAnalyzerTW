@@ -93,28 +93,24 @@
     <a href="#main-content" class="skip-to-main-content sr-only sr-only-focusable">跳到主要內容</a>
 
     <div class="container mt-4">
-        <header role="banner">
-            <!-- 深色模式切換按鈕 -->
-            <div class="dark-mode-toggle-container">
-                <button id="dark-mode-toggle" class="btn btn-sm btn-outline-secondary" aria-label="切換深色模式" title="切換深色模式">
+        <header role="banner" class="page-header">
+            <div class="page-header-text">
+                <h1 id="page-title">房市新聞摘要與趨勢分析</h1>
+                <p class="page-subtitle">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
+            </div>
+            <div class="page-header-actions">
+                <button id="dark-mode-toggle" class="btn btn-sm btn-outline-secondary header-action-btn" aria-label="切換深色模式" title="切換深色模式">
                     <svg class="icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
                     <span class="dark-mode-text">深色模式</span>
                 </button>
+                <button id="upload-fab" class="btn btn-sm btn-primary header-action-btn" aria-label="上傳CSV資料" title="上傳CSV資料">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>
+                    <span>上傳 CSV</span>
+                </button>
             </div>
-            <h1 id="page-title" class="my-4 text-center animate__animated animate__fadeIn">房市新聞摘要與趨勢分析</h1>
-            <p class="text-center text-muted mb-4 animate__animated animate__fadeIn">分析台灣房地產市場新聞，掌握最新趨勢與洞察</p>
         </header>
         
-        <!-- 測試SVG圖片 -->
-        <div class="text-center mb-3" id="svg-test" style="display:none;">
-            <img src="data:image/svg+xml;charset=UTF-8,%3csvg width='200' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='%233498db'/%3e%3ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='white' text-anchor='middle' dy='.3em'%3e測試圖片%3c/text%3e%3c/svg%3e" alt="測試SVG圖片" style="max-width: 200px;">
-            <p><small>SVG 圖片測試</small></p>
-        </div>
         
-        <!-- CSV上傳浮動按鈕 -->
-        <button id="upload-fab" class="upload-fab" aria-label="上傳CSV資料" title="上傳CSV資料">
-            <svg class="icon" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>
-        </button>
 
         <!-- 骨架屏 - 統計卡片 -->
         <section id="stats-skeleton" class="mb-4" style="display: none;">
@@ -161,34 +157,34 @@
         <!-- 資料統計摘要區塊 -->
         <section id="data-summary-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
             <div class="row">
-                <div class="col-md-3 col-sm-6 mb-3">
+                <div class="col-6 col-md-3 mb-3">
                     <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-label">篇文章</div>
+                            <div class="stat-label">新聞篇數</div>
                             <div class="stat-value" id="total-articles-count" data-target="0">0</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-3">
+                <div class="col-6 col-md-3 mb-3">
                     <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-label">資料範圍</div>
+                            <div class="stat-label">資料期間</div>
                             <div class="stat-value small-text" id="date-range-display">-</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-3">
+                <div class="col-6 col-md-3 mb-3">
                     <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-label">個關鍵詞</div>
+                            <div class="stat-label">不重複關鍵詞</div>
                             <div class="stat-value" id="keywords-count" data-target="0">0</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-sm-6 mb-3">
+                <div class="col-6 col-md-3 mb-3">
                     <div class="stat-card">
                         <div class="stat-content">
-                            <div class="stat-label">家媒體</div>
+                            <div class="stat-label">新聞來源</div>
                             <div class="stat-value" id="publishers-count" data-target="0">0</div>
                         </div>
                     </div>
@@ -199,11 +195,9 @@
         <!-- 洞察摘要區塊 -->
         <section id="insights-section" class="mb-4 data-dependent-section" style="display:none;" aria-labelledby="insights-heading">
             <div class="card insights-card">
-                <div class="insights-card-header d-flex align-items-center">
-                    <span class="insights-card-icon" aria-hidden="true">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-lightbulb"></use></svg>
-                    </span>
+                <div class="insights-card-header">
                     <h5 id="insights-heading" class="mb-0">本期洞察</h5>
+                    <span id="insights-period" class="insights-period"></span>
                 </div>
                 <div class="card-body" id="insights-content">
                     <!-- 由 UIComponents.renderInsights() 動態填入 -->
@@ -211,76 +205,6 @@
             </div>
         </section>
 
-        <!-- 圖表預覽卡片區塊 -->
-        <section id="chart-preview-section" class="mb-4 animate__animated animate__fadeIn data-dependent-section" style="display: none;">
-            <h5 class="mb-3">數據總覽</h5>
-            <div class="row">
-                <!-- 關鍵詞趨勢預覽 -->
-                <div class="col-md-4 mb-3">
-                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞趨勢分析詳情">
-                        <div class="chart-preview-header">
-                            <div class="chart-preview-icon chart-preview-icon-blue">
-                                <svg class="icon" aria-hidden="true"><use href="#icon-line-chart"></use></svg>
-                            </div>
-                            <div class="chart-preview-title">
-                                <h6>關鍵詞趨勢</h6>
-                                <p class="chart-preview-subtitle">熱門關鍵詞出現頻率</p>
-                            </div>
-                        </div>
-                        <div class="chart-preview-body">
-                            <canvas id="mini-keyword-chart" width="300" height="150"></canvas>
-                        </div>
-                        <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 市場趨勢預覽 -->
-                <div class="col-md-4 mb-3">
-                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看市場趨勢分佈詳情">
-                        <div class="chart-preview-header">
-                            <div class="chart-preview-icon chart-preview-icon-orange">
-                                <svg class="icon" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>
-                            </div>
-                            <div class="chart-preview-title">
-                                <h6>市場趨勢</h6>
-                                <p class="chart-preview-subtitle">預期走向分佈</p>
-                            </div>
-                        </div>
-                        <div class="chart-preview-body">
-                            <canvas id="mini-trend-chart" width="300" height="150"></canvas>
-                        </div>
-                        <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 關鍵詞雲預覽 -->
-                <div class="col-md-4 mb-3">
-                    <div class="chart-preview-card" role="button" tabindex="0" aria-label="查看關鍵詞文字雲詳情">
-                        <div class="chart-preview-header">
-                            <div class="chart-preview-icon chart-preview-icon-purple">
-                                <svg class="icon" aria-hidden="true"><use href="#icon-cloud"></use></svg>
-                            </div>
-                            <div class="chart-preview-title">
-                                <h6>關鍵詞雲</h6>
-                                <p class="chart-preview-subtitle">詞頻視覺化</p>
-                            </div>
-                        </div>
-                        <div class="chart-preview-body">
-                            <div id="mini-cloud-preview" class="mini-cloud-container"></div>
-                        </div>
-                        <div class="chart-preview-footer">
-                            <span class="chart-preview-link">查看完整分析</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="section-divider data-dependent-section" style="display: none;"></div>
 
         <!-- 圖表切換按鈕 -->
         <section id="chart-toggle-section" class="mb-3 animate__animated animate__fadeIn data-dependent-section" aria-label="圖表類型切換" style="display: none;">
@@ -301,13 +225,14 @@
         <!-- 關鍵詞趨勢分析圖表容器 -->
         <section id="keywordTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-trend-title" style="display: none;">
             <h2 id="keyword-trend-title">關鍵詞趨勢分析</h2>
+            <p id="keyword-trend-period" class="chart-period" aria-live="polite"></p>
 
             <!-- 檢視模式切換 -->
             <div class="text-center mb-3">
                 <div class="btn-group trend-mode-toggle" role="group" aria-label="趨勢檢視模式切換">
-                    <button type="button" id="single-month-mode" class="btn btn-outline-primary active" title="單月檢視">單月檢視</button>
-                    <button type="button" id="multi-month-mode" class="btn btn-outline-primary" title="多月比較">多月比較</button>
-                    <button type="button" id="time-range-mode" class="btn btn-outline-primary" title="時間範圍分析">時間範圍</button>
+                    <button type="button" id="single-month-mode" class="btn btn-outline-primary active" aria-pressed="true" title="選定期間內提及篇數最多的關鍵詞">期間排行</button>
+                    <button type="button" id="multi-month-mode" class="btn btn-outline-primary" aria-pressed="false" title="多月比較">多月比較</button>
+                    <button type="button" id="time-range-mode" class="btn btn-outline-primary" aria-pressed="false" title="時間範圍分析">逐月變化</button>
                 </div>
             </div>
 
@@ -371,14 +296,11 @@
             </div>
 
             <!-- 圖表控制按鈕 -->
-            <div class="text-center mt-3">
+            <div class="chart-footer-row">
+                <span id="trend-chart-description">
+                    <span id="trend-description-text">點擊長條可篩選含該關鍵詞的新聞</span>
+                </span>
                 <button id="reset-chart-zoom" class="btn btn-sm btn-outline-secondary" title="重置圖表縮放">重置縮放</button>
-            </div>
-
-            <div class="text-muted text-center mt-3">
-                <small id="trend-chart-description">
-                    <span id="trend-description-text">此圖表顯示選定月份中出現頻率最高的關鍵詞</span>
-                </small>
             </div>
         </section>
 
@@ -479,6 +401,7 @@
                     </div>
                     <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
                         <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+                        <span class="btn-label">收藏</span>
                         <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
                     </button>
                     <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
@@ -501,14 +424,15 @@
                         </select>
                         <button id="sort-direction-btn" class="btn btn-sm btn-outline-secondary sort-direction-btn" data-direction="desc" title="目前：新到舊" aria-label="切換排序方向">
                             <svg class="icon" aria-hidden="true"><use href="#icon-sort-desc"></use></svg>
+                            <span class="btn-label sort-direction-label">遞減</span>
                         </button>
                     </div>
                     <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#more-filters" aria-expanded="false" aria-controls="more-filters" title="更多篩選選項">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-sliders"></use></svg> 更多
+                        <svg class="icon" aria-hidden="true"><use href="#icon-sliders"></use></svg> 更多篩選
                     </button>
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
+                            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出
                         </button>
                         <div class="dropdown-menu dropdown-menu-right">
                             <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-file-text"></use></svg> 資料格式</h6>
@@ -673,13 +597,18 @@
             </div>
         </section>
 
-        <button id="toggle-news-button" class="btn btn-info mb-4 animate__animated animate__fadeIn data-dependent-section" aria-expanded="false" aria-controls="news-content" aria-label="顯示或隱藏新聞內容" style="display: none;">顯示/隱藏新聞內容</button>
+        <div class="news-toggle-bar data-dependent-section" style="display: none;">
+            <div class="news-toggle-inner">
+                <h2 class="news-toggle-title">新聞列表</h2>
+                <button id="toggle-news-button" class="btn btn-primary" aria-expanded="false" aria-controls="news-content">展開新聞列表</button>
+            </div>
+        </div>
 
         <div id="news-content" class="collapse">
             <main id="main-content" role="main">
                 <!-- 新聞列表標題與檢視模式切換 -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 id="articles-heading" class="mb-0">新聞列表</h2>
+                <div class="d-flex justify-content-end align-items-center mb-3">
+                    <h2 id="articles-heading" class="sr-only">新聞列表</h2>
                     <!-- 檢視模式切換按鈕 -->
                     <div class="btn-group" role="group" aria-label="檢視模式切換">
                         <button id="view-mode-card" class="btn btn-sm btn-outline-primary active" title="卡片檢視" aria-label="切換為卡片檢視">
@@ -781,36 +710,39 @@
                 <rect x="60" y="40" width="80" height="60" rx="8" fill="currentColor" opacity="0.3"/>
                 <path d="M100 70 L100 90 M90 80 L110 80" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
             </svg>
-            <h3>歡迎使用房市趨勢分析工具</h3>
-            <p class="empty-state-description">上傳CSV檔案開始分析台灣房地產市場趨勢</p>
+            <h3>房市新聞趨勢分析</h3>
+            <p class="empty-state-description">上傳已標註走向的房市新聞 CSV，查看新聞反映的市場走向與熱門關鍵詞</p>
 
             <ol class="onboarding-steps">
                 <li>
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <strong>上傳CSV檔案</strong>
-                        <span>包含新聞資料的CSV檔案</span>
+                        <strong>上傳新聞 CSV</strong>
+                        <span>需含 title、date、keywords、summary、預期走向 等欄位，格式見 <a href="sample_data.csv" download="sample_data.csv">範本 CSV</a></span>
                     </div>
                 </li>
                 <li>
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <strong>自動分析</strong>
-                        <span>系統分析關鍵詞與市場趨勢</span>
+                        <strong>自動彙整</strong>
+                        <span>依新聞標註，逐月彙整上漲／下跌／平穩的新聞篇數與關鍵詞</span>
                     </div>
                 </li>
                 <li>
                     <div class="step-number">3</div>
                     <div class="step-content">
-                        <strong>深入洞察</strong>
-                        <span>使用圖表與篩選功能探索數據</span>
+                        <strong>比較與篩選</strong>
+                        <span>比較關鍵詞排行、看走向分布，篩選並匯出新聞摘要</span>
                     </div>
                 </li>
             </ol>
 
-            <button id="empty-state-upload-btn" class="btn btn-primary btn-lg">
-                <svg class="icon me-2" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>上傳CSV檔案
-            </button>
+            <div class="empty-state-actions">
+                <button id="empty-state-upload-btn" class="btn btn-primary btn-lg">
+                    <svg class="icon me-2" aria-hidden="true"><use href="#icon-cloud-upload"></use></svg>上傳 CSV 檔案
+                </button>
+                <button id="empty-state-sample-btn" class="btn btn-outline-primary btn-lg">試用範例資料</button>
+            </div>
         </div>
     </div>
 

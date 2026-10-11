@@ -29,6 +29,7 @@
         "trend-down": "#C84141",
         "trend-stable": "#4988C4",
         "trend-none": "#94A3B8",
+        "trend-unrelated": "#CBD5E1",
         "shadow": "#0F2854"
     },
     "dark": {
@@ -55,6 +56,7 @@
         "trend-down": "#F87171",
         "trend-stable": "#6BA0D4",
         "trend-none": "#6B7B91",
+        "trend-unrelated": "#A9B8CC",
         "shadow": "#000000"
     },
     "palette": [

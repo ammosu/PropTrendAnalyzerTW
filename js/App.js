@@ -155,6 +155,16 @@ class App {
             emptyStateUploadBtn.addEventListener('click', openUploadSidebar);
         }
 
+        // 空狀態「試用範例資料」：打開側欄（看得到進度）並直接載入 sample_data.csv
+        const emptyStateSampleBtn = document.getElementById('empty-state-sample-btn');
+        if (emptyStateSampleBtn) {
+            emptyStateSampleBtn.addEventListener('click', () => {
+                if (!window.csvUploader?.loadSampleData) return;
+                openUploadSidebar();
+                window.csvUploader.loadSampleData();
+            });
+        }
+
         // 關閉按鈕點擊事件
         if (sidebarClose) {
             sidebarClose.addEventListener('click', closeUploadSidebar);

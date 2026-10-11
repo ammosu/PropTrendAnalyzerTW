@@ -562,7 +562,18 @@ class EventHandlers {
     }
 
     // 更新篩選結果數量顯示
+    // 新聞列表開關：寫明下一步動作與目前篩選後的篇數
+    setNewsToggleLabel(expanded) {
+        const toggleButton = document.getElementById('toggle-news-button');
+        if (!toggleButton) return;
+        const filtered = this.stateManager.getState('filteredArticlesData') || [];
+        toggleButton.textContent = expanded ? '收合新聞列表' : `展開新聞列表（${filtered.length.toLocaleString()} 篇）`;
+        toggleButton.setAttribute('aria-expanded', String(expanded));
+    }
+
     updateFilterResultCount(count) {
+        const toggleButton = document.getElementById('toggle-news-button');
+        if (toggleButton) this.setNewsToggleLabel(toggleButton.getAttribute('aria-expanded') === 'true');
         const countElement = document.getElementById('filtered-count');
         if (countElement) {
             countElement.textContent = count;
@@ -761,6 +772,8 @@ class EventHandlers {
                 sortDirectionBtn.title = '降序排列';
             }
         }
+        const label = sortDirectionBtn.querySelector('.sort-direction-label');
+        if (label) label.textContent = newDirection === 'asc' ? '遞增' : '遞減';
     }
 
     /**
@@ -1160,13 +1173,7 @@ class EventHandlers {
             }, 300);
         }, 10);
 
-        // 安全地更新按鈕內容
-        while (toggleButton.firstChild) {
-            toggleButton.removeChild(toggleButton.firstChild);
-        }
-        const icon = window.IconHelper.make('x-circle');
-        toggleButton.appendChild(icon);
-        toggleButton.appendChild(document.createTextNode(' 隱藏新聞內容'));
+        this.setNewsToggleLabel(true);
 
         // 更新 ARIA 屬性
         if (this.accessibilityManager) {
@@ -1190,13 +1197,7 @@ class EventHandlers {
             }, 500);
         }, 10);
 
-        // 安全地更新按鈕內容
-        while (toggleButton.firstChild) {
-            toggleButton.removeChild(toggleButton.firstChild);
-        }
-        const icon = window.IconHelper.make('newspaper');
-        toggleButton.appendChild(icon);
-        toggleButton.appendChild(document.createTextNode(' 顯示新聞內容'));
+        this.setNewsToggleLabel(false);
 
         // 更新 ARIA 屬性
         if (this.accessibilityManager) {
@@ -1268,8 +1269,8 @@ class EventHandlers {
         // 使用雙端滑桿
         this.chartManager.initializeDualRangeSlider(months, formattedLabels);
 
-        // 初始渲染最新月份
-        this.chartManager.renderTrendChart(months[months.length - 1]);
+        // 初始渲染：預設「全部」期間
+        this.chartManager.renderTrendChart(months[0], months[months.length - 1]);
     }
 
     // 根據月份數量動態調整滑桿寬度
@@ -1335,7 +1336,7 @@ class EventHandlers {
 
     // 切換趨勢模式
     switchTrendMode(mode) {
-        const singleMonthControls = document.getElementById('single-month-controls');
+        const singleMonthControls = document.getElementById('keyword-trend-controls');
         const multiMonthControls = document.getElementById('multi-month-controls');
         const timeRangeControls = document.getElementById('time-range-controls');
 
@@ -1353,13 +1354,16 @@ class EventHandlers {
         multiMonthBtn?.classList.remove('active');
         timeRangeBtn?.classList.remove('active');
 
+        [singleMonthBtn, multiMonthBtn, timeRangeBtn].forEach(b => b?.setAttribute('aria-pressed', 'false'));
+        ({ single: singleMonthBtn, multi: multiMonthBtn, range: timeRangeBtn })[mode]?.setAttribute('aria-pressed', 'true');
+
         // 根據模式顯示相應控制區
         switch (mode) {
             case 'single':
                 if (singleMonthControls) singleMonthControls.style.display = 'block';
                 singleMonthBtn?.classList.add('active');
-                // 恢復單月圖表
-                this.handleSliderChange();
+                // 恢復期間排行（目前滑桿範圍）
+                if (this.chartManager.renderCurrentKeywordRange) this.chartManager.renderCurrentKeywordRange();
                 break;
 
             case 'multi':
@@ -1446,7 +1450,7 @@ class EventHandlers {
             // 更新說明文字
             const descriptionText = document.getElementById('trend-description-text');
             if (descriptionText) {
-                descriptionText.textContent = `此圖表顯示選定月份中出現頻率最高的關鍵詞`;
+                descriptionText.textContent = '點擊長條可篩選含該關鍵詞的新聞';
             }
         } else {
             // 多個月份使用比較圖表

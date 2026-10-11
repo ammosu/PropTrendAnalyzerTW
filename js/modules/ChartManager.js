@@ -27,10 +27,15 @@ class ChartManager {
     _initThemeObserver() {
         if (!('MutationObserver' in window)) return;
         this._themeObserver = new MutationObserver(() => {
+            this.applyChartThemeDefaults();
             const container = document.getElementById('keywordCloudContainer');
             if (container && container.style.display !== 'none' && container.offsetParent !== null) {
                 this.renderKeywordCloud();
             }
+            // 長條／趨勢圖的刻度與圖例色也是繪製當下取的，主題切換後重畫
+            if (this.stateManager.getState('expectedTrendChart')) this.renderExpectedTrendChart();
+            const singleMode = document.getElementById('single-month-mode');
+            if (singleMode?.classList.contains('active') && this.renderCurrentKeywordRange) this.renderCurrentKeywordRange();
         });
         this._themeObserver.observe(document.documentElement, {
             attributes: true,
@@ -38,8 +43,16 @@ class ChartManager {
         });
     }
 
+    // Chart.js 未指定顏色的文字（圖例、刻度）跟著主題，深色底才讀得到
+    applyChartThemeDefaults() {
+        if (typeof Chart === 'undefined' || !window.DesignTokens) return;
+        Chart.defaults.color = window.DesignTokens.color('text-secondary');
+        Chart.defaults.borderColor = window.DesignTokens.withAlpha('text-muted', 0.2);
+    }
+
     // 渲染預期趨勢圖表
     renderExpectedTrendChart(chartType = null) {
+        this.applyChartThemeDefaults();
         this.uiComponents.showLoading('正在生成市場趨勢分佈圖表...');
 
         let filteredArticlesData = this.stateManager.getState('filteredArticlesData');
@@ -197,7 +210,7 @@ class ChartManager {
                 endInput.value = e;
             }
             updateFill();
-            this.renderTrendChart(months[e]);
+            this.renderTrendChart(months[s], months[e]);
         };
 
         // 移除舊的事件監聽器（用 cloneNode 取代節點）
@@ -211,6 +224,11 @@ class ChartManager {
 
         startInput.addEventListener('input', onRangeChange);
         endInput.addEventListener('input', onRangeChange);
+
+        // 供「期間排行」模式切回時重繪目前滑桿範圍
+        this.renderCurrentKeywordRange = () => {
+            this.renderTrendChart(months[parseInt(startInput.value)], months[parseInt(endInput.value)]);
+        };
 
         // 快速按鈕：先移除舊的事件監聽器，再重新綁定
         document.querySelectorAll('.quick-range-btn').forEach(btn => {
@@ -235,7 +253,7 @@ class ChartManager {
                 startInput.value = startIdx;
                 endInput.value = endIdx;
                 updateFill();
-                this.renderTrendChart(months[endIdx]);
+                this.renderTrendChart(months[startIdx], months[endIdx]);
             });
         });
     }
@@ -633,7 +651,8 @@ class ChartManager {
     }
 
     // 渲染關鍵詞趨勢圖表（單月模式）
-    renderTrendChart(selectedMonth) {
+    // 期間關鍵詞排行：startMonth..endMonth（YYYY-MM，含頭尾）；只給一個月份即單月
+    renderTrendChart(selectedMonth, endMonth = null) {
         if (!selectedMonth) {
             console.warn('未提供月份參數，無法渲染趨勢圖表');
             return;
@@ -654,14 +673,20 @@ class ChartManager {
 
         const keywordCounts = {};
 
+        const rangeEnd = endMonth || selectedMonth;
         const filteredArticles = filteredArticlesData.filter(article => {
             const articleDate = new Date(article.date);
             const articleYearMonth = `${articleDate.getFullYear()}-${String(articleDate.getMonth() + 1).padStart(2, '0')}`;
-            return articleYearMonth === selectedMonth;
+            return articleYearMonth >= selectedMonth && articleYearMonth <= rangeEnd;
         });
+        const periodLabel = rangeEnd === selectedMonth
+            ? this.utilities.formatMonthDisplay(selectedMonth)
+            : `${this.utilities.formatMonthDisplay(selectedMonth)} – ${this.utilities.formatMonthDisplay(rangeEnd)}`;
+        this.updateKeywordPeriod(`${periodLabel}・${filteredArticles.length.toLocaleString()} 篇新聞・提及篇數前 10 名`);
 
         filteredArticles.forEach(article => {
-            article.keywords.forEach(keyword => {
+            // 同一篇重複的關鍵詞只算一次（單位是「提及篇數」）
+            new Set(article.keywords).forEach(keyword => {
                 if (keywordCounts[keyword]) {
                     keywordCounts[keyword]++;
                 } else {
@@ -705,7 +730,7 @@ class ChartManager {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: `關鍵詞出現次數 (${this.utilities.formatMonthDisplay(selectedMonth)})`,
+                    label: `提及篇數（${periodLabel}）`,
                     data: data,
                     backgroundColor: backgroundColors,
                     borderColor: borderColors,
@@ -726,28 +751,34 @@ class ChartManager {
                     duration: chartAnimationDuration,
                     easing: 'easeOutQuart'
                 },
-                layout: { padding: { top: 24 } },
+                // 水平長條：長詞不必斜排，數值標在條末
+                indexAxis: 'y',
+                layout: { padding: { right: 36 } },
                 scales: {
-                    y: {
+                    x: {
                         beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '提及新聞數（篇；一篇可含多個關鍵詞）',
+                            color: window.DesignTokens.color('text-muted'),
+                            font: { size: 13 }
+                        },
                         grid: {
-                            color: 'rgba(15, 23, 42, 0.06)',
+                            color: window.DesignTokens.withAlpha('shadow', 0.06),
                             drawBorder: false
                         },
                         ticks: {
                             font: { size: 12 },
                             color: window.DesignTokens.color('text-muted'),
-                            precision: 0,
-                            stepSize: 1
+                            precision: 0
                         }
                     },
-                    x: {
+                    y: {
                         grid: { display: false, drawBorder: false },
                         ticks: {
-                            font: { size: 12 },
-                            color: window.DesignTokens.color('text-secondary'),
-                            maxRotation: 45,
-                            minRotation: 45
+                            font: { size: 14 },
+                            color: window.DesignTokens.color('text-primary'),
+                            autoSkip: false
                         }
                     }
                 },
@@ -779,7 +810,7 @@ class ChartManager {
                                 return context[0].label;
                             },
                             label: function(context) {
-                                return `出現次數: ${context.raw} 次`;
+                                return `提及篇數：${context.raw} 篇`;
                             },
                             footer: function(context) {
                                 const totalCounts = context[0].chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -796,14 +827,14 @@ class ChartManager {
                             pinch: {
                                 enabled: true
                             },
-                            mode: 'xy',
+                            mode: 'x',
                         },
                         pan: {
                             enabled: true,
-                            mode: 'xy',
+                            mode: 'x',
                         },
                         limits: {
-                            y: {min: 0, max: 'original'}
+                            x: {min: 0, max: 'original'}
                         }
                     }
                 },
@@ -815,6 +846,12 @@ class ChartManager {
 
         this.stateManager.setTrendChart(chart);
         this.uiComponents.hideLoading();
+    }
+
+    // 關鍵詞排行標題下的期間說明
+    updateKeywordPeriod(text) {
+        const el = document.getElementById('keyword-trend-period');
+        if (el) el.textContent = text;
     }
 
     // 處理關鍵詞圖表點擊事件
@@ -931,6 +968,7 @@ class ChartManager {
 
     // 渲染多月份比較圖表
     renderMultiMonthComparisonChart(selectedMonths) {
+        this.updateKeywordPeriod(`${selectedMonths.map(m => this.utilities.formatMonthDisplay(m)).join('、')}・各月提及篇數比較`);
         if (!selectedMonths || selectedMonths.length === 0) {
             console.warn('未提供月份列表，無法渲染多月比較圖表');
             return;
@@ -1124,6 +1162,7 @@ class ChartManager {
 
     // 渲染時間範圍趨勢圖表
     renderTimeRangeTrendChart(startMonth, endMonth) {
+        this.updateKeywordPeriod(`${this.utilities.formatMonthDisplay(startMonth)} – ${this.utilities.formatMonthDisplay(endMonth)}・熱門關鍵詞逐月變化`);
         if (!startMonth || !endMonth) {
             console.warn('未提供起始或結束月份，無法渲染時間範圍圖表');
             return;
@@ -1745,7 +1784,7 @@ class ChartManager {
                         window.DesignTokens.color('trend-up'),
                         window.DesignTokens.color('trend-down'),
                         window.DesignTokens.color('trend-stable'),
-                        window.DesignTokens.color('secondary'),
+                        window.DesignTokens.color('trend-unrelated'),
                         window.DesignTokens.color('trend-none')
                     ],
                     borderWidth: 0
@@ -1887,13 +1926,15 @@ ChartManager.barValueLabelPlugin = {
         const color = (window.DesignTokens && window.DesignTokens.color('text-primary')) || '#0F172A';
         ctx.save();
         ctx.fillStyle = color;
-        ctx.font = '600 12px "Noto Sans TC", system-ui, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
+        ctx.font = '500 13px "DM Mono", "Noto Sans TC", monospace';
+        const horizontal = chart.options.indexAxis === 'y';
+        ctx.textAlign = horizontal ? 'left' : 'center';
+        ctx.textBaseline = horizontal ? 'middle' : 'bottom';
         meta.data.forEach((bar, i) => {
             const v = values[i];
             if (v == null) return;
-            ctx.fillText(String(v), bar.x, bar.y - 6);
+            if (horizontal) ctx.fillText(String(v), bar.x + 6, bar.y);
+            else ctx.fillText(String(v), bar.x, bar.y - 6);
         });
         ctx.restore();
     }

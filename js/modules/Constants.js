@@ -48,7 +48,7 @@ const Constants = {
                 UP:        t['trend-up']     || '#6B9080',
                 DOWN:      t['trend-down']   || '#C57B57',
                 STABLE:    t['trend-stable'] || '#9CAFAA',
-                UNRELATED: t['secondary']    || '#D6A99D',
+                UNRELATED: t['trend-unrelated'] || '#CBD5E1',
                 UNKNOWN:   t['trend-none']   || '#B5B0A8',
             },
 

@@ -1102,57 +1102,79 @@ class UIComponents {
 
         section.style.display = 'block';
 
-        const { topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate } = insightData;
+        const { topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate,
+            periodStart, periodEnd, recentStart, recentCount } = insightData;
+        const esc = (v) => this.securityUtils.escapeHtml(String(v));
+
+        const periodEl = document.getElementById('insights-period');
+        if (periodEl && periodStart) {
+            periodEl.textContent = `${periodStart} – ${periodEnd}・全部 ${(insightData.total || 0).toLocaleString()} 篇`;
+        }
 
         // Top 5 關鍵詞橫條圖
         const keywordRows = topKeywords.map(({ keyword, count }) => {
             const pct = Math.round((count / maxKeywordCount) * 100);
-            return `<div class="insight-keyword-row mb-2">
-                <div class="d-flex justify-content-between mb-1">
-                    <span class="insight-keyword-label">${this.securityUtils.escapeHtml(keyword)}</span>
-                    <span class="insight-keyword-count text-muted">${count}</span>
-                </div>
-                <div class="insight-bar-bg">
-                    <div class="insight-bar-fill" style="width:${pct}%"></div>
-                </div>
+            return `<div class="insight-keyword-row">
+                <span class="insight-keyword-label">${esc(keyword)}</span>
+                <span class="insight-bar-bg"><span class="insight-bar-fill" style="width:${pct}%"></span></span>
+                <span class="insight-keyword-count">${count}</span>
             </div>`;
         }).join('');
 
-        // 趨勢分佈
+        // 預期走向：五類全列（零值也列），分母為全部篇數
         const total = Object.values(trendCounts).reduce((a, b) => a + b, 0);
-        const trendHtml = [
+        const trendTypes = [
             { key: '上漲', cls: 'trend-up' },
             { key: '下跌', cls: 'trend-down' },
-            { key: '平穩', cls: 'trend-stable' }
-        ].map(({ key, cls }) => {
+            { key: '平穩', cls: 'trend-stable' },
+            { key: '無相關', cls: 'trend-unrelated' },
+            { key: '無法判斷', cls: 'trend-unknown' }
+        ];
+        const share = (count) => (total > 0 ? (count / total) * 100 : 0);
+        const stackHtml = trendTypes
+            .filter(({ key }) => (trendCounts[key] || 0) > 0)
+            .map(({ key, cls }) => `<span class="insight-stack-seg ${cls}" style="width:${share(trendCounts[key]).toFixed(2)}%" title="${key}"></span>`)
+            .join('');
+        const trendRows = trendTypes.map(({ key, cls }) => {
             const count = trendCounts[key] || 0;
-            const pct = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-            return `<span class="insight-trend-badge ${cls}">${key} ${count} 篇 (${pct}%)</span>`;
+            return `<li class="insight-trend-row">
+                <span class="insight-trend-dot ${cls}" aria-hidden="true"></span>
+                <span class="insight-trend-name">${key}</span>
+                <span class="insight-trend-count">${count.toLocaleString()} 篇</span>
+                <span class="insight-trend-pct">${share(count).toFixed(1)}%</span>
+            </li>`;
         }).join('');
-
-        // 高峰月份
-        const peakHtml = peakMonth
-            ? `<span class="insight-peak">資料高峰：${this.securityUtils.escapeHtml(peakMonth.month)}（${peakMonth.count} 篇）</span>`
-            : '';
 
         // 近期方向
         const recentPct = (recentUpRate * 100).toFixed(1);
         const overallPct = (overallUpRate * 100).toFixed(1);
-        const trendIcon = recentTrend === '升溫' ? '↑' : '→';
-        const trendCls = recentTrend === '升溫' ? 'trend-up' : 'trend-stable';
-        const recentHtml = `<span class="insight-recent ${trendCls}">近 3 個月上漲 ${recentPct}%（整體 ${overallPct}%）— 趨勢${recentTrend} ${trendIcon}</span>`;
+        const recentCls = recentTrend === '升溫' ? 'trend-up' : 'trend-down';
+        const diffPt = (recentUpRate - overallUpRate) * 100;
+        const diffText = Math.abs(diffPt) < 0.05 ? '與全期持平' : `較全期${diffPt > 0 ? '高' : '低'} ${Math.abs(diffPt).toFixed(1)} 個百分點`;
+        const recentRange = recentStart ? `${esc(recentStart)} – ${esc(periodEnd)}` : '近 3 個月';
 
         content.innerHTML = `
             <div class="insights-grid">
                 <div class="insight-block">
-                    <div class="insight-block-title"><svg class="icon mr-1" aria-hidden="true"><use href="#icon-flame"></use></svg>Top 5 熱門關鍵詞</div>
+                    <div class="insight-block-title">熱門關鍵詞 Top 5<span class="insight-block-unit">提及次數</span></div>
                     ${keywordRows}
                 </div>
                 <div class="insight-block">
-                    <div class="insight-block-title"><svg class="icon mr-1" aria-hidden="true"><use href="#icon-pie-chart"></use></svg>趨勢走向分佈</div>
-                    <div class="insight-trend-badges">${trendHtml}</div>
-                    <div class="mt-3">${peakHtml}</div>
-                    <div class="mt-2">${recentHtml}</div>
+                    <div class="insight-block-title">新聞標註的預期走向<span class="insight-block-unit">占全部 ${total.toLocaleString()} 篇</span></div>
+                    <div class="insight-stack" role="img" aria-label="預期走向分布比例">${stackHtml}</div>
+                    <ul class="insight-trend-list">${trendRows}</ul>
+                </div>
+                <div class="insight-block insight-block-facts">
+                    <div class="insight-fact">
+                        <div class="insight-fact-label">近 3 個月標註「上漲」的新聞占比</div>
+                        <div class="insight-fact-value ${recentCls}">${recentPct}%</div>
+                        <div class="insight-fact-note"><strong>${diffText}</strong>（全期 ${overallPct}%）<br>${recentRange}・${(recentCount || 0).toLocaleString()} 篇</div>
+                    </div>
+                    ${peakMonth ? `<div class="insight-fact">
+                        <div class="insight-fact-label">新聞量最多的月份</div>
+                        <div class="insight-fact-value">${esc(peakMonth.month)}</div>
+                        <div class="insight-fact-note">${peakMonth.count.toLocaleString()} 篇</div>
+                    </div>` : ''}
                 </div>
             </div>`;
     }

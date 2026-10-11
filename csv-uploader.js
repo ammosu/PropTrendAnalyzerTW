@@ -1469,7 +1469,12 @@ function computeInsightData(articles) {
         : 0;
     const recentTrend = recentUpRate > overallUpRate ? "升溫" : "趨緩";
 
-    return { topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate };
+    return {
+        topKeywords, maxKeywordCount, trendCounts, peakMonth, recentTrend, recentUpRate, overallUpRate,
+        total: articles.length,
+        periodStart: sortedMonths[0], periodEnd: sortedMonths[sortedMonths.length - 1],
+        recentStart: recentMonths[0], recentCount: recentArticles.length
+    };
 }
 
 // 導出函數供其他模塊使用
