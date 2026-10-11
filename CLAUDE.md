@@ -81,3 +81,12 @@ Trend values (預期走向): `上漲`, `下跌`, `平穩`, `無相關`, `無法�
 - Dark mode: Toggle `data-theme="dark"` on `<html>`, override styles with `[data-theme="dark"]` selector
 - Scripts are loaded in dependency order at end of `index.html`
 - Test data available: `test_data.csv` (can be loaded via UI)
+- Colors live only in `design-tokens/tokens.json`; run `npm run build:tokens` to regenerate `css/tokens.css` and `js/modules/Tokens.js` (never edit those by hand). In JS use `window.DesignTokens.color()` / `withAlpha()`
+
+## Intentional UI Decisions (don't revert)
+
+- The filter bar is page-global: charts read `filteredArticlesData`, so it stays above the charts, not inside the news section
+- The 數據總覽 preview cards and the floating upload button were removed; upload lives in the page header (`#upload-fab`)
+- Keyword charts count 提及篇數: a keyword is counted once per article. 期間排行 aggregates the whole selected month range; 期間排行 and 多月比較 use horizontal bars
+- 無相關 has its own `trend-unrelated` token (distinct from 平穩)
+- Insights show no standing summary sentence; numbers shown side by side must add up from their displayed rounded values
