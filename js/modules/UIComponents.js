@@ -972,8 +972,8 @@ class UIComponents {
 
             // 如果正在篩選書籤，重新渲染
             if (this.stateManager && this.stateManager.getState('bookmarkFilterActive')) {
-                if (window.app && window.app.filterArticles) {
-                    window.app.filterArticles();
+                if (window.App && window.App.filterArticles) {
+                    window.App.filterArticles();
                 }
             }
         });
@@ -1157,7 +1157,7 @@ class UIComponents {
         content.innerHTML = `
             <div class="insights-grid">
                 <div class="insight-block">
-                    <div class="insight-block-title">熱門關鍵詞 Top 5<span class="insight-block-unit">提及次數</span></div>
+                    <div class="insight-block-title">熱門關鍵詞 Top 5<span class="insight-block-unit">提及篇數</span></div>
                     ${keywordRows}
                 </div>
                 <div class="insight-block">

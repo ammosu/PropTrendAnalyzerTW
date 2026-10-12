@@ -863,22 +863,23 @@ class ChartManager {
 
         if (!keyword) return;
 
-        // 更新關鍵字篩選輸入框
-        const keywordFilter = document.getElementById('keyword-filter');
-        if (keywordFilter) {
-            keywordFilter.value = keyword;
-            keywordFilter.focus();
+        this.applyKeywordFilter(keyword);
+    }
 
-            // 觸發篩選
-            if (window.app && window.app.eventHandlers) {
-                window.app.eventHandlers.filterArticles();
-            }
+    // 關鍵詞條件：作用於整頁，與其他篩選條件同時生效；再點同一個詞即取消
+    applyKeywordFilter(keyword, { toggle = false } = {}) {
+        const current = this.stateManager.getState('selectedCloudKeyword');
+        const next = toggle && current === keyword ? null : keyword;
+        this.stateManager.updateState('selectedCloudKeyword', next);
 
-            // 顯示提示
-            this.showChartClickToast(`已篩選關鍵詞：${keyword}`);
+        const eventHandlers = window.App && window.App.eventHandlers;
+        if (eventHandlers) eventHandlers.filterArticles();
 
-            // 滾動到新聞列表
-            this.scrollToNewsSection();
+        if (next) {
+            const count = (this.stateManager.getState('filteredArticlesData') || []).length;
+            this.showChartClickToast(`已加入篩選「關鍵詞：${next}」，共 ${count.toLocaleString()} 篇`);
+        } else {
+            this.showChartClickToast('已移除關鍵詞篩選');
         }
     }
 
@@ -950,20 +951,8 @@ class ChartManager {
 
     // 滾動到新聞列表區塊
     scrollToNewsSection() {
-        const newsContent = document.getElementById('news-content');
-
-        // 如果新聞內容是摺疊的，先展開
-        if (newsContent && !newsContent.classList.contains('show') && window.BSCompat) {
-            window.BSCompat.Collapse.show(newsContent);
-        }
-
-        // 滾動到新聞區塊
-        setTimeout(() => {
-            const filterOptions = document.getElementById('filter-options');
-            if (filterOptions) {
-                filterOptions.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 300);
+        const news = document.getElementById('news-section');
+        if (news) news.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // 渲染多月份比較圖表
@@ -1446,89 +1435,6 @@ class ChartManager {
         }, 300);
     }
 
-    switchToKeyword(keyword) {
-        if (!keyword) {
-            // 清除篩選：還原為全部文章
-            if (window.app && window.app.eventHandlers) {
-                window.app.eventHandlers.filterArticles();
-            }
-            this.renderKeywordCloud();
-            return;
-        }
-
-        // 篩選包含此關鍵詞的文章
-        const articlesData = this.stateManager.getState('articlesData') || [];
-        const filtered = articlesData.filter(article =>
-            article.keywords && Array.isArray(article.keywords) && article.keywords.includes(keyword)
-        );
-        this.stateManager.setFilteredArticles(filtered);
-        if (window.app && window.app.eventHandlers) {
-            window.app.eventHandlers.updateFilterResultCount(filtered.length);
-        }
-        if (window.app && window.app.uiComponents) {
-            window.app.uiComponents.renderArticles(1);
-            window.app.uiComponents.renderPagination();
-        }
-
-        // 切換趨勢圖到此關鍵詞的月別時間序列
-        this.renderKeywordTrendForSingleKeyword(keyword);
-
-        // 重新渲染詞雲（加入高亮）
-        this.renderKeywordCloud();
-    }
-
-    renderKeywordTrendForSingleKeyword(keyword) {
-        const articlesData = this.stateManager.getState('articlesData') || [];
-        const chartAnimationDuration = this.stateManager.getState('chartAnimationDuration');
-
-        const monthlyCounts = {};
-        articlesData.forEach(article => {
-            if (article.keywords && article.keywords.includes(keyword)) {
-                const d = new Date(article.date);
-                if (!isNaN(d)) {
-                    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                    monthlyCounts[ym] = (monthlyCounts[ym] || 0) + 1;
-                }
-            }
-        });
-
-        const months = Object.keys(monthlyCounts).sort();
-        const labels = months.map(m => this.utilities.formatMonthDisplay(m));
-        const data = months.map(m => monthlyCounts[m]);
-
-        const existingChart = this.stateManager.getState('trendChart');
-        if (existingChart) existingChart.destroy();
-
-        const ctx = document.getElementById('trend').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: `「${keyword}」出現次數`,
-                    data,
-                    backgroundColor: window.DesignTokens.withAlpha('primary', 0.7),
-                    borderColor: window.DesignTokens.color('primary-hover'),
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: chartAnimationDuration, easing: 'easeOutQuart' },
-                scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0, stepSize: 1 } },
-                    x: { ticks: { maxRotation: 45, minRotation: 45 } }
-                },
-                plugins: {
-                    legend: { display: true },
-                    tooltip: { callbacks: { label: ctx => ` 出現 ${ctx.raw} 次` } }
-                }
-            }
-        });
-        if (this.stateManager.setTrendChart) this.stateManager.setTrendChart(chart);
-    }
-
     // 渲染關鍵詞文字雲
     renderKeywordCloud(topN = 50) {
         this.uiComponents.showLoading('正在生成關鍵詞文字雲...');
@@ -1549,12 +1455,12 @@ class ChartManager {
             }
         }
 
-        // 統計所有關鍵詞出現次數
+        // 統計各關鍵詞的提及篇數（同一篇只算一次）
         const keywordCounts = {};
 
         filteredArticlesData.forEach(article => {
             if (article.keywords && Array.isArray(article.keywords)) {
-                article.keywords.forEach(keyword => {
+                new Set(article.keywords).forEach(keyword => {
                     if (keyword && keyword.trim()) {
                         keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
                     }
@@ -1577,7 +1483,7 @@ class ChartManager {
         const wordCloudData = sortedKeywords.map(([keyword, count]) => [keyword, count]);
 
         // 同步渲染下方 Top 15 排行表格
-        this.renderKeywordRankTable(sortedKeywords);
+        this.renderKeywordRankTable(sortedKeywords, filteredArticlesData.length);
 
         // 檢查是否載入了 WordCloud
         if (typeof WordCloud === 'undefined') {
@@ -1593,6 +1499,18 @@ class ChartManager {
             console.error('找不到文字雲 canvas 元素');
             this.uiComponents.hideLoading();
             return;
+        }
+
+        // canvas 尺寸跟著容器（與 Top 15 並排時欄寬變窄，固定 800×500 會被裁切）
+        const box = canvas.parentElement;
+        if (box && box.clientWidth > 0) {
+            const cs = getComputedStyle(box);
+            const w = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+            const h = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+            if (w > 0 && h > 0) {
+                canvas.width = Math.round(w);
+                canvas.height = Math.round(h);
+            }
         }
 
         // 清空 canvas
@@ -1623,19 +1541,15 @@ class ChartManager {
             backgroundColor: 'transparent',
             minSize: 12,
             drawOutOfBound: false,
-            shrinkToFit: true
+            shrinkToFit: true,
+            // 點詞：加入全頁關鍵詞篩選（wordcloud2 只提供 click 回呼，不會發 DOM 事件）
+            click: (item) => {
+                if (item && item[0]) this.applyKeywordFilter(item[0], { toggle: true });
+            },
+            hover: (item) => {
+                canvas.style.cursor = item ? 'pointer' : '';
+            }
         });
-
-        // 點擊詞雲關鍵詞
-        canvas.removeEventListener('wordclicked', canvas._wordClickHandler);
-        canvas._wordClickHandler = (e) => {
-            const word = e.detail[0];
-            const current = this.stateManager.getState('selectedCloudKeyword');
-            const next = current === word ? null : word;
-            this.stateManager.updateState('selectedCloudKeyword', next);
-            this.switchToKeyword(next);
-        };
-        canvas.addEventListener('wordclicked', canvas._wordClickHandler);
 
         console.log(`文字雲渲染完成，包含 ${wordCloudData.length} 個關鍵詞`);
         this.uiComponents.hideLoading();
@@ -1674,202 +1588,17 @@ class ChartManager {
     }
 
     /**
-     * 渲染迷你關鍵詞趨勢圖
-     */
-    renderMiniKeywordChart() {
-        const canvas = document.getElementById('mini-keyword-chart');
-        if (!canvas) return;
-
-        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
-        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
-
-        // 計算關鍵詞頻率
-        const keywordCounts = {};
-        filteredArticlesData.forEach(article => {
-            if (article.keywords && Array.isArray(article.keywords)) {
-                article.keywords.forEach(keyword => {
-                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-                });
-            }
-        });
-
-        // 取前 5 個關鍵詞
-        const sortedKeywords = Object.entries(keywordCounts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-
-        const labels = sortedKeywords.map(([keyword]) => keyword);
-        const data = sortedKeywords.map(([, count]) => count);
-
-        // 銷毀舊圖表
-        if (this.miniKeywordChart) {
-            this.miniKeywordChart.destroy();
-        }
-
-        // 創建新圖表
-        const ctx = canvas.getContext('2d');
-        this.miniKeywordChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: window.DesignTokens.withAlpha('primary', 0.6),
-                    borderColor: window.DesignTokens.color('primary'),
-                    borderWidth: 2,
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        ticks: { font: { size: 10 } },
-                        grid: { display: false }
-                    },
-                    y: {
-                        display: false,
-                        grid: { display: false }
-                    }
-                },
-                animation: { duration: 500 }
-            }
-        });
-    }
-
-    /**
-     * 渲染迷你市場趨勢圖
-     */
-    renderMiniTrendChart() {
-        const canvas = document.getElementById('mini-trend-chart');
-        if (!canvas) return;
-
-        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
-        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
-
-        // 計算趨勢分佈
-        const trendCounts = {
-            "上漲": 0,
-            "下跌": 0,
-            "平穩": 0,
-            "無相關": 0,
-            "無法判斷": 0
-        };
-
-        filteredArticlesData.forEach(article => {
-            const trend = article.expectedMarketTrend || "無法判斷";
-            if (trendCounts.hasOwnProperty(trend)) {
-                trendCounts[trend]++;
-            }
-        });
-
-        const labels = Object.keys(trendCounts);
-        const data = Object.values(trendCounts);
-
-        // 銷毀舊圖表
-        if (this.miniTrendChart) {
-            this.miniTrendChart.destroy();
-        }
-
-        // 創建新圖表
-        const ctx = canvas.getContext('2d');
-        this.miniTrendChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: [
-                        window.DesignTokens.color('trend-up'),
-                        window.DesignTokens.color('trend-down'),
-                        window.DesignTokens.color('trend-stable'),
-                        window.DesignTokens.color('trend-unrelated'),
-                        window.DesignTokens.color('trend-none')
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false }
-                },
-                animation: { duration: 500 },
-                cutout: '60%'
-            }
-        });
-    }
-
-    /**
-     * 渲染迷你關鍵詞雲
-     */
-    renderMiniKeywordCloud() {
-        const container = document.getElementById('mini-cloud-preview');
-        if (!container) return;
-
-        const filteredArticlesData = this.stateManager.getState('filteredArticlesData');
-        if (!filteredArticlesData || filteredArticlesData.length === 0) return;
-
-        // 計算關鍵詞頻率
-        const keywordCounts = {};
-        filteredArticlesData.forEach(article => {
-            if (article.keywords && Array.isArray(article.keywords)) {
-                article.keywords.forEach(keyword => {
-                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-                });
-            }
-        });
-
-        // 取前 10 個關鍵詞
-        const sortedKeywords = Object.entries(keywordCounts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
-
-        // 清空容器
-        container.innerHTML = '';
-
-        // 渲染文字
-        sortedKeywords.forEach(([keyword], index) => {
-            const span = document.createElement('span');
-            span.className = 'mini-cloud-word';
-            span.textContent = keyword;
-
-            // 根據排名設定字體大小
-            const fontSize = 18 - (index * 1.5);
-            span.style.fontSize = `${fontSize}px`;
-
-            container.appendChild(span);
-        });
-    }
-
-    /**
-     * 渲染所有迷你圖表
-     */
-    renderMiniCharts() {
-        this.renderMiniKeywordChart();
-        this.renderMiniTrendChart();
-        this.renderMiniKeywordCloud();
-    }
-
-    /**
      * 在文字雲下方渲染 Top 15 關鍵詞排行表格（雙呈現提升資訊密度）
      */
-    renderKeywordRankTable(sortedKeywords) {
+    renderKeywordRankTable(sortedKeywords, articleCount) {
         const tbody = document.getElementById('keyword-rank-tbody');
         if (!tbody) return;
 
         const top = sortedKeywords.slice(0, 15);
         if (top.length === 0) { tbody.innerHTML = ''; return; }
 
-        const total = sortedKeywords.reduce((sum, [, c]) => sum + c, 0);
+        // 占比的分母是目前篩選後的新聞篇數（不隨文字雲顯示數量改變）
+        const total = articleCount || 0;
         const max = top[0][1];
         const sanitize = (s) => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -1887,7 +1616,7 @@ class ChartManager {
             `;
         }).join('');
 
-        // 點擊一列即等同點圖中柱子：套關鍵字篩選並滾到新聞
+        // 點擊一列即等同點文字雲：加入全頁關鍵詞篩選，再點一次取消
         if (!tbody._wired) {
             tbody.addEventListener('click', (e) => {
                 const tr = e.target.closest('tr[data-keyword]');
@@ -1907,15 +1636,7 @@ class ChartManager {
 
     _applyKeywordFilterFromTable(keyword) {
         if (!keyword) return;
-        const input = document.getElementById('keyword-filter');
-        if (input) {
-            input.value = keyword;
-            if (window.app && window.app.eventHandlers) {
-                window.app.eventHandlers.filterArticles();
-            }
-            this.showChartClickToast(`已篩選關鍵詞：${keyword}`);
-            this.scrollToNewsSection();
-        }
+        this.applyKeywordFilter(keyword, { toggle: true });
     }
 }
 

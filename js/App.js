@@ -185,77 +185,6 @@ class App {
         console.log('UI 互動已初始化（浮動按鈕、側邊欄）');
     }
 
-    // 初始化圖表預覽卡片點擊事件
-    initializeChartPreviewCards() {
-        const chartPreviewCards = document.querySelectorAll('.chart-preview-card');
-
-        chartPreviewCards.forEach((card, index) => {
-            // 點擊事件
-            card.addEventListener('click', () => {
-                this.navigateToChart(index);
-            });
-
-            // 鍵盤事件（Enter 和 Space）
-            card.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    this.navigateToChart(index);
-                }
-            });
-        });
-
-        console.log('圖表預覽卡片互動已初始化');
-    }
-
-    // 導航到對應的完整圖表
-    navigateToChart(index) {
-        // 顯示對應的圖表容器
-        const chartContainers = [
-            'keywordTrendContainer',
-            'expectedTrendContainer',
-            'keywordCloudContainer'
-        ];
-
-        const targetContainer = document.getElementById(chartContainers[index]);
-        if (!targetContainer) return;
-
-        // 隱藏其他圖表容器
-        chartContainers.forEach((containerId, i) => {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.style.display = (i === index) ? 'block' : 'none';
-            }
-        });
-
-        // 更新圖表切換按鈕狀態
-        const chartToggleButtons = [
-            'showKeywordTrend',
-            'showExpectedTrend',
-            'showKeywordCloud'
-        ];
-
-        chartToggleButtons.forEach((buttonId, i) => {
-            const button = document.getElementById(buttonId);
-            if (button) {
-                if (i === index) {
-                    button.classList.add('active');
-                    button.setAttribute('aria-pressed', 'true');
-                } else {
-                    button.classList.remove('active');
-                    button.setAttribute('aria-pressed', 'false');
-                }
-            }
-        });
-
-        // 同步更新 AccessibilityManager 狀態
-        if (this.accessibilityManager) {
-            this.accessibilityManager.updateChartButtonsAria(chartToggleButtons[index]);
-        }
-
-        // 平滑滾動到圖表區域
-        targetContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
     // 顯示骨架屏
     showSkeletons() {
         const statsSkeleton = document.getElementById('stats-skeleton');
@@ -405,9 +334,6 @@ class App {
         // 初始化篩選器
         this.initializeFilters();
 
-        // 初始化新聞內容切換狀態
-        this.initializeNewsContentState();
-
         // 更新資料統計
         this.updateDataStatistics();
 
@@ -494,6 +420,11 @@ class App {
         console.log('匯出功能事件監聽器已初始化');
     }
 
+    // 初始化匯出按鈕（相容舊方法）
+    initializeExportButtons() {
+        // 已合併到 initializeExportFeatures
+    }
+
     // 初始化書籤篩選功能
     initializeBookmarkFilter() {
         const bookmarkFilterBtn = document.getElementById('bookmark-filter-btn');
@@ -555,32 +486,11 @@ class App {
         }
     }
 
-    // 文章篩選（包含書籤篩選）
+    // 文章篩選（收藏條件已併入 EventHandlers.filterArticles）
     filterArticles() {
         if (this.eventHandlers) {
-            // 獲取基本篩選結果
             this.eventHandlers.filterArticles();
-
-            // 如果書籤篩選開啟，進一步篩選
-            const bookmarkFilterActive = this.stateManager.getState('bookmarkFilterActive');
-            if (bookmarkFilterActive && this.bookmarkManager) {
-                const currentFiltered = this.stateManager.getState('filteredArticlesData');
-                const bookmarkedOnly = this.bookmarkManager.filterBookmarkedArticles(currentFiltered);
-                this.stateManager.setFilteredArticles(bookmarkedOnly);
-
-                // 重新渲染
-                this.uiComponents.renderArticles(1);
-                this.uiComponents.renderPagination();
-
-                // 更新計數
-                this.eventHandlers.updateFilterResultCount(bookmarkedOnly.length);
-            }
         }
-    }
-
-    // 初始化匯出按鈕（相容舊方法）
-    initializeExportButtons() {
-        // 已合併到 initializeExportFeatures
     }
 
     // 處理過濾後文章變化
@@ -650,11 +560,8 @@ class App {
             // 初始化預期趨勢圖表
             this.chartManager.renderExpectedTrendChart();
 
-            // 渲染迷你圖表預覽
-            this.chartManager.renderMiniCharts();
-
-            // 初始化圖表預覽卡片點擊事件
-            this.initializeChartPreviewCards();
+            // 渲染關鍵詞文字雲（三張圖表上下排列，一開始就全部畫好）
+            this.chartManager.renderKeywordCloud();
 
             // 隱藏骨架屏和載入動畫
             this.hideSkeletons();
@@ -706,14 +613,9 @@ class App {
 
         const sections = document.querySelectorAll('.data-dependent-section');
         sections.forEach(section => {
-            // 特殊處理：expectedTrendContainer 和 keywordCloudContainer 預設不顯示（由頁籤切換控制）
-            if (section.id === 'expectedTrendContainer' || section.id === 'keywordCloudContainer') {
-                return; // 保持隱藏狀態
-            }
-            // 使用 block 來顯示區塊元素
             section.style.display = 'block';
         });
-        console.log('已顯示所有資料相關區塊（保持圖表頁籤切換邏輯）');
+        console.log('已顯示所有資料相關區塊');
     }
 
     // 初始化篩選器
@@ -783,15 +685,6 @@ class App {
                 cardViewBtn.classList.add('active');
                 listViewBtn.classList.remove('active');
             }
-        }
-    }
-
-    // 初始化新聞內容切換狀態
-    initializeNewsContentState() {
-        const newsContent = document.getElementById('news-content');
-        if (newsContent) {
-            // 確保頁面初次載入時只顯示分析部分
-            newsContent.classList.add('collapse');
         }
     }
 

@@ -830,11 +830,19 @@ function updateProgress(percent, message) {
 function animateValue(element, start, end, duration) {
     if (!element) return;
 
+    // 篩選會頻繁更新同一張卡：先停掉上一個動畫，否則舊計時器會蓋掉新數字
+    if (element._animTimer) clearInterval(element._animTimer);
+
     const range = end - start;
+    if (range === 0) {
+        // 起訖相同時 increment 為 0，計時器永遠不會結束
+        element.textContent = end;
+        return;
+    }
     const increment = range / (duration / 16); // 60fps
     let current = start;
 
-    const timer = setInterval(() => {
+    const timer = element._animTimer = setInterval(() => {
         current += increment;
         if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
             current = end;
@@ -1404,11 +1412,11 @@ function showSampleDataLoadedToast(count) {
 function computeInsightData(articles) {
     if (!articles || articles.length === 0) return null;
 
-    // Top 5 關鍵詞
+    // Top 5 關鍵詞（提及篇數：同一篇只算一次）
     const keywordCounts = {};
     articles.forEach(article => {
         if (article.keywords && Array.isArray(article.keywords)) {
-            article.keywords.forEach(kw => {
+            new Set(article.keywords).forEach(kw => {
                 if (kw) keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
             });
         }

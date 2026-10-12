@@ -85,7 +85,11 @@ Trend values (預期走向): `上漲`, `下跌`, `平穩`, `無相關`, `無法�
 
 ## Intentional UI Decisions (don't revert)
 
-- The filter bar is page-global: charts read `filteredArticlesData`, so it stays above the charts, not inside the news section
+- The filter bar (`#filter-options`) is page-global and sits right below the header: stat cards, insights, all three charts and the news list follow `filteredArticlesData`. Every filter change goes through `EventHandlers.filterArticles()` → `applyFilterResult()`
+- Clicking a word cloud word, a Top 15 row or a keyword bar adds a 「關鍵詞」 condition (`selectedCloudKeyword`) that ANDs with the other filters and shows as a removable tag. wordcloud2 has no DOM click event — use its `click` option
+- The three charts are stacked (no tabs) with an anchor nav (`#section-nav`); each chart card has its own 「匯出 PNG」. Chart-local month ranges only affect that chart
+- Sort, view mode and news export live in the news section header, not the filter bar. The news list is shown by default (no collapse toggle)
+- On mobile, 更多篩選 opens as a bottom sheet; it filters live (no apply button). `.container` drops `backdrop-filter` on mobile so the fixed sheet anchors to the viewport
 - The 數據總覽 preview cards and the floating upload button were removed; upload lives in the page header (`#upload-fab`)
 - Keyword charts count 提及篇數: a keyword is counted once per article. 期間排行 aggregates the whole selected month range; 期間排行 and 多月比較 use horizontal bars
 - 無相關 has its own `trend-unrelated` token (distinct from 平穩)

@@ -46,7 +46,6 @@ class EventHandlers {
         this.initializeDarkModeToggle();
         this.initializeNavigationEvents();
         this.initializeChartEvents();
-        this.initializeContentToggleEvents();
         this.initializeFileUploadLabel();
         this.initializeTrendModeToggle();
     }
@@ -323,29 +322,17 @@ class EventHandlers {
 
     // 初始化圖表相關事件
     initializeChartEvents() {
-        const showKeywordTrendBtn = document.getElementById('showKeywordTrend');
-        const showExpectedTrendBtn = document.getElementById('showExpectedTrend');
-        const showKeywordCloudBtn = document.getElementById('showKeywordCloud');
         const cloudSizeSlider = document.getElementById('cloud-size-slider');
 
-        if (showKeywordTrendBtn) {
-            showKeywordTrendBtn.addEventListener('click', (e) => this.handleShowKeywordTrend(e));
-        }
-        if (showExpectedTrendBtn) {
-            showExpectedTrendBtn.addEventListener('click', (e) => this.handleShowExpectedTrend(e));
-        }
-        if (showKeywordCloudBtn) {
-            showKeywordCloudBtn.addEventListener('click', (e) => this.handleShowKeywordCloud(e));
-        }
         if (cloudSizeSlider) {
             cloudSizeSlider.addEventListener('input', (e) => this.handleCloudSizeChange(e));
         }
 
-        // 市場趨勢圖表類型切換按鈕
-        const chartTypeBtns = document.querySelectorAll('.chart-type-btn');
-        chartTypeBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => this.handleChartTypeChange(e));
-        });
+        // 市場趨勢圖表呈現方式
+        const chartTypeSelect = document.getElementById('chart-type-select');
+        if (chartTypeSelect) {
+            chartTypeSelect.addEventListener('change', (e) => this.handleChartTypeChange(e));
+        }
 
         // 甜甜圈圖月份滑桿
         this.initDoughnutSliderEvents();
@@ -397,23 +384,10 @@ class EventHandlers {
 
     // 處理圖表類型切換
     handleChartTypeChange(event) {
-        const btn = event.currentTarget;
-        const chartType = btn.dataset.chartType;
-
-        // 更新按鈕狀態
-        document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        const chartType = event.target.value;
 
         // 渲染新的圖表類型
         this.chartManager.renderExpectedTrendChart(chartType);
-    }
-
-    // 初始化內容切換事件
-    initializeContentToggleEvents() {
-        const toggleNewsButton = document.getElementById('toggle-news-button');
-        if (toggleNewsButton) {
-            toggleNewsButton.addEventListener('click', () => this.handleNewsToggle());
-        }
     }
 
     // 初始化滑桿事件
@@ -437,6 +411,8 @@ class EventHandlers {
         const selectedMedia = Array.from(document.querySelectorAll('.media-filter:checked')).map(el => el.value);
         const sortField = sortFieldEl ? sortFieldEl.value : 'date';
         const sortDirection = sortDirectionBtn ? sortDirectionBtn.dataset.direction : 'desc';
+        // 點文字雲／關鍵詞長條加入的關鍵詞條件（與其他條件 AND）
+        const cloudKeyword = this.stateManager.getState('selectedCloudKeyword') || '';
 
         // 驗證日期輸入
         if (startDate && !this.validator.isValidDate(startDate)) {
@@ -462,6 +438,7 @@ class EventHandlers {
             startDate,
             endDate,
             keyword,
+            cloudKeyword,
             selectedMedia: selectedMedia.sort(),
             sortField,
             sortDirection,
@@ -473,23 +450,7 @@ class EventHandlers {
         // 檢查快取
         const cachedResult = this.cache.get(cacheKey);
         if (cachedResult) {
-            console.log('使用快取的篩選結果');
-            this.stateManager.setFilteredArticles(cachedResult);
-            this.stateManager.setCurrentPage(1);
-
-            // 更新篩選結果數量和標籤（即使使用快取也要更新）
-            this.updateFilterResultCount(cachedResult.length);
-            this.updateFilterTags({
-                startDate,
-                endDate,
-                keyword,
-                selectedMedia
-            });
-
-            this.uiComponents.renderArticles(1);
-            this.uiComponents.renderPagination();
-            this.initializeMonthSlider();
-            this.chartManager.renderExpectedTrendChart();
+            this.applyFilterResult(cachedResult, { startDate, endDate, keyword, cloudKeyword, selectedMedia });
             return;
         }
 
@@ -513,8 +474,10 @@ class EventHandlers {
             const matchesKeyword = keyword ?
                 this.searchManager.matchesSearch(article, keyword) : true;
             const matchesMedia = selectedMedia.length === 0 || selectedMedia.includes(article.publisher);
+            const matchesCloudKeyword = !cloudKeyword ||
+                (Array.isArray(article.keywords) && article.keywords.includes(cloudKeyword));
 
-            return matchesDate && matchesKeyword && matchesMedia;
+            return matchesDate && matchesKeyword && matchesMedia && matchesCloudKeyword;
         });
 
         // 應用排序
@@ -523,40 +486,82 @@ class EventHandlers {
         // 存入快取（TTL 設為 5 分鐘）
         this.cache.set(cacheKey, filteredArticles, this.constants.CACHE.FILTER_TTL);
 
-        this.stateManager.setFilteredArticles(filteredArticles);
+        this.applyFilterResult(filteredArticles, { startDate, endDate, keyword, cloudKeyword, selectedMedia });
+    }
+
+    // 套用篩選結果：篩選作用於整頁——統計、洞察、三張圖表與新聞列表一起更新
+    applyFilterResult(articles, filters) {
+        let result = articles;
+
+        // 只看收藏（收藏會變動，不進快取）
+        const bookmarkManager = window.bookmarkManager;
+        if (this.stateManager.getState('bookmarkFilterActive') && bookmarkManager) {
+            result = bookmarkManager.filterBookmarkedArticles(result);
+        }
+
+        this.stateManager.setFilteredArticles(result);
         this.stateManager.setCurrentPage(1);
 
-        // 更新篩選結果數量
-        this.updateFilterResultCount(filteredArticles.length);
-
-        // 更新篩選標籤
-        this.updateFilterTags({
-            startDate,
-            endDate,
-            keyword,
-            selectedMedia
-        });
+        this.updateFilterResultCount(result.length);
+        this.updateFilterTags(filters);
 
         this.uiComponents.renderArticles(1);
         this.uiComponents.renderPagination();
 
+        this.updateSummaryForFilter(result);
+
+        if (result.length === 0) {
+            this.showEmptyCharts('此篩選條件沒有新聞');
+            return;
+        }
+
         this.initializeMonthSlider();
         this.chartManager.renderExpectedTrendChart();
+        const cloudSize = document.getElementById('cloud-size-slider');
+        this.chartManager.renderKeywordCloud(cloudSize ? parseInt(cloudSize.value) : undefined);
     }
 
-    // 更新篩選結果數量顯示
-    // 新聞列表開關：寫明下一步動作與目前篩選後的篇數
-    setNewsToggleLabel(expanded) {
-        const toggleButton = document.getElementById('toggle-news-button');
-        if (!toggleButton) return;
-        const filtered = this.stateManager.getState('filteredArticlesData') || [];
-        toggleButton.textContent = expanded ? '收合新聞列表' : `展開新聞列表（${filtered.length.toLocaleString()} 篇）`;
-        toggleButton.setAttribute('aria-expanded', String(expanded));
+    // 概況卡與洞察跟著篩選結果更新
+    updateSummaryForFilter(articles) {
+        if (articles.length === 0) {
+            ['total-articles-count', 'keywords-count', 'publishers-count'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '0';
+            });
+            const range = document.getElementById('date-range-display');
+            if (range) range.textContent = '–';
+            const content = document.getElementById('insights-content');
+            if (content) content.innerHTML = '<p class="insights-empty">此篩選條件沒有新聞，請調整或清除篩選。</p>';
+            const period = document.getElementById('insights-period');
+            if (period) period.textContent = '';
+            return;
+        }
+        if (window.csvUploader && window.csvUploader.updateDataSummary) {
+            window.csvUploader.updateDataSummary(articles);
+            const insightData = this.stateManager.getState('insightData');
+            if (insightData) this.uiComponents.renderInsights(insightData);
+        }
+    }
+
+    // 篩選結果為空時，三張圖表都改顯示提示，不退回顯示全部資料
+    showEmptyCharts(message) {
+        [['trendChart', 'trend'], ['expectedTrendChart', 'expectedTrendChart']].forEach(([key, canvasId]) => {
+            const chart = this.stateManager.getState(key);
+            if (chart) {
+                chart.destroy();
+                this.stateManager.updateState(key, null);
+            }
+            this.chartManager.showEmptyChart(canvasId, message);
+        });
+        this.chartManager.updateKeywordPeriod(message);
+        if (this.chartManager.showEmptyWordCloud) this.chartManager.showEmptyWordCloud(message);
+        const tbody = document.getElementById('keyword-rank-tbody');
+        if (tbody) tbody.innerHTML = '';
     }
 
     updateFilterResultCount(count) {
-        const toggleButton = document.getElementById('toggle-news-button');
-        if (toggleButton) this.setNewsToggleLabel(toggleButton.getAttribute('aria-expanded') === 'true');
+        const newsCount = document.getElementById('news-count');
+        if (newsCount) newsCount.textContent = count.toLocaleString();
         const countElement = document.getElementById('filtered-count');
         if (countElement) {
             countElement.textContent = count;
@@ -611,6 +616,15 @@ class EventHandlers {
             hasActiveFilters = true;
         }
 
+        // 關鍵詞條件（點文字雲或關鍵詞長條加入）
+        if (filters.cloudKeyword) {
+            this.addFilterTag(tagsContainer, '關鍵詞', filters.cloudKeyword, () => {
+                this.stateManager.updateState('selectedCloudKeyword', null);
+                this.filterArticles();
+            });
+            hasActiveFilters = true;
+        }
+
         // 媒體篩選標籤：如果有篩選（不是全選），顯示摘要標籤
         if (filters.selectedMedia && filters.selectedMedia.length > 0) {
             const allMediaCheckboxes = document.querySelectorAll('.media-filter');
@@ -631,6 +645,10 @@ class EventHandlers {
                 hasActiveFilters = true;
             }
         }
+
+        // 有條件時才顯示標籤列（原本容器一直是 display:none，標籤看不到）
+        const tagsWrap = document.getElementById('active-filters-container');
+        if (tagsWrap) tagsWrap.style.display = hasActiveFilters ? 'flex' : 'none';
 
         // 顯示或隱藏「清除全部」按鈕
         if (clearAllBtn) {
@@ -676,6 +694,9 @@ class EventHandlers {
 
         // 全選所有媒體
         document.querySelectorAll('.media-filter').forEach(cb => cb.checked = true);
+
+        // 清除關鍵詞條件
+        this.stateManager.updateState('selectedCloudKeyword', null);
 
         // 清除快速日期選擇
         this.clearQuickDateSelection();
@@ -915,98 +936,6 @@ class EventHandlers {
         }, 3000);
     }
 
-    // 處理顯示關鍵詞趨勢
-    handleShowKeywordTrend(event) {
-        const keywordTrendContainer = document.getElementById('keywordTrendContainer');
-        const expectedTrendContainer = document.getElementById('expectedTrendContainer');
-        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
-
-        if (!keywordTrendContainer || !expectedTrendContainer) return;
-
-        this.uiComponents.showLoading('正在載入關鍵詞趨勢分析...');
-
-        setTimeout(() => {
-            // 隱藏其他容器
-            if (keywordCloudContainer && keywordCloudContainer.style.display !== 'none') {
-                keywordCloudContainer.style.display = 'none';
-            }
-
-            if (expectedTrendContainer.style.display !== 'none') {
-                this.switchChartContainers(expectedTrendContainer, keywordTrendContainer, () => {
-                    this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
-                    this.uiComponents.hideLoading();
-                });
-            } else {
-                this.showChartContainer(keywordTrendContainer);
-                this.updateChartButtons(event.target, 'showExpectedTrend', 'showKeywordCloud');
-                this.uiComponents.hideLoading();
-            }
-        }, 300);
-    }
-
-    // 處理顯示預期趨勢
-    handleShowExpectedTrend(event) {
-        const keywordTrendContainer = document.getElementById('keywordTrendContainer');
-        const expectedTrendContainer = document.getElementById('expectedTrendContainer');
-        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
-
-        if (!keywordTrendContainer || !expectedTrendContainer) return;
-
-        this.uiComponents.showLoading('正在載入市場趨勢分佈...');
-
-
-        setTimeout(() => {
-            // 隱藏其他容器
-            if (keywordCloudContainer && keywordCloudContainer.style.display !== 'none') {
-                keywordCloudContainer.style.display = 'none';
-            }
-
-            if (keywordTrendContainer.style.display !== 'none') {
-                this.switchChartContainers(keywordTrendContainer, expectedTrendContainer, () => {
-                    this.updateChartButtons(event.target, 'showKeywordTrend', 'showKeywordCloud');
-                    this.chartManager.renderExpectedTrendChart();
-                });
-            } else {
-                this.showChartContainer(expectedTrendContainer);
-                this.updateChartButtons(event.target, 'showKeywordTrend', 'showKeywordCloud');
-                this.chartManager.renderExpectedTrendChart();
-            }
-        }, 300);
-    }
-
-    // 處理顯示關鍵詞文字雲
-    handleShowKeywordCloud(event) {
-        const keywordTrendContainer = document.getElementById('keywordTrendContainer');
-        const expectedTrendContainer = document.getElementById('expectedTrendContainer');
-        const keywordCloudContainer = document.getElementById('keywordCloudContainer');
-
-        if (!keywordCloudContainer) return;
-
-        this.uiComponents.showLoading('正在載入關鍵詞文字雲...');
-
-
-        setTimeout(() => {
-            // 隱藏其他容器
-            if (keywordTrendContainer && keywordTrendContainer.style.display !== 'none') {
-                keywordTrendContainer.style.display = 'none';
-            }
-            if (expectedTrendContainer && expectedTrendContainer.style.display !== 'none') {
-                expectedTrendContainer.style.display = 'none';
-            }
-
-            // 顯示文字雲容器
-            this.showChartContainer(keywordCloudContainer);
-            this.updateChartButtons(event.target, 'showKeywordTrend', 'showExpectedTrend');
-
-            // 取得當前滑桿值
-            const cloudSizeSlider = document.getElementById('cloud-size-slider');
-            const topN = cloudSizeSlider ? parseInt(cloudSizeSlider.value) : 50;
-
-            // 渲染文字雲
-            this.chartManager.renderKeywordCloud(topN);
-        }, 300);
-    }
-
     // 處理文字雲大小變更
     handleCloudSizeChange(event) {
         const value = event.target.value;
@@ -1021,120 +950,6 @@ class EventHandlers {
         this.cloudSizeChangeTimeout = setTimeout(() => {
             this.chartManager.renderKeywordCloud(parseInt(value));
         }, 500);
-    }
-
-    // 切換圖表容器
-    switchChartContainers(hideContainer, showContainer, callback) {
-        hideContainer.classList.add('animate__animated', 'animate__fadeOut');
-        
-        setTimeout(() => {
-            hideContainer.style.display = 'none';
-            hideContainer.classList.remove('animate__animated', 'animate__fadeOut');
-            
-            showContainer.style.display = 'block';
-            showContainer.classList.add('animate__animated', 'animate__fadeIn');
-            
-            this.uiComponents.hideLoading();
-            
-            if (callback) {
-                setTimeout(callback, 100);
-            }
-        }, 300);
-    }
-
-    // 顯示圖表容器
-    showChartContainer(container) {
-        container.style.display = 'block';
-        container.classList.add('animate__animated', 'animate__fadeIn');
-        this.uiComponents.hideLoading();
-    }
-
-    // 更新圖表按鈕狀態
-    updateChartButtons(activeButton, ...inactiveButtonIds) {
-        // 添加活躍狀態
-        activeButton.classList.add('active');
-        activeButton.setAttribute('aria-pressed', 'true');
-
-        // 移除所有不活躍按鈕的活躍狀態
-        inactiveButtonIds.forEach(buttonId => {
-            const inactiveButton = document.getElementById(buttonId);
-            if (inactiveButton) {
-                inactiveButton.classList.remove('active');
-                inactiveButton.setAttribute('aria-pressed', 'false');
-            }
-        });
-
-        // 更新 ARIA 屬性
-        if (this.accessibilityManager) {
-            this.accessibilityManager.updateChartButtonsAria(activeButton.id);
-        }
-    }
-
-    // 調整關鍵詞趨勢的滑桿
-    // 處理新聞內容切換
-    handleNewsToggle() {
-        const toggleNewsButton = document.getElementById('toggle-news-button');
-        const newsContent = document.getElementById('news-content');
-        
-        if (!toggleNewsButton || !newsContent) return;
-        
-        if (newsContent.classList.contains('collapse')) {
-            this.showNewsContent(newsContent, toggleNewsButton);
-        } else {
-            this.hideNewsContent(newsContent, toggleNewsButton);
-        }
-    }
-
-    // 顯示新聞內容
-    showNewsContent(newsContent, toggleButton) {
-        newsContent.classList.remove('collapse');
-        newsContent.style.maxHeight = '0';
-        newsContent.style.overflow = 'hidden';
-        newsContent.style.transition = 'max-height 0.5s ease-in-out';
-
-        setTimeout(() => {
-            newsContent.style.maxHeight = newsContent.scrollHeight + 'px';
-
-            setTimeout(() => {
-                newsContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                setTimeout(() => {
-                    newsContent.style.maxHeight = '';
-                    newsContent.style.overflow = '';
-                }, 500);
-            }, 300);
-        }, 10);
-
-        this.setNewsToggleLabel(true);
-
-        // 更新 ARIA 屬性
-        if (this.accessibilityManager) {
-            this.accessibilityManager.updateNewsToggleAria(true);
-        }
-    }
-
-    // 隱藏新聞內容
-    hideNewsContent(newsContent, toggleButton) {
-        newsContent.style.maxHeight = newsContent.scrollHeight + 'px';
-        newsContent.style.overflow = 'hidden';
-        newsContent.style.transition = 'max-height 0.5s ease-in-out';
-
-        setTimeout(() => {
-            newsContent.style.maxHeight = '0';
-
-            setTimeout(() => {
-                newsContent.classList.add('collapse');
-                newsContent.style.maxHeight = '';
-                newsContent.style.overflow = '';
-            }, 500);
-        }, 10);
-
-        this.setNewsToggleLabel(false);
-
-        // 更新 ARIA 屬性
-        if (this.accessibilityManager) {
-            this.accessibilityManager.updateNewsToggleAria(false);
-        }
     }
 
     // 處理下一個月

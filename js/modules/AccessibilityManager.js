@@ -269,41 +269,6 @@ class AccessibilityManager {
     }
 
     /**
-     * 更新圖表按鈕的 aria-pressed 屬性
-     * @param {string} activeButtonId - 啟用的按鈕 ID
-     */
-    updateChartButtonsAria(activeButtonId) {
-        const buttonIds = ['showKeywordTrend', 'showExpectedTrend', 'showKeywordCloud'];
-
-        buttonIds.forEach(buttonId => {
-            const button = document.getElementById(buttonId);
-            if (button) {
-                const isActive = activeButtonId === buttonId;
-                button.setAttribute('aria-pressed', isActive.toString());
-                if (isActive) {
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('active');
-                }
-            }
-        });
-    }
-
-    /**
-     * 更新新聞內容切換按鈕的 ARIA 屬性
-     * @param {boolean} isExpanded - 是否展開
-     */
-    updateNewsToggleAria(isExpanded) {
-        const toggleButton = document.getElementById('toggle-news-button');
-        if (toggleButton) {
-            toggleButton.setAttribute('aria-expanded', isExpanded.toString());
-
-            const message = isExpanded ? '新聞內容已展開' : '新聞內容已收合';
-            this.announceToScreenReader(message);
-        }
-    }
-
-    /**
      * 確保所有圖示都有 aria-hidden 屬性
      */
     ensureIconsAreHidden() {

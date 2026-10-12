@@ -109,6 +109,169 @@
                 </button>
             </div>
         </header>
+
+        <!-- 全頁篩選：作用於概況、洞察、三張圖表與新聞列表 -->
+        <section id="filter-options" class="filter-panel mb-4 data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
+            <div class="filter-panel-head">
+                <h2 id="filter-heading" class="filter-panel-title">全頁篩選</h2>
+                <span class="filter-panel-note">概況、洞察、圖表與新聞列表同步更新</span>
+                <div id="filter-result-count" class="filter-result-count" aria-live="polite">符合 <span id="filtered-count">0</span> 篇</div>
+            </div>
+            <div class="filter-compact-bar">
+                <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Month" title="最近1個月">1個月</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last3Months" title="最近3個月">3個月</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last6Months" title="最近6個月">6個月</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Year" title="最近1年">1年</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn active" data-range="all" title="全部時間">全部</button>
+                </div>
+                <div class="filter-search">
+                    <div class="search-container">
+                        <div class="input-group input-group-sm">
+                            <input type="text"
+                                   id="keyword-filter"
+                                   class="form-control search-input"
+                                   placeholder="搜尋標題、內文、摘要或關鍵詞..."
+                                   aria-label="搜尋文章"
+                                   autocomplete="off">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary search-clear-btn"
+                                        type="button"
+                                        id="search-clear-btn"
+                                        title="清除搜尋"
+                                        style="display: none;">
+                                    <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>
+                                </button>
+                                <button id="search-options-dropdown-btn"
+                                        class="btn btn-outline-secondary dropdown-toggle search-options-btn"
+                                        type="button"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        title="搜尋選項">
+                                    <svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
+                                    <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-crosshair"></use></svg> 搜尋範圍</h6>
+                                    <div class="px-3 py-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
+                                            <label class="custom-control-label" for="search-scope-title">標題</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-summary" value="summary" checked>
+                                            <label class="custom-control-label" for="search-scope-summary">摘要</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-content" value="fullText" checked>
+                                            <label class="custom-control-label" for="search-scope-content">內文</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-keywords" value="keywords" checked>
+                                            <label class="custom-control-label" for="search-scope-keywords">關鍵詞</label>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg> 搜尋選項</h6>
+                                    <div class="px-3 py-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
+                                            <label class="custom-control-label" for="search-case-sensitive">區分大小寫</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="search-exact-match">
+                                            <label class="custom-control-label" for="search-exact-match">完全符合</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 搜尋建議下拉選單 -->
+                        <div class="search-suggestions" id="search-suggestions" style="display: none;">
+                            <div class="search-suggestions-section" id="search-history-section" style="display: none;">
+                                <div class="search-suggestions-header">
+                                    <span><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg> 最近搜尋</span>
+                                    <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
+                                        <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
+                                    </button>
+                                </div>
+                                <div class="search-suggestions-list" id="search-history-list"></div>
+                            </div>
+                            <div class="search-suggestions-section" id="search-popular-section">
+                                <div class="search-suggestions-header">
+                                    <span><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg> 熱門關鍵詞</span>
+                                </div>
+                                <div class="search-suggestions-list" id="search-popular-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-compact-actions">
+                    <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+                        <span class="btn-label">收藏</span>
+                        <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary more-filters-btn" type="button" data-toggle="collapse" data-target="#more-filters" aria-expanded="false" aria-controls="more-filters" title="日期範圍與新聞來源">
+                        <svg class="icon" aria-hidden="true"><use href="#icon-sliders"></use></svg> 更多篩選
+                    </button>
+                </div>
+            </div>
+
+            <!-- 已選篩選條件標籤 -->
+            <div class="active-filters-container mt-2" id="active-filters-container" style="display: none;">
+                <div id="active-filters-tags" class="d-flex align-items-center gap-2 flex-wrap"></div>
+                <button id="clear-all-filters-btn" class="clear-all-filters-btn" style="display: none;" title="清除所有篩選條件">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-x-circle"></use></svg> 清除全部
+                </button>
+            </div>
+
+            <!-- 展開區：日期範圍與新聞來源（手機為底部面板） -->
+            <div class="collapse" id="more-filters">
+                <div class="more-filters-panel">
+                    <div class="more-filters-sheet-head">
+                        <span class="more-filters-sheet-title">更多篩選</span>
+                        <button type="button" class="btn btn-sm btn-primary" data-toggle="collapse" data-target="#more-filters" aria-controls="more-filters">完成</button>
+                    </div>
+                    <!-- 日期範圍 -->
+                    <div class="filter-group">
+                        <label class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-calendar-days"></use></svg> 日期範圍</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="date" id="start-date" class="form-control form-control-sm" aria-label="起始日期">
+                            <span class="text-muted">~</span>
+                            <input type="date" id="end-date" class="form-control form-control-sm" aria-label="結束日期">
+                        </div>
+                    </div>
+
+                    <!-- 新聞媒體篩選 -->
+                    <div class="filter-group">
+                        <label id="media-filter-label" class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-newspaper"></use></svg> 新聞媒體</label>
+                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="中國時報" checked id="media-filter-chinatimes">
+                                中國時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked id="media-filter-united-daily">
+                                聯合新聞網
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="工商時報" checked id="media-filter-commercial-times">
+                                工商時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="自由時報" checked id="media-filter-liberty-times">
+                                自由時報
+                            </label>
+                            <label class="btn btn-sm btn-outline-primary active m-1">
+                                <input type="checkbox" class="media-filter" value="風傳媒" checked id="media-filter-storm">
+                                風傳媒
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
         
         
 
@@ -206,25 +369,26 @@
         </section>
 
 
-        <!-- 圖表切換按鈕 -->
-        <section id="chart-toggle-section" class="mb-3 animate__animated animate__fadeIn data-dependent-section" aria-label="圖表類型切換" style="display: none;">
-            <div class="chart-toggle-btn-group" role="tablist" aria-label="圖表類型切換">
-                <button id="showKeywordTrend" class="chart-toggle-btn active" role="tab" aria-pressed="true">
-                    <span class="btn-text">關鍵詞趨勢</span>
-                </button>
-                <button id="showExpectedTrend" class="chart-toggle-btn" role="tab" aria-pressed="false">
-                    <span class="btn-text">市場趨勢</span>
-                </button>
-                <button id="showKeywordCloud" class="chart-toggle-btn" role="tab" aria-pressed="false">
-                    <span class="btn-text">關鍵詞雲</span>
-                </button>
+        <!-- 頁內導覽：三張圖表上下排列，用錨點跳轉 -->
+        <nav id="section-nav" class="section-nav mb-3 data-dependent-section" aria-label="頁內導覽" style="display: none;">
+            <div class="section-nav-inner">
+                <a href="#insights-section">洞察</a>
+                <a href="#keywordTrendContainer">關鍵詞趨勢</a>
+                <a href="#expectedTrendContainer">走向分佈</a>
+                <a href="#keywordCloudContainer">文字雲</a>
+                <a href="#news-section">新聞列表</a>
             </div>
-        </section>
+        </nav>
 
 
         <!-- 關鍵詞趨勢分析圖表容器 -->
         <section id="keywordTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-trend-title" style="display: none;">
-            <h2 id="keyword-trend-title">關鍵詞趨勢分析</h2>
+            <div class="chart-card-head">
+                <h2 id="keyword-trend-title">關鍵詞趨勢分析</h2>
+                <button id="export-chart-keyword-btn" class="btn btn-sm btn-outline-secondary chart-export-btn" type="button" title="將這張圖匯出為 PNG">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出 PNG
+                </button>
+            </div>
             <p id="keyword-trend-period" class="chart-period" aria-live="polite"></p>
 
             <!-- 檢視模式切換 -->
@@ -240,6 +404,7 @@
             <!-- 關鍵詞趨勢圖 — 時間範圍控制（雙端滑桿） -->
             <div id="keyword-trend-controls" class="mb-3">
                 <!-- 快速時間按鈕 -->
+                <p class="chart-local-note">月份範圍只調整這張圖，不影響全頁篩選</p>
                 <div class="d-flex flex-wrap mb-2" id="quick-range-buttons">
                     <button class="btn btn-sm btn-outline-primary quick-range-btn mr-1 mb-1" data-range="3">近 3 個月</button>
                     <button class="btn btn-sm btn-outline-primary quick-range-btn mr-1 mb-1" data-range="6">近 6 個月</button>
@@ -292,7 +457,7 @@
             </div>
 
             <div class="chart-container">
-                <canvas id="trend" width="600" height="400" role="img" aria-label="關鍵詞出現次數趨勢圖表"></canvas>
+                <canvas id="trend" width="600" height="400" role="img" aria-label="關鍵詞提及篇數圖表"></canvas>
             </div>
 
             <!-- 圖表控制按鈕 -->
@@ -306,27 +471,23 @@
 
         <!-- 每月預期市場趨勢分佈圖表容器 -->
         <section id="expectedTrendContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="expected-trend-title" style="display: none;">
-            <h2 id="expected-trend-title">每月預期市場趨勢分佈</h2>
+            <div class="chart-card-head">
+                <h2 id="expected-trend-title">每月預期市場趨勢分佈</h2>
+                <button id="export-chart-trend-btn" class="btn btn-sm btn-outline-secondary chart-export-btn" type="button" title="將這張圖匯出為 PNG">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出 PNG
+                </button>
+            </div>
 
             <!-- 圖表類型切換 -->
-            <div class="text-center mb-3">
-                <div class="chart-type-toggle" role="group" aria-label="圖表類型切換">
-                    <button type="button" class="chart-type-btn active" data-chart-type="bar" title="堆疊長條圖">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg> 長條圖
-                    </button>
-                    <button type="button" class="chart-type-btn" data-chart-type="line" title="折線圖">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-line-chart"></use></svg> 折線圖
-                    </button>
-                    <button type="button" class="chart-type-btn" data-chart-type="area" title="堆疊面積圖">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-area-chart"></use></svg> 面積圖
-                    </button>
-                    <button type="button" class="chart-type-btn" data-chart-type="percentage" title="百分比堆疊圖">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-percent"></use></svg> 百分比
-                    </button>
-                    <button type="button" class="chart-type-btn" data-chart-type="doughnut" title="甜甜圈圖">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-loader"></use></svg> 甜甜圈
-                    </button>
-                </div>
+            <div class="chart-toolbar mb-3">
+                <label for="chart-type-select" class="chart-toolbar-label">呈現方式</label>
+                <select id="chart-type-select" class="form-control form-control-sm chart-type-select">
+                    <option value="bar" selected>堆疊長條圖</option>
+                    <option value="line">折線圖</option>
+                    <option value="area">堆疊面積圖</option>
+                    <option value="percentage">百分比堆疊圖</option>
+                    <option value="doughnut">甜甜圈圖</option>
+                </select>
             </div>
 
             <!-- 甜甜圈圖月份滑桿 -->
@@ -358,61 +519,55 @@
 
         <!-- 關鍵詞文字雲視覺化容器 -->
         <section id="keywordCloudContainer" class="animate__animated animate__fadeIn data-dependent-section" role="region" aria-labelledby="keyword-cloud-title" style="display: none;">
-            <h2 id="keyword-cloud-title">關鍵詞文字雲視覺化</h2>
-            <div class="cloud-controls text-center mb-3">
-                <label for="cloud-size-slider" class="form-label">顯示關鍵詞數量：<span id="cloud-size-value">50</span></label>
-                <input type="range" id="cloud-size-slider" class="form-range cloud-slider" min="20" max="100" step="10" value="50" aria-label="選擇顯示的關鍵詞數量">
+            <div class="chart-card-head">
+                <h2 id="keyword-cloud-title">關鍵詞文字雲視覺化</h2>
+                <button id="export-chart-cloud-btn" class="btn btn-sm btn-outline-secondary chart-export-btn" type="button" title="將這張圖匯出為 PNG">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出 PNG
+                </button>
             </div>
-            <div class="wordcloud-container">
-                <canvas id="keywordCloudCanvas" width="800" height="500" role="img" aria-label="關鍵詞文字雲視覺化圖表"></canvas>
-            </div>
-            <div class="text-muted text-center mt-3">
-                <small>此文字雲顯示所有文章中出現頻率最高的關鍵詞，字體大小代表出現次數</small>
-            </div>
-
-            <!-- Top 15 關鍵詞表格（雙呈現，提升資訊密度） -->
-            <div class="keyword-rank-section mt-4">
-                <h3 class="keyword-rank-title">Top 15 關鍵詞</h3>
-                <div class="keyword-rank-tablewrap">
-                    <table class="keyword-rank-table" aria-label="Top 15 關鍵詞表格">
-                        <thead>
-                            <tr>
-                                <th scope="col" class="rank-col">#</th>
-                                <th scope="col">關鍵詞</th>
-                                <th scope="col" class="num-col">出現次數</th>
-                                <th scope="col" class="num-col">佔比</th>
-                                <th scope="col" class="bar-col">分佈</th>
-                            </tr>
-                        </thead>
-                        <tbody id="keyword-rank-tbody"></tbody>
-                    </table>
+            <div class="cloud-layout">
+                <div class="cloud-main">
+                    <div class="cloud-controls text-center mb-3">
+                        <label for="cloud-size-slider" class="form-label">顯示關鍵詞數量：<span id="cloud-size-value">50</span></label>
+                        <input type="range" id="cloud-size-slider" class="form-range cloud-slider" min="20" max="100" step="10" value="50" aria-label="選擇顯示的關鍵詞數量">
+                    </div>
+                    <div class="wordcloud-container">
+                        <canvas id="keywordCloudCanvas" width="800" height="500" role="img" aria-label="關鍵詞文字雲視覺化圖表"></canvas>
+                    </div>
+                    <div class="text-muted text-center mt-3">
+                        <small>字越大代表提及的新聞越多；點選關鍵詞可加入全頁篩選</small>
+                    </div>
+                </div>
+                <!-- Top 15 關鍵詞表格（雙呈現，提升資訊密度） -->
+                <div class="keyword-rank-section mt-4">
+                    <h3 class="keyword-rank-title">Top 15 關鍵詞</h3>
+                    <div class="keyword-rank-tablewrap">
+                        <table class="keyword-rank-table" aria-label="Top 15 關鍵詞表格">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="rank-col">#</th>
+                                    <th scope="col">關鍵詞</th>
+                                    <th scope="col" class="num-col">提及篇數</th>
+                                    <th scope="col" class="num-col">占新聞比</th>
+                                    <th scope="col" class="bar-col">分佈</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyword-rank-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <div class="section-divider data-dependent-section" style="display: none;"></div>
 
-        <section id="filter-options" class="mb-4 animate__animated animate__fadeIn data-dependent-section" role="search" aria-labelledby="filter-heading" style="display: none;">
-            <!-- 預設顯示區：快速選擇 + 排序 + 文章數 -->
-            <div class="filter-compact-bar">
-                <div class="filter-compact-left">
-                    <div id="filter-result-count" class="badge badge-primary p-2" style="font-size: 0.9rem;">
-                        共 <span id="filtered-count">0</span> 篇
-                    </div>
-                    <button id="bookmark-filter-btn" class="btn btn-sm btn-outline-warning bookmark-filter-btn" title="顯示收藏的文章">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
-                        <span class="btn-label">收藏</span>
-                        <span class="bookmark-count-badge" id="bookmark-count-badge" style="display: none;">0</span>
-                    </button>
-                    <div class="quick-date-filters" role="group" aria-label="快速日期篩選">
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Month" title="最近1個月">1個月</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last3Months" title="最近3個月">3個月</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last6Months" title="最近6個月">6個月</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn" data-range="last1Year" title="最近1年">1年</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary quick-date-btn active" data-range="all" title="全部時間">全部</button>
-                    </div>
+        <!-- 新聞列表：排序、檢視模式與匯出只作用於這裡 -->
+        <section id="news-section" class="news-section data-dependent-section" aria-labelledby="articles-heading" style="display: none;">
+            <div class="news-header">
+                <div class="news-header-title">
+                    <h2 id="articles-heading">新聞列表</h2>
+                    <span class="news-count">符合 <span id="news-count">0</span> 篇</span>
                 </div>
-                <div class="filter-compact-right">
+                <div class="news-header-actions">
                     <div class="sort-controls-compact">
                         <select id="sort-field" class="form-control form-control-sm sort-field-select" aria-label="選擇排序欄位">
                             <option value="date" selected>時間</option>
@@ -427,189 +582,6 @@
                             <span class="btn-label sort-direction-label">遞減</span>
                         </button>
                     </div>
-                    <button class="btn btn-sm btn-outline-primary" type="button" data-toggle="collapse" data-target="#more-filters" aria-expanded="false" aria-controls="more-filters" title="更多篩選選項">
-                        <svg class="icon" aria-hidden="true"><use href="#icon-sliders"></use></svg> 更多篩選
-                    </button>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出資料">
-                            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right">
-                            <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-file-text"></use></svg> 資料格式</h6>
-                            <button id="export-csv-btn" class="dropdown-item" type="button">
-                                <svg class="icon text-success" aria-hidden="true"><use href="#icon-file-spreadsheet"></use></svg> CSV 格式
-                            </button>
-                            <button id="export-json-btn" class="dropdown-item" type="button">
-                                <svg class="icon text-info" aria-hidden="true"><use href="#icon-file-code"></use></svg> JSON 格式
-                            </button>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-bar-chart"></use></svg> 圖表</h6>
-                            <button id="export-chart-keyword-btn" class="dropdown-item" type="button">
-                                <svg class="icon text-primary" aria-hidden="true"><use href="#icon-line-chart"></use></svg> 關鍵詞趨勢圖
-                            </button>
-                            <button id="export-chart-trend-btn" class="dropdown-item" type="button">
-                                <svg class="icon text-warning" aria-hidden="true"><use href="#icon-pie-chart"></use></svg> 市場趨勢圖
-                            </button>
-                            <button id="export-chart-cloud-btn" class="dropdown-item" type="button">
-                                <svg class="icon text-secondary" aria-hidden="true"><use href="#icon-cloud"></use></svg> 文字雲圖
-                            </button>
-                            <div class="dropdown-divider"></div>
-                            <button id="export-full-report-btn" class="dropdown-item font-weight-bold" type="button">
-                                <svg class="icon text-danger" aria-hidden="true"><use href="#icon-file-down"></use></svg> 完整報表
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 已選篩選條件標籤 -->
-            <div class="active-filters-container mt-2" id="active-filters-container" style="display: none;">
-                <div id="active-filters-tags" class="d-flex align-items-center gap-2 flex-wrap"></div>
-                <button id="clear-all-filters-btn" class="clear-all-filters-btn" style="display: none;" title="清除所有篩選條件">
-                    <svg class="icon" aria-hidden="true"><use href="#icon-x-circle"></use></svg> 清除全部
-                </button>
-            </div>
-
-            <!-- 展開區：更多篩選選項 -->
-            <div class="collapse mt-3" id="more-filters">
-                <div class="more-filters-panel">
-                    <!-- 日期範圍 -->
-                    <div class="filter-group">
-                        <label class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-calendar-days"></use></svg> 日期範圍</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="date" id="start-date" class="form-control form-control-sm" aria-label="起始日期">
-                            <span class="text-muted">~</span>
-                            <input type="date" id="end-date" class="form-control form-control-sm" aria-label="結束日期">
-                        </div>
-                    </div>
-
-                    <!-- 搜尋 -->
-                    <div class="filter-group">
-                        <label class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-search"></use></svg> 關鍵字搜尋</label>
-                        <div class="search-container">
-                            <div class="input-group input-group-sm">
-                                <input type="text"
-                                       id="keyword-filter"
-                                       class="form-control search-input"
-                                       placeholder="搜尋標題、內文、摘要或關鍵詞..."
-                                       aria-label="搜尋文章"
-                                       autocomplete="off">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary search-clear-btn"
-                                            type="button"
-                                            id="search-clear-btn"
-                                            title="清除搜尋"
-                                            style="display: none;">
-                                        <svg class="icon" aria-hidden="true"><use href="#icon-x"></use></svg>
-                                    </button>
-                                    <button id="search-options-dropdown-btn"
-                                            class="btn btn-outline-secondary dropdown-toggle search-options-btn"
-                                            type="button"
-                                            data-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false"
-                                            title="搜尋選項">
-                                        <svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg>
-                                    </button>
-                                    <div class="dropdown-menu dropdown-menu-right search-options-dropdown">
-                                        <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-crosshair"></use></svg> 搜尋範圍</h6>
-                                        <div class="px-3 py-2">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-title" value="title" checked>
-                                                <label class="custom-control-label" for="search-scope-title">標題</label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-summary" value="summary" checked>
-                                                <label class="custom-control-label" for="search-scope-summary">摘要</label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-content" value="fullText" checked>
-                                                <label class="custom-control-label" for="search-scope-content">內文</label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input search-scope-option" id="search-scope-keywords" value="keywords" checked>
-                                                <label class="custom-control-label" for="search-scope-keywords">關鍵詞</label>
-                                            </div>
-                                        </div>
-                                        <div class="dropdown-divider"></div>
-                                        <h6 class="dropdown-header"><svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg> 搜尋選項</h6>
-                                        <div class="px-3 py-2">
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" id="search-case-sensitive">
-                                                <label class="custom-control-label" for="search-case-sensitive">區分大小寫</label>
-                                            </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" id="search-exact-match">
-                                                <label class="custom-control-label" for="search-exact-match">完全符合</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 搜尋建議下拉選單 -->
-                            <div class="search-suggestions" id="search-suggestions" style="display: none;">
-                                <div class="search-suggestions-section" id="search-history-section" style="display: none;">
-                                    <div class="search-suggestions-header">
-                                        <span><svg class="icon" aria-hidden="true"><use href="#icon-history"></use></svg> 最近搜尋</span>
-                                        <button class="btn btn-sm btn-link search-clear-history" id="search-clear-history" title="清除歷史">
-                                            <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
-                                        </button>
-                                    </div>
-                                    <div class="search-suggestions-list" id="search-history-list"></div>
-                                </div>
-                                <div class="search-suggestions-section" id="search-popular-section">
-                                    <div class="search-suggestions-header">
-                                        <span><svg class="icon" aria-hidden="true"><use href="#icon-flame"></use></svg> 熱門關鍵詞</span>
-                                    </div>
-                                    <div class="search-suggestions-list" id="search-popular-list"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 新聞媒體篩選 -->
-                    <div class="filter-group">
-                        <label id="media-filter-label" class="filter-group-label"><svg class="icon" aria-hidden="true"><use href="#icon-newspaper"></use></svg> 新聞媒體</label>
-                        <div class="btn-group-toggle d-flex flex-wrap" data-toggle="buttons" role="group" aria-labelledby="media-filter-label">
-                            <label class="btn btn-sm btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="中國時報" checked id="media-filter-chinatimes">
-                                中國時報
-                            </label>
-                            <label class="btn btn-sm btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="聯合新聞網" checked id="media-filter-united-daily">
-                                聯合新聞網
-                            </label>
-                            <label class="btn btn-sm btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="工商時報" checked id="media-filter-commercial-times">
-                                工商時報
-                            </label>
-                            <label class="btn btn-sm btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="自由時報" checked id="media-filter-liberty-times">
-                                自由時報
-                            </label>
-                            <label class="btn btn-sm btn-outline-primary active m-1">
-                                <input type="checkbox" class="media-filter" value="風傳媒" checked id="media-filter-storm">
-                                風傳媒
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="news-toggle-bar data-dependent-section" style="display: none;">
-            <div class="news-toggle-inner">
-                <h2 class="news-toggle-title">新聞列表</h2>
-                <button id="toggle-news-button" class="btn btn-primary" aria-expanded="false" aria-controls="news-content">展開新聞列表</button>
-            </div>
-        </div>
-
-        <div id="news-content" class="collapse">
-            <main id="main-content" role="main">
-                <!-- 新聞列表標題與檢視模式切換 -->
-                <div class="d-flex justify-content-end align-items-center mb-3">
-                    <h2 id="articles-heading" class="sr-only">新聞列表</h2>
-                    <!-- 檢視模式切換按鈕 -->
                     <div class="btn-group" role="group" aria-label="檢視模式切換">
                         <button id="view-mode-card" class="btn btn-sm btn-outline-primary active" title="卡片檢視" aria-label="切換為卡片檢視">
                             <svg class="icon" aria-hidden="true"><use href="#icon-grid"></use></svg> 卡片
@@ -618,7 +590,22 @@
                             <svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg> 列表
                         </button>
                     </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="匯出符合條件的新聞">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg> 匯出
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <h6 class="dropdown-header">符合條件的新聞</h6>
+                            <button id="export-csv-btn" class="dropdown-item" type="button">CSV 格式</button>
+                            <button id="export-json-btn" class="dropdown-item" type="button">JSON 格式</button>
+                            <div class="dropdown-divider"></div>
+                            <button id="export-full-report-btn" class="dropdown-item" type="button">完整報表</button>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <main id="main-content" role="main">
                 <div id="articles" class="row" role="feed" aria-labelledby="articles-heading" aria-busy="false"></div>
 
                 <nav aria-label="頁面跳轉" id="pagination-options" class="mb-4 mt-4">
@@ -642,7 +629,7 @@
 
                 <nav class="pagination" id="pagination" aria-label="文章分頁導航"></nav>
             </main>
-        </div>
+        </section>
 
         <footer role="contentinfo" class="mt-5 mb-3 text-center text-muted">
             <p><small>© 2025 房市新聞摘要與趨勢分析 | 資料僅供參考，不構成投資建議</small></p>
