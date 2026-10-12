@@ -39,7 +39,8 @@ class StateManager {
             chartAnimationDuration: constants.STATE.DEFAULT_ANIMATION_DURATION,
             viewMode: 'card', // 'card' 或 'list'
             darkMode: false, // 深色模式狀態
-            selectedCloudKeyword: null
+            selectedCloudKeyword: null,
+            selectedTrend: null
         };
 
         /**
@@ -194,7 +195,8 @@ class StateManager {
             currentChartType: 'bar',
             chartAnimationDuration: 800,
             viewMode: 'card',
-            selectedCloudKeyword: null
+            selectedCloudKeyword: null,
+            selectedTrend: null
         };
         this.notify('reset', this.state, null);
     }

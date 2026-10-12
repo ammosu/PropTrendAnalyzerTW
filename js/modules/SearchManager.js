@@ -33,7 +33,6 @@ class SearchManager {
         this.initializeElements();
         this.loadSearchOptions();
         this.attachEventListeners();
-        this.loadPopularKeywords();
     }
 
     /**
@@ -303,6 +302,7 @@ class SearchManager {
 
             if (!this.currentSearchTerm) {
                 this.renderHistory();
+                this.renderPopularKeywords(this.getPopularKeywords().slice(0, 8));
             }
         }
     }
@@ -320,7 +320,7 @@ class SearchManager {
      * 更新搜尋建議
      */
     updateSuggestions(searchTerm) {
-        // 過濾熱門關鍵詞
+        // 從全部關鍵詞（依提及篇數排序）中找出含輸入字的
         const popularKeywords = this.getPopularKeywords();
         const filteredKeywords = popularKeywords.filter(kw =>
             kw.keyword.toLowerCase().includes(searchTerm.toLowerCase())
@@ -366,40 +366,28 @@ class SearchManager {
     }
 
     /**
-     * 載入熱門關鍵詞
+     * 取得熱門關鍵詞：依提及篇數（同篇只算一次）排序的全部關鍵詞
+     * 資料是上傳後才有的，所以在使用時計算，並依資料陣列快取
      */
-    loadPopularKeywords() {
+    getPopularKeywords() {
         const articlesData = this.stateManager.getState('articlesData');
+        if (!articlesData || articlesData.length === 0) return [];
+        if (this._popularSource === articlesData && this._popularKeywords) return this._popularKeywords;
 
-        if (!articlesData || articlesData.length === 0) {
-            return;
-        }
-
-        // 計算關鍵詞頻率
         const keywordCounts = {};
         articlesData.forEach(article => {
             if (article.keywords && Array.isArray(article.keywords)) {
-                article.keywords.forEach(keyword => {
-                    keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+                new Set(article.keywords).forEach(keyword => {
+                    if (keyword) keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
                 });
             }
         });
 
-        // 排序並取前10個
-        const popularKeywords = Object.entries(keywordCounts)
+        this._popularSource = articlesData;
+        this._popularKeywords = Object.entries(keywordCounts)
             .map(([keyword, count]) => ({ keyword, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 10);
-
-        this.stateManager.setState('popularKeywords', popularKeywords);
-        this.renderPopularKeywords(popularKeywords);
-    }
-
-    /**
-     * 取得熱門關鍵詞
-     */
-    getPopularKeywords() {
-        return this.stateManager.getState('popularKeywords') || [];
+            .sort((a, b) => b.count - a.count);
+        return this._popularKeywords;
     }
 
     /**
@@ -409,7 +397,8 @@ class SearchManager {
         if (!this.searchPopularList) return;
 
         if (keywords.length === 0) {
-            this.searchPopularList.innerHTML = '<div class="px-3 py-2 text-muted" style="font-size: 0.9rem;">無熱門關鍵詞</div>';
+            const message = this.currentSearchTerm ? '沒有符合的關鍵詞' : '尚未載入資料';
+            this.searchPopularList.innerHTML = `<div class="px-3 py-2 text-muted" style="font-size: 0.9rem;">${message}</div>`;
             return;
         }
 

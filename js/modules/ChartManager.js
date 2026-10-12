@@ -412,6 +412,9 @@ class ChartManager {
                 datasets: trendDatasets
             },
             options: {
+                onClick: (event, elements) => {
+                    this.handleTrendChartClick(event, elements, months, formattedLabels);
+                },
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
@@ -490,6 +493,11 @@ class ChartManager {
                 }]
             },
             options: {
+                onClick: (_event, elements) => {
+                    if (!elements || elements.length === 0) return;
+                    const trend = trendTypes[elements[0].index];
+                    this.applyTrendFilter(selectedMonth, trend);
+                },
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
@@ -580,9 +588,9 @@ class ChartManager {
         let description;
         if (chartType === 'doughnut') {
             if (monthLabel) {
-                description = `甜甜圈圖顯示 ${monthLabel} 各趨勢類型的分佈`;
+                description = `甜甜圈圖顯示 ${monthLabel} 各趨勢類型的分佈；點區塊可篩選該月該走向的新聞`;
             } else {
-                description = '甜甜圈圖顯示所選期間內各趨勢類型的整體分佈，拖動滑桿可查看各月份變化';
+                description = '甜甜圈圖顯示所選期間內各趨勢類型的整體分佈，拖動滑桿可查看各月份變化；點區塊可篩選該走向的新聞';
             }
         } else {
             const descriptions = {
@@ -591,63 +599,47 @@ class ChartManager {
                 'area': '堆疊面積圖呈現各趨勢類型的累積變化',
                 'percentage': '百分比圖顯示每月各趨勢類型的佔比分佈'
             };
-            description = descriptions[chartType] || descriptions['bar'];
+            description = (descriptions[chartType] || descriptions['bar']) + '；點圖中區塊可篩選該月該走向的新聞';
         }
 
         descEl.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#icon-info"></use></svg> ${description}`;
     }
 
-    // 處理趨勢圖表點擊事件
-    handleTrendChartClick(_event, elements, months, formattedLabels) {
+    // 處理趨勢圖表點擊事件：點某月某走向的區塊 → 全頁篩選該月份＋該走向
+    handleTrendChartClick(_event, elements, months) {
         if (!elements || elements.length === 0) return;
 
-        const clickedElement = elements[0];
         const chart = this.stateManager.getState('expectedTrendChart');
-
         if (!chart) return;
 
-        const datasetIndex = clickedElement.datasetIndex;
-        const dataIndex = clickedElement.index;
-
-        const trendType = chart.data.datasets[datasetIndex].label;
-        const month = months[dataIndex];
-        const formattedMonth = formattedLabels[dataIndex];
-
-        // 創建並顯示趨勢篩選提示
-        this.showChartClickToast(`已篩選：${formattedMonth} 的「${trendType}」趨勢`);
-
-        // 設定日期範圍篩選（選定月份）
-        this.applyMonthFilter(month);
-
-        // 滾動到新聞列表
-        this.scrollToNewsSection();
+        const { datasetIndex, index } = elements[0];
+        const trend = chart.data.datasets[datasetIndex] && chart.data.datasets[datasetIndex].label;
+        this.applyTrendFilter(months[index], trend);
     }
 
-    // 套用月份篩選
-    applyMonthFilter(month) {
-        if (!month) return;
+    // 套用「月份＋走向」條件：月份寫進日期範圍，走向加成可移除的標籤，都是全頁條件
+    applyTrendFilter(month, trend) {
+        const eventHandlers = window.App && window.App.eventHandlers;
+        if (!eventHandlers || !trend) return;
 
-        // 計算月份的起始和結束日期
-        const [year, monthNum] = month.split('-').map(Number);
-        const startDate = new Date(year, monthNum - 1, 1);
-        const endDate = new Date(year, monthNum, 0); // 該月最後一天
-
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
-
-        // 更新日期篩選輸入框
-        const startDateInput = document.getElementById('start-date');
-        const endDateInput = document.getElementById('end-date');
-
-        if (startDateInput && endDateInput) {
-            startDateInput.value = startDateStr;
-            endDateInput.value = endDateStr;
-
-            // 觸發篩選
-            if (window.app && window.app.eventHandlers) {
-                window.app.eventHandlers.filterArticles();
-            }
+        if (month) {
+            const [year, monthNum] = month.split('-').map(Number);
+            const pad = (n) => String(n).padStart(2, '0');
+            const lastDay = new Date(year, monthNum, 0).getDate();
+            // 不用 toISOString：它會轉成 UTC，台灣時間月初會變成前一天
+            const startDateInput = document.getElementById('start-date');
+            const endDateInput = document.getElementById('end-date');
+            if (startDateInput) startDateInput.value = `${year}-${pad(monthNum)}-01`;
+            if (endDateInput) endDateInput.value = `${year}-${pad(monthNum)}-${pad(lastDay)}`;
+            eventHandlers.clearQuickDateSelection();
         }
+
+        this.stateManager.updateState('selectedTrend', trend);
+        eventHandlers.filterArticles();
+
+        const count = (this.stateManager.getState('filteredArticlesData') || []).length;
+        const monthText = month ? `${this.utilities.formatMonthDisplay(month)}・` : '';
+        this.showChartClickToast(`已篩選「${monthText}${trend}」，共 ${count.toLocaleString()} 篇`);
     }
 
     // 渲染關鍵詞趨勢圖表（單月模式）
@@ -947,12 +939,6 @@ class ChartManager {
                 }
             }, 300);
         }, 2500);
-    }
-
-    // 滾動到新聞列表區塊
-    scrollToNewsSection() {
-        const news = document.getElementById('news-section');
-        if (news) news.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // 渲染多月份比較圖表

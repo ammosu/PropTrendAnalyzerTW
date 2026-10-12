@@ -87,6 +87,7 @@ Trend values (預期走向): `上漲`, `下跌`, `平穩`, `無相關`, `無法�
 
 - The filter bar (`#filter-options`) is page-global and sits right below the header: stat cards, insights, all three charts and the news list follow `filteredArticlesData`. Every filter change goes through `EventHandlers.filterArticles()` → `applyFilterResult()`
 - Clicking a word cloud word, a Top 15 row or a keyword bar adds a 「關鍵詞」 condition (`selectedCloudKeyword`) that ANDs with the other filters and shows as a removable tag. wordcloud2 has no DOM click event — use its `click` option
+- Clicking a segment of the 市場趨勢 chart sets the date range to that month and adds a 「走向」 condition (`selectedTrend`); doughnut slices add the 走向 only (plus the month if one is selected)
 - The three charts are stacked (no tabs) with an anchor nav (`#section-nav`); each chart card has its own 「匯出 PNG」. Chart-local month ranges only affect that chart
 - Sort, view mode and news export live in the news section header, not the filter bar. The news list is shown by default (no collapse toggle)
 - On mobile, 更多篩選 opens as a bottom sheet; it filters live (no apply button). `.container` drops `backdrop-filter` on mobile so the fixed sheet anchors to the viewport

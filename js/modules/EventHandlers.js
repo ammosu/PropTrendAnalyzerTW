@@ -413,6 +413,8 @@ class EventHandlers {
         const sortDirection = sortDirectionBtn ? sortDirectionBtn.dataset.direction : 'desc';
         // 點文字雲／關鍵詞長條加入的關鍵詞條件（與其他條件 AND）
         const cloudKeyword = this.stateManager.getState('selectedCloudKeyword') || '';
+        // 點市場趨勢圖加入的走向條件
+        const trendFilter = this.stateManager.getState('selectedTrend') || '';
 
         // 驗證日期輸入
         if (startDate && !this.validator.isValidDate(startDate)) {
@@ -439,6 +441,7 @@ class EventHandlers {
             endDate,
             keyword,
             cloudKeyword,
+            trendFilter,
             selectedMedia: selectedMedia.sort(),
             sortField,
             sortDirection,
@@ -450,7 +453,7 @@ class EventHandlers {
         // 檢查快取
         const cachedResult = this.cache.get(cacheKey);
         if (cachedResult) {
-            this.applyFilterResult(cachedResult, { startDate, endDate, keyword, cloudKeyword, selectedMedia });
+            this.applyFilterResult(cachedResult, { startDate, endDate, keyword, cloudKeyword, trendFilter, selectedMedia });
             return;
         }
 
@@ -477,7 +480,9 @@ class EventHandlers {
             const matchesCloudKeyword = !cloudKeyword ||
                 (Array.isArray(article.keywords) && article.keywords.includes(cloudKeyword));
 
-            return matchesDate && matchesKeyword && matchesMedia && matchesCloudKeyword;
+            const matchesTrend = !trendFilter || article.expectedMarketTrend === trendFilter;
+
+            return matchesDate && matchesKeyword && matchesMedia && matchesCloudKeyword && matchesTrend;
         });
 
         // 應用排序
@@ -486,7 +491,7 @@ class EventHandlers {
         // 存入快取（TTL 設為 5 分鐘）
         this.cache.set(cacheKey, filteredArticles, this.constants.CACHE.FILTER_TTL);
 
-        this.applyFilterResult(filteredArticles, { startDate, endDate, keyword, cloudKeyword, selectedMedia });
+        this.applyFilterResult(filteredArticles, { startDate, endDate, keyword, cloudKeyword, trendFilter, selectedMedia });
     }
 
     // 套用篩選結果：篩選作用於整頁——統計、洞察、三張圖表與新聞列表一起更新
@@ -625,6 +630,15 @@ class EventHandlers {
             hasActiveFilters = true;
         }
 
+        // 走向條件（點市場趨勢圖加入）
+        if (filters.trendFilter) {
+            this.addFilterTag(tagsContainer, '走向', filters.trendFilter, () => {
+                this.stateManager.updateState('selectedTrend', null);
+                this.filterArticles();
+            });
+            hasActiveFilters = true;
+        }
+
         // 媒體篩選標籤：如果有篩選（不是全選），顯示摘要標籤
         if (filters.selectedMedia && filters.selectedMedia.length > 0) {
             const allMediaCheckboxes = document.querySelectorAll('.media-filter');
@@ -695,8 +709,9 @@ class EventHandlers {
         // 全選所有媒體
         document.querySelectorAll('.media-filter').forEach(cb => cb.checked = true);
 
-        // 清除關鍵詞條件
+        // 清除關鍵詞與走向條件
         this.stateManager.updateState('selectedCloudKeyword', null);
+        this.stateManager.updateState('selectedTrend', null);
 
         // 清除快速日期選擇
         this.clearQuickDateSelection();
