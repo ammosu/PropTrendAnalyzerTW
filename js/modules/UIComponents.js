@@ -1108,7 +1108,7 @@ class UIComponents {
 
         const periodEl = document.getElementById('insights-period');
         if (periodEl && periodStart) {
-            periodEl.textContent = `${periodStart} – ${periodEnd}・全部 ${(insightData.total || 0).toLocaleString()} 篇`;
+            periodEl.textContent = `${periodStart} – ${periodEnd}・${(insightData.total || 0).toLocaleString()} 篇`;
         }
 
         // Top 5 關鍵詞橫條圖
@@ -1121,7 +1121,7 @@ class UIComponents {
             </div>`;
         }).join('');
 
-        // 預期走向：五類全列（零值也列），分母為全部篇數
+        // 預期走向：五類全列（零值也列），分母為目前篩選後的全部篇數
         const total = Object.values(trendCounts).reduce((a, b) => a + b, 0);
         const trendTypes = [
             { key: '上漲', cls: 'trend-up' },
@@ -1161,7 +1161,7 @@ class UIComponents {
                     ${keywordRows}
                 </div>
                 <div class="insight-block">
-                    <div class="insight-block-title">新聞標註的預期走向<span class="insight-block-unit">占全部 ${total.toLocaleString()} 篇</span></div>
+                    <div class="insight-block-title">新聞標註的預期走向<span class="insight-block-unit">占 ${total.toLocaleString()} 篇</span></div>
                     <div class="insight-stack" role="img" aria-label="預期走向分布比例">${stackHtml}</div>
                     <ul class="insight-trend-list">${trendRows}</ul>
                 </div>

@@ -5328,6 +5328,6 @@ body > .search-options-dropdown {
     .news-header-actions { width: 100%; }
     .news-header-actions .sort-controls-compact { flex: 1 1 100%; gap: 0.375rem; }
     .news-header-actions .sort-controls-compact .sort-field-select { flex: 1 1 0 !important; width: auto !important; min-width: 0 !important; max-width: none !important; }
-    .news-header-actions > .btn-group { flex: 1; }
+    .news-header-actions > .btn-group { flex: 1; flex-direction: row; }
     .news-header-actions > .btn-group > .btn { flex: 1; }
 }
