@@ -40,11 +40,11 @@ async function loadArticlesData() {
     
     // 如果沒有上傳的資料，嘗試從預設位置載入
     try {
-      // 先確認伺服器上有預設資料，避免在 data/ 為空時產生 404
-      const filesResponse = await fetch('/api/data-files');
-      const filesInfo = filesResponse.ok ? await filesResponse.json() : { files: [] };
-      const hasDefaultData = (filesInfo.files || []).some(f => f.name === 'all_articles.json');
-      if (!hasDefaultData) {
+      // 先讀靜態的 metadata.json 確認有預設資料，避免在 data/ 為空時產生 404
+      // （不依賴伺服器 API，GitHub Pages 等純靜態主機也能用）
+      const metaResponse = await fetch('data/metadata.json');
+      const metadata = metaResponse.ok ? await metaResponse.json() : {};
+      if (!(metadata.totalArticles > 0)) {
         throw new Error('沒有預設資料');
       }
 

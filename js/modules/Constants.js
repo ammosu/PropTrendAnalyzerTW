@@ -88,7 +88,7 @@ const Constants = {
 
     // API 端點 (預留給未來使用)
     API: {
-        DATA_FILES: '/api/data-files',
+        DATA_METADATA: 'data/metadata.json',
     },
 
     // 狀態管理初始值

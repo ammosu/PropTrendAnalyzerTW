@@ -3,7 +3,6 @@
 // Import required modules
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 
 // Create Express app
 const app = express();
@@ -49,29 +48,6 @@ app.use(express.static(__dirname));
 // Route for the home page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Optional: API endpoint to get available data files
-app.get('/api/data-files', (req, res) => {
-  const dataDir = path.join(__dirname, 'data');
-  
-  try {
-    if (fs.existsSync(dataDir)) {
-      const files = fs.readdirSync(dataDir)
-        .filter(file => file.endsWith('.json'))
-        .map(file => ({
-          name: file,
-          path: `/data/${file}`
-        }));
-      
-      res.json({ success: true, files });
-    } else {
-      res.json({ success: false, message: 'Data directory not found', files: [] });
-    }
-  } catch (error) {
-    console.error('Error reading data directory:', error);
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
-  }
 });
 
 // Start the server
