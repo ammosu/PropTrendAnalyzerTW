@@ -346,6 +346,8 @@ class UIComponents {
         if (trend === '上漲') return 'trend-up';
         if (trend === '下跌') return 'trend-down';
         if (trend === '平穩') return 'trend-stable';
+        if (trend === '無相關') return 'trend-unrelated';
+        if (trend === '無法判斷') return 'trend-none';
         return '';
     }
 
@@ -526,7 +528,7 @@ class UIComponents {
             type: 'button',
             class: 'close',
             'data-dismiss': 'modal',
-            'aria-label': 'Close'
+            'aria-label': '關閉文章詳情'
         });
         const closeSpan = this.securityUtils.createSafeElement('span', { 'aria-hidden': 'true' }, '×');
         closeButton.appendChild(closeSpan);
@@ -537,6 +539,14 @@ class UIComponents {
         // Modal Body
         const modalBody = this.securityUtils.createSafeElement('div', { class: 'modal-body' });
         
+        if (article.summary) {
+            const summarySection = this.securityUtils.createSafeElement('section', { class: 'article-summary' });
+            summarySection.appendChild(this.securityUtils.createSafeElement('h6', {}, '重點摘要'));
+            summarySection.appendChild(this.securityUtils.createSafeElement('p', {}, article.summary));
+            modalBody.appendChild(summarySection);
+        }
+        modalBody.appendChild(this.securityUtils.createSafeElement('h6', { class: 'article-fulltext-heading' }, '文章全文'));
+
         // 文章內容 - 使用安全的 HTML 渲染
         const contentDiv = this.securityUtils.createSafeElement('div', { class: 'article-content mb-4' });
         const formattedContent = this.formatArticleContent(article.fullText);
@@ -686,7 +696,8 @@ class UIComponents {
         } else if (expectedTrend === trends.STABLE) {
             return classes.BADGE_INFO;
         }
-        return classes.BADGE_SECONDARY; // 預設
+        if (expectedTrend === '無法判斷') return classes.BADGE_WARNING;
+        return classes.BADGE_SECONDARY; // 無相關或缺少標註
     }
 
     // 生成字符串哈希值
@@ -712,6 +723,10 @@ class UIComponents {
         alert.appendChild(icon);
         alert.appendChild(title);
         alert.appendChild(text);
+        const reset = this.securityUtils.createSafeElement('button', {
+            type: 'button', class: 'btn btn-primary', 'data-clear-filters': ''
+        }, '清除全部篩選');
+        alert.appendChild(reset);
         container.appendChild(alert);
         
         return container;
@@ -736,70 +751,26 @@ class UIComponents {
     createImageContainer(article, index) {
         const imgContainer = this.securityUtils.createSafeElement('div', { class: 'card-img-container' });
         
-        // 圖片 - 使用 SVG 預設圖片以避免外部服務依賴
-        let imageUrl;
-        if (article.imageUrl) {
-            imageUrl = article.imageUrl;
-        } else {
-            // 根據文章標題生成顏色
-            const titleHash = this.generateHashFromString(article.title || '預設');
-            const colors = this.constants.COLORS.PALETTE;
-            const bgColor = colors[titleHash % colors.length];
-            const textColor = '#ffffff';
-            
-            // 生成帶有房子圖形的 SVG 圖片
-            let svgContent;
-            try {
-                svgContent = this.generateRealEstateSVG(bgColor, textColor, article.title || '');
-            } catch (error) {
-                console.warn('SVG 生成失敗，使用簡單圖片:', error);
-                // 簡單的後備 SVG
-                svgContent = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100%" height="100%" fill="${bgColor}"/>
-                    <rect x="150" y="80" width="100" height="60" fill="${textColor}" opacity="0.2"/>
-                    <polygon points="140,80 200,50 260,80" fill="${textColor}" opacity="0.3"/>
-                    <text x="200" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="${textColor}" text-anchor="middle">房地產新聞</text>
-                    <text x="200" y="180" font-family="Arial, sans-serif" font-size="10" fill="${textColor}" text-anchor="middle" opacity="0.8">${(article.title || '').substring(0, 20)}...</text>
-                </svg>`;
-            }
-            
-            imageUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svgContent)}`;
-        }
-        const safeImageUrl = this.securityUtils.sanitizeUrl(imageUrl);
+        // 自動產生的房屋示意圖沒有新聞資訊，以精簡中繼資料列呈現。
+        const isPlaceholder = !article.imageUrl ||
+            (article.imageUrl.startsWith('data:image/svg+xml') &&
+                article.imageUrl.includes(encodeURIComponent('房地產新聞')));
+        const safeImageUrl = !isPlaceholder && this.securityUtils.sanitizeUrl(article.imageUrl);
         if (safeImageUrl) {
-            const img = this.securityUtils.createSafeElement('img', {
-                src: safeImageUrl,
-                class: 'card-img-top',
-                alt: '新聞圖片',
-                loading: 'lazy'
-            });
-            
-            // 圖片載入失敗時的處理
+            const img = document.createElement('img');
+            img.src = safeImageUrl;
+            img.className = 'card-img-top';
+            img.alt = article.title || '新聞圖片';
+            img.loading = 'lazy';
             img.addEventListener('error', () => {
-                // 使用純色背景替代
-                img.style.backgroundColor = '#f8f9fa';
-                img.style.display = 'flex';
-                img.style.alignItems = 'center';
-                img.style.justifyContent = 'center';
-                img.style.color = '#6c757d';
-                img.style.fontSize = '14px';
-                img.alt = '圖片載入失敗';
-                // 設定一個房地產主題的預設圖片
-                const fallbackSVG = `<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100%" height="100%" fill="#dee2e6"/>
-                    <rect x="150" y="60" width="100" height="80" fill="#6c757d" opacity="0.5"/>
-                    <polygon points="140,60 200,30 260,60" fill="#495057"/>
-                    <rect x="175" y="100" width="20" height="20" fill="#ffffff" opacity="0.7"/>
-                    <rect x="205" y="100" width="20" height="20" fill="#ffffff" opacity="0.7"/>
-                    <rect x="185" y="120" width="30" height="20" fill="#495057"/>
-                    <text x="200" y="170" font-family="Arial" font-size="12" fill="#6c757d" text-anchor="middle">房地產新聞</text>
-                </svg>`;
-                img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(fallbackSVG);
-            });
-            
+                img.remove();
+                imgContainer.classList.add('article-card-meta');
+            }, { once: true });
             imgContainer.appendChild(img);
+        } else {
+            imgContainer.classList.add('article-card-meta');
         }
-        
+
         // 覆蓋層
         const overlay = this.securityUtils.createSafeElement('div', { class: 'card-img-overlay-top' });
         
@@ -1167,9 +1138,9 @@ class UIComponents {
                 </div>
                 <div class="insight-block insight-block-facts">
                     <div class="insight-fact">
-                        <div class="insight-fact-label">近 3 個月標註「上漲」的新聞占比</div>
+                        <div class="insight-fact-label">近期標註「上漲」的新聞占比</div>
                         <div class="insight-fact-value ${recentCls}">${recentPct}%</div>
-                        <div class="insight-fact-note"><strong>${diffText}</strong>（全期 ${overallPct}%）<br>${recentRange}・${(recentCount || 0).toLocaleString()} 篇</div>
+                        <div class="insight-fact-note"><strong>${diffText}</strong>（全期 ${overallPct}%）<br>${recentRange}・${(recentCount || 0).toLocaleString()} 篇<br>取最後至多 3 個有資料月份</div>
                     </div>
                     ${peakMonth ? `<div class="insight-fact">
                         <div class="insight-fact-label">新聞量最多的月份</div>

@@ -826,30 +826,11 @@ function updateProgress(percent, message) {
     }
 }
 
-// 數字動畫計數
+// 統計數字直接同步，避免動畫中的中間值與篩選結果不一致。
 function animateValue(element, start, end, duration) {
     if (!element) return;
-
-    // 篩選會頻繁更新同一張卡：先停掉上一個動畫，否則舊計時器會蓋掉新數字
     if (element._animTimer) clearInterval(element._animTimer);
-
-    const range = end - start;
-    if (range === 0) {
-        // 起訖相同時 increment 為 0，計時器永遠不會結束
-        element.textContent = end;
-        return;
-    }
-    const increment = range / (duration / 16); // 60fps
-    let current = start;
-
-    const timer = element._animTimer = setInterval(() => {
-        current += increment;
-        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-            current = end;
-            clearInterval(timer);
-        }
-        element.textContent = Math.floor(current);
-    }, 16);
+    element.textContent = end;
 }
 
 // 更新資料統計摘要

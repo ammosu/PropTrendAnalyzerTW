@@ -326,7 +326,9 @@ class SearchManager {
             kw.keyword.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+        this.searchHistorySection.style.display = 'none';
         this.renderPopularKeywords(filteredKeywords.slice(0, 5));
+        if (filteredKeywords.length === 0) this.hideSuggestions();
     }
 
     /**
@@ -510,6 +512,13 @@ class SearchManager {
         const suggestions = this.searchSuggestions;
         if (!suggestions || suggestions.style.display === 'none') return;
 
+        // 即使沒有建議項目，也必須能關閉下拉框。
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            this.hideSuggestions();
+            return;
+        }
         const items = suggestions.querySelectorAll('.search-suggestion-item');
         if (items.length === 0) return;
 
@@ -531,10 +540,6 @@ class SearchManager {
                     e.preventDefault();
                     items[currentIndex].click();
                 }
-                break;
-            case 'Escape':
-                e.preventDefault();
-                this.hideSuggestions();
                 break;
         }
     }

@@ -320,6 +320,9 @@ class App {
                 case 'filteredArticlesData':
                     this.handleFilteredArticlesChanged();
                     break;
+                case 'insightData':
+                    if (newValue) this.uiComponents.renderInsights(newValue);
+                    break;
                 case 'currentPage':
                     this.handlePageChanged();
                     break;
@@ -336,14 +339,6 @@ class App {
 
         // 更新資料統計
         this.updateDataStatistics();
-
-        // 渲染洞察摘要
-        setTimeout(() => {
-            const insightData = this.stateManager.getState('insightData');
-            if (insightData && this.uiComponents) {
-                this.uiComponents.renderInsights(insightData);
-            }
-        }, 200);
 
         // 初始化匯出功能
         this.initializeExportButtons();
@@ -543,6 +538,9 @@ class App {
         // 初始化過濾後的文章資料
         this.stateManager.setFilteredArticles(articlesData);
         
+        // IndexedDB 可能在訂閱前已載入；初次畫面也要同步洞察。
+        this.eventHandlers.updateSummaryForFilter(articlesData);
+
         // 顯示所有資料相關區塊
         this.showDataDependentSections();
 

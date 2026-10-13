@@ -1,0 +1,166 @@
+/* Workspace layout: shared tokens remain in design-tokens/tokens.json. */
+body { background: var(--bg-secondary); }
+.workspace-shell {
+    max-width: 1440px;
+    padding: 24px 32px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+.workspace-shell h1,
+.workspace-shell h2,
+.workspace-shell .insights-card-header h5 { font-family: var(--font-body); }
+.page-header { align-items: center; border: 0; margin-bottom: 8px; }
+.page-header #page-title { font-size: clamp(1.4rem, 2.2vw, 1.85rem); font-weight: 700; }
+.page-subtitle { margin-top: 8px; line-height: 1.7; }
+.section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-secondary);
+    padding-top: 8px;
+}
+.section-nav-inner { gap: 4px; flex-wrap: nowrap; overflow-x: auto; padding: 0; }
+.section-nav-inner a {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    color: var(--text-secondary);
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+}
+.section-nav-inner a:hover,
+.section-nav-inner a:focus-visible { background: var(--primary-a08); border-bottom-color: var(--primary); text-decoration: none; }
+#filter-options, #insights-section, #keywordTrendContainer,
+#expectedTrendContainer, #keywordCloudContainer, #news-section { scroll-margin-top: 76px; }
+#filter-options {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: none;
+}
+#filter-options:hover { transform: none; box-shadow: none; }
+.filter-panel .filter-compact-bar { flex-wrap: wrap; gap: 10px; }
+.filter-search { order: -1; flex: 1 1 270px; min-width: 0; }
+.filter-panel .quick-date-filters { flex-wrap: wrap; }
+#filter-options .quick-date-btn { border-radius: 6px; min-height: 38px; }
+#filter-options .form-control { min-height: 38px; }
+#trend-filter { flex: 0 0 120px; width: 120px; }
+.filter-compact-actions .btn { min-height: 38px; }
+.filter-result-count { white-space: nowrap; }
+.filter-tag { background: var(--primary); border-radius: 6px; }
+.filter-tag-remove { width: 28px; height: 28px; }
+#data-summary-section { margin-bottom: 20px !important; }
+#data-summary-section > .row { margin: 0; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; }
+#data-summary-section > .row > div { padding: 0; margin-bottom: 0 !important; }
+#data-summary-section .stat-card {
+    border: 0;
+    border-right: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 18px 22px;
+    min-height: 100px;
+    margin-bottom: 0;
+    box-shadow: none;
+    background: transparent;
+}
+#data-summary-section > .row > div:last-child .stat-card { border-right: 0; }
+.stat-value { font-family: var(--font-body); font-size: 2rem; font-weight: 700; }
+.stat-value.small-text { font-family: var(--font-body); font-size: .95rem; white-space: normal; }
+.stat-label { letter-spacing: 0; font-weight: 500; }
+.insights-card,
+[data-theme="dark"] .insights-card { border: 1px solid var(--border-color); background: var(--bg-primary); box-shadow: none; border-radius: 10px; }
+.insights-card { cursor: default; }
+.insights-card:hover { transform: none; box-shadow: none; }
+.insights-card-header { border-bottom-color: var(--border-color); }
+.insight-fact-value { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+#keywordTrendContainer, #expectedTrendContainer, #keywordCloudContainer {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: none;
+    margin-bottom: 24px;
+}
+.chart-card-head h2 { color: var(--text-primary); }
+#keyword-trend-controls { max-width: none; }
+#keywordTrendContainer > .text-center { text-align: left !important; }
+.chart-local-note { text-align: left; font-size: .875rem; line-height: 1.6; }
+.news-section { border: 0; }
+.news-header { padding: 8px 0; }
+.card-title { line-height: 1.6; }
+.card-text { line-height: 1.85; }
+.custom-file-label::after { content: '選擇檔案'; }
+.filter-sheet-open { overflow: hidden; }
+[data-theme="dark"] .form-control { color-scheme: dark; }
+[data-theme="dark"] .btn-outline-primary { color: var(--primary-light); }
+[data-theme="dark"] .btn-outline-primary.active,
+[data-theme="dark"] .btn-outline-primary:hover { color: var(--text-primary); }
+[data-theme="dark"] .text-muted { color: var(--text-muted) !important; }
+@media (max-width: 992px) {
+    .workspace-shell { padding: 20px; }
+    .filter-search { order: -1; flex-basis: 100%; }
+    .filter-compact-actions { flex: 1; justify-content: flex-end; }
+}
+@media (max-width: 576px) {
+    .workspace-shell { padding: 12px; margin-top: 0 !important; }
+    .page-header { flex-direction: column; align-items: stretch; gap: 12px; padding-bottom: 8px; }
+    .page-header-actions { align-self: stretch; justify-content: flex-end; }
+    .page-subtitle { font-size: .875rem; }
+    .section-nav-inner a { padding: 12px; font-size: .875rem; }
+    #filter-options { padding: 16px; }
+    .filter-panel-note { font-size: .8rem; }
+    #filter-options .filter-search { order: -1; }
+    #filter-options .quick-date-btn { min-height: 44px; font-size: .8rem; }
+    #trend-filter { flex: 1 1 100%; width: 100%; }
+    #filter-options .form-control { min-height: 44px; font-size: 16px; }
+    .filter-compact-actions .btn { min-height: 44px; }
+    #data-summary-section .stat-card { padding: 14px; min-height: 90px; }
+    #data-summary-section > .row > div:nth-child(2) .stat-card { border-right: 0; }
+    #data-summary-section > .row > div:nth-child(-n+2) .stat-card { border-bottom: 1px solid var(--border-color); }
+    .stat-value { font-size: 1.6rem; }
+    .insights-card .card-body { padding: 16px; }
+    #keywordTrendContainer, #expectedTrendContainer, #keywordCloudContainer { padding: 16px; }
+    .chart-card-head { gap: 8px; align-items: flex-start; }
+    .chart-card-head h2 { line-height: 1.6; }
+    .chart-export-btn { min-height: 40px; }
+    .trend-mode-toggle { display: flex; flex-direction: row; width: 100%; }
+    .trend-mode-toggle .btn { flex: 1; padding: 10px 4px; font-size: .8rem; }
+    .cloud-layout .cloud-controls { flex-wrap: wrap; }
+    .cloud-layout .cloud-slider { flex-basis: 100%; max-width: none; }
+    #filter-options #more-filters .more-filters-panel { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+    #more-filters .filter-group .d-flex { min-width: 0; }
+    #more-filters input[type="date"] { min-width: 0; width: 0; flex: 1; }
+}
+
+#active-filters-tags { flex: 1; }
+.clear-all-filters-btn { margin-left: auto; flex-shrink: 0; }
+
+/* 新聞卡片只讓有內容的圖片占用版面。 */
+#articles .article-card-meta { height: auto; min-height: 0; background: transparent; padding: 20px 24px 0; }
+#articles .article-card-meta .card-img-overlay-top { position: static; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; }
+#articles .card { cursor: default; border: 1px solid var(--border-color); box-shadow: none !important; }
+#articles .card:hover { transform: none; }
+#articles .card-title { color: var(--text-primary); }
+#articles .card-body { padding-top: 16px; }
+#articles .badge { box-shadow: none; font-weight: 500; padding: 6px 8px; }
+.badge-primary { background: var(--bg-tertiary); color: var(--text-secondary); }
+.badge-success { background: var(--trend-up); color: var(--bg-primary); }
+.badge-danger { background: var(--trend-down); color: var(--bg-primary); }
+.badge-info { background: var(--trend-stable); color: var(--bg-primary); }
+.badge-warning { background: var(--trend-none); color: var(--bg-primary); }
+.badge-secondary { background: var(--bg-tertiary); color: var(--text-secondary); }
+.trend-unrelated { color: var(--text-muted); }
+.article-summary { background: var(--bg-secondary); border-left: 3px solid var(--primary); padding: 16px 20px; margin-bottom: 24px; }
+.article-summary h6, .article-fulltext-heading { color: var(--text-primary); font-weight: 700; }
+.article-summary p { margin: 0; line-height: 1.85; }
+#articleModal .article-content { max-width: 70ch; line-height: 1.9; }
+@media (max-width: 576px) {
+    #articles.row { margin-left: 0; margin-right: 0; }
+    #articles > article { padding-left: 0; padding-right: 0; }
+    .section-nav-inner { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .section-nav-inner a { padding: 10px 8px; text-align: center; }
+    #filter-options, #insights-section, #keywordTrendContainer,
+    #expectedTrendContainer, #keywordCloudContainer, #news-section { scroll-margin-top: 120px; }
+}
+
+[data-theme="dark"] #filtered-count { color: var(--primary-light); }

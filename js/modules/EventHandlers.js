@@ -48,6 +48,7 @@ class EventHandlers {
         this.initializeChartEvents();
         this.initializeFileUploadLabel();
         this.initializeTrendModeToggle();
+        this.initializeFilterSheet();
     }
 
     // 初始化檔案上傳標籤
@@ -97,6 +98,17 @@ class EventHandlers {
             });
         }
 
+        document.getElementById('trend-filter')?.addEventListener('change', (event) => {
+            this.stateManager.updateState('selectedTrend', event.target.value || null);
+            this.filterArticles();
+        });
+        document.getElementById('articles')?.addEventListener('click', (event) => {
+            if (event.target.closest('[data-clear-filters]')) {
+                this.clearAllFilters();
+                document.getElementById('keyword-filter')?.focus();
+            }
+        });
+
         // 媒體篩選按鈕
         document.querySelectorAll('.media-filter').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.filterArticles());
@@ -115,13 +127,15 @@ class EventHandlers {
         const quickDateButtons = document.querySelectorAll('.quick-date-btn');
 
         quickDateButtons.forEach(button => {
+            button.setAttribute('aria-pressed', String(button.classList.contains('active')));
             button.addEventListener('click', () => {
                 const range = button.dataset.range;
                 this.applyQuickDateFilter(range);
 
                 // 更新按鈕選中狀態
-                quickDateButtons.forEach(btn => btn.classList.remove('active'));
+                quickDateButtons.forEach(btn => { btn.classList.remove('active'); btn.setAttribute('aria-pressed', 'false'); });
                 button.classList.add('active');
+                button.setAttribute('aria-pressed', 'true');
             });
         });
     }
@@ -205,6 +219,7 @@ class EventHandlers {
     clearQuickDateSelection() {
         document.querySelectorAll('.quick-date-btn').forEach(btn => {
             btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
         });
     }
 
@@ -318,6 +333,63 @@ class EventHandlers {
         if (jumpButton) {
             jumpButton.addEventListener('click', () => this.handlePageJump());
         }
+    }
+
+    syncBookmarkFilterButton() {
+        const button = document.getElementById('bookmark-filter-btn');
+        if (!button) return;
+        const active = Boolean(this.stateManager.getState('bookmarkFilterActive'));
+        button.classList.toggle('btn-warning', active);
+        button.classList.toggle('btn-outline-warning', !active);
+        button.setAttribute('aria-pressed', String(active));
+        button.title = active ? '顯示所有文章' : '顯示收藏的文章';
+        window.IconHelper.set(button.querySelector('svg.icon'), active ? 'bookmark-fill' : 'bookmark');
+    }
+
+    // 手機篩選面板：鎖定背景捲動、焦點循環，關閉後回到觸發按鈕。
+    initializeFilterSheet() {
+        const sheet = document.getElementById('more-filters');
+        const trigger = document.querySelector('.more-filters-btn');
+        if (!sheet || !trigger) return;
+        const mobile = window.matchMedia('(max-width: 576px)');
+        const sync = () => {
+            const open = sheet.classList.contains('show');
+            const modal = open && mobile.matches;
+            document.body.classList.toggle('filter-sheet-open', modal);
+            trigger.setAttribute('aria-expanded', String(open));
+            if (modal) {
+                sheet.setAttribute('role', 'dialog');
+                sheet.setAttribute('aria-modal', 'true');
+            } else {
+                sheet.removeAttribute('role');
+                sheet.removeAttribute('aria-modal');
+            }
+        };
+        sheet.addEventListener('shown.bs.collapse', () => {
+            sync();
+            if (mobile.matches) sheet.querySelector('button')?.focus();
+        });
+        sheet.addEventListener('hidden.bs.collapse', () => {
+            sync();
+            trigger.focus();
+        });
+        mobile.addEventListener('change', sync);
+        sheet.addEventListener('keydown', (event) => {
+            if (!mobile.matches || !sheet.classList.contains('show')) return;
+            if (event.key === 'Escape') {
+                event.stopPropagation();
+                window.BSCompat.Collapse.hide(sheet);
+            }
+            if (event.key !== 'Tab') return;
+            const items = [...sheet.querySelectorAll('button, input, select, [tabindex="0"]')]
+                .filter(el => !el.disabled && el.getClientRects().length);
+            const first = items[0], last = items[items.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault(); last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault(); first?.focus();
+            }
+        });
     }
 
     // 初始化圖表相關事件
@@ -507,6 +579,10 @@ class EventHandlers {
         this.stateManager.setFilteredArticles(result);
         this.stateManager.setCurrentPage(1);
 
+        const trendSelect = document.getElementById('trend-filter');
+        if (trendSelect) trendSelect.value = filters.trendFilter || '';
+        this.syncBookmarkFilterButton();
+        document.querySelectorAll('.media-filter').forEach(cb => cb.closest('label')?.classList.toggle('active', cb.checked));
         this.updateFilterResultCount(result.length);
         this.updateFilterTags(filters);
 
@@ -531,7 +607,10 @@ class EventHandlers {
         if (articles.length === 0) {
             ['total-articles-count', 'keywords-count', 'publishers-count'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.textContent = '0';
+                if (el) {
+                    clearInterval(el._animTimer);
+                    el.textContent = '0';
+                }
             });
             const range = document.getElementById('date-range-display');
             if (range) range.textContent = '–';
@@ -543,8 +622,7 @@ class EventHandlers {
         }
         if (window.csvUploader && window.csvUploader.updateDataSummary) {
             window.csvUploader.updateDataSummary(articles);
-            const insightData = this.stateManager.getState('insightData');
-            if (insightData) this.uiComponents.renderInsights(insightData);
+            // insightData 訂閱負責渲染，避免與載入流程競態。
         }
     }
 
@@ -595,10 +673,19 @@ class EventHandlers {
 
         let hasActiveFilters = false;
 
+        if (this.stateManager.getState('bookmarkFilterActive')) {
+            this.addFilterTag(tagsContainer, '收藏', '只看收藏', () => {
+                this.stateManager.updateState('bookmarkFilterActive', false);
+                this.filterArticles();
+            });
+            hasActiveFilters = true;
+        }
+
         // 日期篩選標籤
         if (filters.startDate) {
             this.addFilterTag(tagsContainer, '起始日期', filters.startDate, () => {
                 document.getElementById('start-date').value = '';
+                this.clearQuickDateSelection();
                 this.filterArticles();
             });
             hasActiveFilters = true;
@@ -607,6 +694,7 @@ class EventHandlers {
         if (filters.endDate) {
             this.addFilterTag(tagsContainer, '結束日期', filters.endDate, () => {
                 document.getElementById('end-date').value = '';
+                this.clearQuickDateSelection();
                 this.filterArticles();
             });
             hasActiveFilters = true;
@@ -713,8 +801,16 @@ class EventHandlers {
         this.stateManager.updateState('selectedCloudKeyword', null);
         this.stateManager.updateState('selectedTrend', null);
 
-        // 清除快速日期選擇
+        this.stateManager.updateState('bookmarkFilterActive', false);
+        this.searchManager?.hideSuggestions();
+        const searchClear = document.getElementById('search-clear-btn');
+        if (searchClear) searchClear.style.display = 'none';
+
+        // 重設為全部時間
         this.clearQuickDateSelection();
+        const allDates = document.querySelector('.quick-date-btn[data-range="all"]');
+        allDates?.classList.add('active');
+        allDates?.setAttribute('aria-pressed', 'true');
 
         // 重新套用篩選
         this.filterArticles();
